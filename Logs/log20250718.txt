@@ -1,0 +1,289 @@
+2025-07-18 22:25:11.799 +03:00 [INF] DB tables already exist. Exit install
+2025-07-18 22:25:17.692 +03:00 [INF] Executed DbCommand (48ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='Fashion_Site' AND TABLE_NAME='__EFMigrationsHistory';
+2025-07-18 22:25:18.052 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='Fashion_Site' AND TABLE_NAME='__EFMigrationsHistory';
+2025-07-18 22:25:18.916 +03:00 [INF] Executed DbCommand (223ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT `MigrationId`, `ProductVersion`
+FROM `__EFMigrationsHistory`
+ORDER BY `MigrationId`;
+2025-07-18 22:25:20.587 +03:00 [INF] No migrations were applied. The database is already up to date.
+2025-07-18 22:25:21.053 +03:00 [INF] User profile is available. Using 'C:\Users\DELL\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-07-18 22:25:22.041 +03:00 [INF] Executed DbCommand (134ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT `a`.`Id`, `a`.`ConcurrencyStamp`, `a`.`Name`, `a`.`NormalizedName`
+FROM `AspNetRoles` AS `a`
+WHERE `a`.`NormalizedName` = @__normalizedName_0
+LIMIT 1
+2025-07-18 22:25:23.945 +03:00 [INF] Executed DbCommand (23ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT `a`.`Id`, `a`.`ConcurrencyStamp`, `a`.`Name`, `a`.`NormalizedName`
+FROM `AspNetRoles` AS `a`
+WHERE `a`.`NormalizedName` = @__normalizedName_0
+LIMIT 1
+2025-07-18 22:25:25.211 +03:00 [INF] Executed DbCommand (110ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT `a`.`Id`, `a`.`AccessFailedCount`, `a`.`ConcurrencyStamp`, `a`.`Discriminator`, `a`.`Email`, `a`.`EmailConfirmed`, `a`.`LockoutEnabled`, `a`.`LockoutEnd`, `a`.`NormalizedEmail`, `a`.`NormalizedUserName`, `a`.`PasswordHash`, `a`.`PhoneNumber`, `a`.`PhoneNumberConfirmed`, `a`.`SecurityStamp`, `a`.`TwoFactorEnabled`, `a`.`UserName`, `a`.`Age`, `a`.`CreateAt`, `a`.`DeletedAt`, `a`.`ImageId`, `a`.`LastVisit`, `a`.`Name`, `a`.`ProfilePicture`
+FROM `AspNetUsers` AS `a`
+WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`NormalizedEmail` = @__normalizedEmail_0)
+LIMIT 2
+2025-07-18 22:25:27.823 +03:00 [INF] Now listening on: https://localhost:7288
+2025-07-18 22:25:27.901 +03:00 [INF] Now listening on: http://localhost:5069
+2025-07-18 22:25:28.160 +03:00 [ERR] Index was outside the bounds of the array.
+System.IndexOutOfRangeException: Index was outside the bounds of the array.
+   at Hangfire.MySql.MySqlStorage.<>c.<ToString>b__14_1(String[] x)
+   at System.Linq.Enumerable.ArraySelectIterator`2.MoveNext()
+   at System.Linq.Enumerable.ToDictionary[TSource,TKey,TElement](IEnumerable`1 source, Func`2 keySelector, Func`2 elementSelector, IEqualityComparer`1 comparer)
+   at Hangfire.MySql.MySqlStorage.ToString()
+2025-07-18 22:25:28.531 +03:00 [INF] Starting Hangfire Server using job storage: '<Connection string can not be parsed>'
+2025-07-18 22:25:28.653 +03:00 [INF] Using the following options for SQL Server job storage:
+2025-07-18 22:25:28.673 +03:00 [INF]     Queue poll interval: 00:00:10.
+2025-07-18 22:25:28.697 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 20
+    Listening queues: 'default'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2025-07-18 22:25:28.811 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-18 22:25:28.853 +03:00 [INF] Server mrrobot:23744:59b16b87 successfully announced in 44.764 ms
+2025-07-18 22:25:28.896 +03:00 [INF] Hosting environment: Development
+2025-07-18 22:25:29.000 +03:00 [INF] Server mrrobot:23744:59b16b87 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2025-07-18 22:25:29.030 +03:00 [INF] Content root path: D:\project_fashion\E-Commerce-API-main
+2025-07-18 22:25:29.084 +03:00 [INF] 1 servers were removed due to timeout
+2025-07-18 22:25:29.296 +03:00 [INF] Server mrrobot:23744:59b16b87 all the dispatchers started
+2025-07-18 22:25:32.815 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger - null null
+2025-07-18 22:25:33.136 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger - 301 0 null 321.8895ms
+2025-07-18 22:25:33.160 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/index.html - null null
+2025-07-18 22:25:33.274 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/index.html - 200 null text/html;charset=utf-8 114.2923ms
+2025-07-18 22:25:33.366 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/swagger-ui.css - null null
+2025-07-18 22:25:33.367 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/index.css - null null
+2025-07-18 22:25:33.367 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/swagger-ui-bundle.js - null null
+2025-07-18 22:25:33.367 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/swagger-ui-standalone-preset.js - null null
+2025-07-18 22:25:33.424 +03:00 [INF] Sending file. Request path: '/index.css'. Physical path: 'N/A'
+2025-07-18 22:25:33.433 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-18 22:25:33.433 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/index.js - null null
+2025-07-18 22:25:33.441 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/index.css - 200 202 text/css 74.374ms
+2025-07-18 22:25:33.457 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/_vs/browserLink - null null
+2025-07-18 22:25:33.545 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/_framework/aspnetcore-browser-refresh.js - 200 16505 application/javascript; charset=utf-8 112.2176ms
+2025-07-18 22:25:33.758 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/index.js - 200 null application/javascript;charset=utf-8 324.4191ms
+2025-07-18 22:25:33.828 +03:00 [INF] Sending file. Request path: '/swagger-ui.css'. Physical path: 'N/A'
+2025-07-18 22:25:33.925 +03:00 [INF] Sending file. Request path: '/swagger-ui-standalone-preset.js'. Physical path: 'N/A'
+2025-07-18 22:25:34.008 +03:00 [INF] Sending file. Request path: '/swagger-ui-bundle.js'. Physical path: 'N/A'
+2025-07-18 22:25:34.076 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/swagger-ui.css - 200 154948 text/css 710.3523ms
+2025-07-18 22:25:34.107 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/swagger-ui-standalone-preset.js - 200 229223 text/javascript 739.6556ms
+2025-07-18 22:25:34.117 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/_vs/browserLink - 200 null text/javascript; charset=UTF-8 659.6512ms
+2025-07-18 22:25:34.145 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/swagger-ui-bundle.js - 200 1466324 text/javascript 778.1497ms
+2025-07-18 22:25:34.511 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - null null
+2025-07-18 22:25:35.055 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 543.9888ms
+2025-07-18 22:25:39.349 +03:00 [INF] Executed DbCommand (31ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT `c`.`Id`, `c`.`CreatedAt`, `c`.`DeletedAt`, `c`.`Description`, `c`.`DisplayOrder`, `c`.`ImageId`, `c`.`IsActive`, `c`.`ModifiedAt`, `c`.`Name`
+FROM `Categories` AS `c`
+WHERE `c`.`DeletedAt` IS NOT NULL
+2025-07-18 22:57:57.751 +03:00 [INF] DB tables already exist. Exit install
+2025-07-18 22:57:59.592 +03:00 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='Fashion_Site' AND TABLE_NAME='__EFMigrationsHistory';
+2025-07-18 22:57:59.608 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='Fashion_Site' AND TABLE_NAME='__EFMigrationsHistory';
+2025-07-18 22:57:59.646 +03:00 [INF] Executed DbCommand (16ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT `MigrationId`, `ProductVersion`
+FROM `__EFMigrationsHistory`
+ORDER BY `MigrationId`;
+2025-07-18 22:57:59.671 +03:00 [INF] No migrations were applied. The database is already up to date.
+2025-07-18 22:57:59.704 +03:00 [INF] User profile is available. Using 'C:\Users\DELL\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-07-18 22:58:00.106 +03:00 [INF] Executed DbCommand (50ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT `a`.`Id`, `a`.`ConcurrencyStamp`, `a`.`Name`, `a`.`NormalizedName`
+FROM `AspNetRoles` AS `a`
+WHERE `a`.`NormalizedName` = @__normalizedName_0
+LIMIT 1
+2025-07-18 22:58:00.184 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT `a`.`Id`, `a`.`ConcurrencyStamp`, `a`.`Name`, `a`.`NormalizedName`
+FROM `AspNetRoles` AS `a`
+WHERE `a`.`NormalizedName` = @__normalizedName_0
+LIMIT 1
+2025-07-18 22:58:00.214 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT `a`.`Id`, `a`.`AccessFailedCount`, `a`.`ConcurrencyStamp`, `a`.`Discriminator`, `a`.`Email`, `a`.`EmailConfirmed`, `a`.`LockoutEnabled`, `a`.`LockoutEnd`, `a`.`NormalizedEmail`, `a`.`NormalizedUserName`, `a`.`PasswordHash`, `a`.`PhoneNumber`, `a`.`PhoneNumberConfirmed`, `a`.`SecurityStamp`, `a`.`TwoFactorEnabled`, `a`.`UserName`, `a`.`Age`, `a`.`CreateAt`, `a`.`DeletedAt`, `a`.`ImageId`, `a`.`LastVisit`, `a`.`Name`, `a`.`ProfilePicture`
+FROM `AspNetUsers` AS `a`
+WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`NormalizedEmail` = @__normalizedEmail_0)
+LIMIT 2
+2025-07-18 22:58:05.301 +03:00 [INF] Now listening on: https://localhost:7288
+2025-07-18 22:58:05.543 +03:00 [INF] Now listening on: http://localhost:5069
+2025-07-18 22:58:05.704 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/index.html - null null
+2025-07-18 22:58:05.843 +03:00 [ERR] Index was outside the bounds of the array.
+System.IndexOutOfRangeException: Index was outside the bounds of the array.
+   at Hangfire.MySql.MySqlStorage.<>c.<ToString>b__14_1(String[] x)
+   at System.Linq.Enumerable.ArraySelectIterator`2.MoveNext()
+   at System.Linq.Enumerable.ToDictionary[TSource,TKey,TElement](IEnumerable`1 source, Func`2 keySelector, Func`2 elementSelector, IEqualityComparer`1 comparer)
+   at Hangfire.MySql.MySqlStorage.ToString()
+2025-07-18 22:58:06.013 +03:00 [INF] Starting Hangfire Server using job storage: '<Connection string can not be parsed>'
+2025-07-18 22:58:06.017 +03:00 [INF] Using the following options for SQL Server job storage:
+2025-07-18 22:58:06.019 +03:00 [INF]     Queue poll interval: 00:00:10.
+2025-07-18 22:58:06.024 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 20
+    Listening queues: 'default'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2025-07-18 22:58:06.066 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-18 22:58:06.073 +03:00 [INF] Hosting environment: Development
+2025-07-18 22:58:06.153 +03:00 [INF] Content root path: D:\project_fashion\E-Commerce-API-main
+2025-07-18 22:58:06.203 +03:00 [INF] Server mrrobot:25236:2dc9bd57 successfully announced in 53.3703 ms
+2025-07-18 22:58:06.215 +03:00 [INF] Server mrrobot:25236:2dc9bd57 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2025-07-18 22:58:06.240 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/index.html - 200 null text/html;charset=utf-8 537.378ms
+2025-07-18 22:58:06.259 +03:00 [INF] 1 servers were removed due to timeout
+2025-07-18 22:58:06.599 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-18 22:58:06.748 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/index.js - null null
+2025-07-18 22:58:06.749 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/_vs/browserLink - null null
+2025-07-18 22:58:07.216 +03:00 [INF] Server mrrobot:25236:2dc9bd57 all the dispatchers started
+2025-07-18 22:58:07.289 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/_framework/aspnetcore-browser-refresh.js - 200 16505 application/javascript; charset=utf-8 688.0581ms
+2025-07-18 22:58:07.301 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/index.js - 200 null application/javascript;charset=utf-8 552.3679ms
+2025-07-18 22:58:07.468 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/_vs/browserLink - 200 null text/javascript; charset=UTF-8 718.8602ms
+2025-07-18 22:58:07.828 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - null null
+2025-07-18 22:58:08.408 +03:00 [ERR] An unhandled exception has occurred while executing the request.
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Failed to generate Operation for action - E_Commers.Controllers.ProductController.UploadAndSetMainImage (E-Commerce). See inner exception
+ ---> Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Error reading parameter(s) for action E_Commers.Controllers.ProductController.UploadAndSetMainImage (E-Commerce) as [FromForm] attribute used with IFormFile. Please refer to https://github.com/domaindrivendev/Swashbuckle.AspNetCore#handle-forms-and-file-uploads for more information
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRespository, Func`3 parameterGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRespository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   --- End of inner exception stack trace ---
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`3 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2025-07-18 22:58:08.470 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - 500 null text/plain; charset=utf-8 641.7431ms
+2025-07-18 23:00:11.575 +03:00 [INF] DB tables already exist. Exit install
+2025-07-18 23:00:13.342 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='Fashion_Site' AND TABLE_NAME='__EFMigrationsHistory';
+2025-07-18 23:00:13.357 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='Fashion_Site' AND TABLE_NAME='__EFMigrationsHistory';
+2025-07-18 23:00:13.384 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT `MigrationId`, `ProductVersion`
+FROM `__EFMigrationsHistory`
+ORDER BY `MigrationId`;
+2025-07-18 23:00:13.405 +03:00 [INF] No migrations were applied. The database is already up to date.
+2025-07-18 23:00:13.435 +03:00 [INF] User profile is available. Using 'C:\Users\DELL\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-07-18 23:00:13.759 +03:00 [INF] Executed DbCommand (39ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT `a`.`Id`, `a`.`ConcurrencyStamp`, `a`.`Name`, `a`.`NormalizedName`
+FROM `AspNetRoles` AS `a`
+WHERE `a`.`NormalizedName` = @__normalizedName_0
+LIMIT 1
+2025-07-18 23:00:13.823 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT `a`.`Id`, `a`.`ConcurrencyStamp`, `a`.`Name`, `a`.`NormalizedName`
+FROM `AspNetRoles` AS `a`
+WHERE `a`.`NormalizedName` = @__normalizedName_0
+LIMIT 1
+2025-07-18 23:00:13.847 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT `a`.`Id`, `a`.`AccessFailedCount`, `a`.`ConcurrencyStamp`, `a`.`Discriminator`, `a`.`Email`, `a`.`EmailConfirmed`, `a`.`LockoutEnabled`, `a`.`LockoutEnd`, `a`.`NormalizedEmail`, `a`.`NormalizedUserName`, `a`.`PasswordHash`, `a`.`PhoneNumber`, `a`.`PhoneNumberConfirmed`, `a`.`SecurityStamp`, `a`.`TwoFactorEnabled`, `a`.`UserName`, `a`.`Age`, `a`.`CreateAt`, `a`.`DeletedAt`, `a`.`ImageId`, `a`.`LastVisit`, `a`.`Name`, `a`.`ProfilePicture`
+FROM `AspNetUsers` AS `a`
+WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`NormalizedEmail` = @__normalizedEmail_0)
+LIMIT 2
+2025-07-18 23:00:14.475 +03:00 [INF] Now listening on: https://localhost:7288
+2025-07-18 23:00:14.476 +03:00 [INF] Now listening on: http://localhost:5069
+2025-07-18 23:00:14.567 +03:00 [ERR] Index was outside the bounds of the array.
+System.IndexOutOfRangeException: Index was outside the bounds of the array.
+   at Hangfire.MySql.MySqlStorage.<>c.<ToString>b__14_1(String[] x)
+   at System.Linq.Enumerable.ArraySelectIterator`2.MoveNext()
+   at System.Linq.Enumerable.ToDictionary[TSource,TKey,TElement](IEnumerable`1 source, Func`2 keySelector, Func`2 elementSelector, IEqualityComparer`1 comparer)
+   at Hangfire.MySql.MySqlStorage.ToString()
+2025-07-18 23:00:14.585 +03:00 [INF] Starting Hangfire Server using job storage: '<Connection string can not be parsed>'
+2025-07-18 23:00:14.588 +03:00 [INF] Using the following options for SQL Server job storage:
+2025-07-18 23:00:14.589 +03:00 [INF]     Queue poll interval: 00:00:10.
+2025-07-18 23:00:14.590 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 20
+    Listening queues: 'default'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2025-07-18 23:00:14.604 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-18 23:00:14.606 +03:00 [INF] Hosting environment: Development
+2025-07-18 23:00:14.607 +03:00 [INF] Content root path: D:\project_fashion\E-Commerce-API-main
+2025-07-18 23:00:14.621 +03:00 [INF] Server mrrobot:18312:7cdf6274 successfully announced in 11.1861 ms
+2025-07-18 23:00:14.625 +03:00 [INF] Server mrrobot:18312:7cdf6274 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2025-07-18 23:00:14.786 +03:00 [INF] Server mrrobot:18312:7cdf6274 all the dispatchers started
+2025-07-18 23:00:14.870 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/index.html - null null
+2025-07-18 23:00:15.075 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/index.html - 200 null text/html;charset=utf-8 205.5321ms
+2025-07-18 23:00:15.109 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/index.js - null null
+2025-07-18 23:00:15.109 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/_vs/browserLink - null null
+2025-07-18 23:00:15.109 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-18 23:00:15.120 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/index.js - 200 null application/javascript;charset=utf-8 10.7121ms
+2025-07-18 23:00:15.165 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/_framework/aspnetcore-browser-refresh.js - 200 16505 application/javascript; charset=utf-8 55.8679ms
+2025-07-18 23:00:15.188 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/_vs/browserLink - 200 null text/javascript; charset=UTF-8 78.6433ms
+2025-07-18 23:00:15.265 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - null null
+2025-07-18 23:00:15.457 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 191.5155ms
+2025-07-18 23:02:55.442 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/index.html - null null
+2025-07-18 23:02:55.469 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/index.html - 200 null text/html;charset=utf-8 27.8898ms
+2025-07-18 23:02:55.521 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/_vs/browserLink - null null
+2025-07-18 23:02:55.521 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/index.js - null null
+2025-07-18 23:02:55.523 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-18 23:02:55.533 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/index.js - 200 null application/javascript;charset=utf-8 12.843ms
+2025-07-18 23:02:55.540 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/_framework/aspnetcore-browser-refresh.js - 200 16505 application/javascript; charset=utf-8 17.5136ms
+2025-07-18 23:02:55.546 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/_vs/browserLink - 200 null text/javascript; charset=UTF-8 25.5832ms
+2025-07-18 23:02:55.797 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - null null
+2025-07-18 23:02:56.019 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 221.8845ms
+2025-07-18 23:05:14.621 +03:00 [INF] 1 servers were removed due to timeout
+2025-07-18 23:27:20.272 +03:00 [INF] DB tables already exist. Exit install
+2025-07-18 23:27:21.873 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='Fashion_Site' AND TABLE_NAME='__EFMigrationsHistory';
+2025-07-18 23:27:21.888 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='Fashion_Site' AND TABLE_NAME='__EFMigrationsHistory';
+2025-07-18 23:27:21.911 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT `MigrationId`, `ProductVersion`
+FROM `__EFMigrationsHistory`
+ORDER BY `MigrationId`;
+2025-07-18 23:27:21.936 +03:00 [INF] No migrations were applied. The database is already up to date.
+2025-07-18 23:27:21.970 +03:00 [INF] User profile is available. Using 'C:\Users\DELL\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-07-18 23:27:22.326 +03:00 [INF] Executed DbCommand (50ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT `a`.`Id`, `a`.`ConcurrencyStamp`, `a`.`Name`, `a`.`NormalizedName`
+FROM `AspNetRoles` AS `a`
+WHERE `a`.`NormalizedName` = @__normalizedName_0
+LIMIT 1
+2025-07-18 23:27:22.403 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT `a`.`Id`, `a`.`ConcurrencyStamp`, `a`.`Name`, `a`.`NormalizedName`
+FROM `AspNetRoles` AS `a`
+WHERE `a`.`NormalizedName` = @__normalizedName_0
+LIMIT 1
+2025-07-18 23:27:22.429 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT `a`.`Id`, `a`.`AccessFailedCount`, `a`.`ConcurrencyStamp`, `a`.`Discriminator`, `a`.`Email`, `a`.`EmailConfirmed`, `a`.`LockoutEnabled`, `a`.`LockoutEnd`, `a`.`NormalizedEmail`, `a`.`NormalizedUserName`, `a`.`PasswordHash`, `a`.`PhoneNumber`, `a`.`PhoneNumberConfirmed`, `a`.`SecurityStamp`, `a`.`TwoFactorEnabled`, `a`.`UserName`, `a`.`Age`, `a`.`CreateAt`, `a`.`DeletedAt`, `a`.`ImageId`, `a`.`LastVisit`, `a`.`Name`, `a`.`ProfilePicture`
+FROM `AspNetUsers` AS `a`
+WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`NormalizedEmail` = @__normalizedEmail_0)
+LIMIT 2
+2025-07-18 23:27:23.239 +03:00 [INF] Now listening on: https://localhost:7288
+2025-07-18 23:27:23.241 +03:00 [INF] Now listening on: http://localhost:5069
+2025-07-18 23:27:23.345 +03:00 [ERR] Index was outside the bounds of the array.
+System.IndexOutOfRangeException: Index was outside the bounds of the array.
+   at Hangfire.MySql.MySqlStorage.<>c.<ToString>b__14_1(String[] x)
+   at System.Linq.Enumerable.ArraySelectIterator`2.MoveNext()
+   at System.Linq.Enumerable.ToDictionary[TSource,TKey,TElement](IEnumerable`1 source, Func`2 keySelector, Func`2 elementSelector, IEqualityComparer`1 comparer)
+   at Hangfire.MySql.MySqlStorage.ToString()
+2025-07-18 23:27:23.370 +03:00 [INF] Starting Hangfire Server using job storage: '<Connection string can not be parsed>'
+2025-07-18 23:27:23.372 +03:00 [INF] Using the following options for SQL Server job storage:
+2025-07-18 23:27:23.374 +03:00 [INF]     Queue poll interval: 00:00:10.
+2025-07-18 23:27:23.375 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 20
+    Listening queues: 'default'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2025-07-18 23:27:23.391 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-18 23:27:23.393 +03:00 [INF] Hosting environment: Development
+2025-07-18 23:27:23.394 +03:00 [INF] Content root path: D:\project_fashion\E-Commerce-API-main
+2025-07-18 23:27:23.418 +03:00 [INF] Server mrrobot:18700:b3112738 successfully announced in 12.8589 ms
+2025-07-18 23:27:23.423 +03:00 [INF] Server mrrobot:18700:b3112738 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2025-07-18 23:27:23.577 +03:00 [INF] Server mrrobot:18700:b3112738 all the dispatchers started
+2025-07-18 23:27:23.642 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/index.html - null null
+2025-07-18 23:27:23.840 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/index.html - 200 null text/html;charset=utf-8 198.2986ms
+2025-07-18 23:27:23.928 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-18 23:27:23.928 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/_vs/browserLink - null null
+2025-07-18 23:27:23.928 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/index.js - null null
+2025-07-18 23:27:23.944 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/_framework/aspnetcore-browser-refresh.js - 200 16505 application/javascript; charset=utf-8 15.9433ms
+2025-07-18 23:27:23.947 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/index.js - 200 null application/javascript;charset=utf-8 19.1819ms
+2025-07-18 23:27:23.979 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/_vs/browserLink - 200 null text/javascript; charset=UTF-8 51.4391ms
+2025-07-18 23:27:24.493 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - null null
+2025-07-18 23:27:24.740 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 247.3249ms
+2025-07-18 23:27:32.338 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/index.html - null null
+2025-07-18 23:27:32.353 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/index.html - 200 null text/html;charset=utf-8 15.9959ms
+2025-07-18 23:27:32.384 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-18 23:27:32.386 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/index.js - null null
+2025-07-18 23:27:32.386 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/_vs/browserLink - null null
+2025-07-18 23:27:32.399 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/_framework/aspnetcore-browser-refresh.js - 200 16505 application/javascript; charset=utf-8 14.5971ms
+2025-07-18 23:27:32.409 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/index.js - 200 null application/javascript;charset=utf-8 22.2931ms
+2025-07-18 23:27:32.436 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/_vs/browserLink - 200 null text/javascript; charset=UTF-8 49.4135ms
+2025-07-18 23:27:32.523 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - null null
+2025-07-18 23:27:32.802 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 278.8762ms
+2025-07-18 23:32:23.415 +03:00 [INF] 1 servers were removed due to timeout
