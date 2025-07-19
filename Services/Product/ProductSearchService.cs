@@ -26,20 +26,23 @@ namespace E_Commers.Services.ProductServices
 
 	public class ProductSearchService : IProductSearchService
 	{
+		private readonly IBackgroundJobClient _backgroundJobClient;
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly ILogger<ProductSearchService> _logger;
 		private readonly IErrorNotificationService _errorNotificationService;
 		private readonly ICacheManager _cacheManager;
-		private const string CACHE_TAG_PRODUCT_SEARCH = "product_search";
-		private const string CACHE_TAG_SUBCATEGORY = "subcategory";
-		private static readonly string[] PRODUCT_CACHE_TAGS = new[] { CACHE_TAG_PRODUCT_SEARCH, CACHE_TAG_SUBCATEGORY };
+		public const string CACHE_TAG_PRODUCT_SEARCH = "product_search";
+		public const string CACHE_TAG_SUBCATEGORY = "subcategory";
+		public static readonly string[] PRODUCT_CACHE_TAGS = new[] { CACHE_TAG_PRODUCT_SEARCH, CACHE_TAG_SUBCATEGORY };
 
 		public ProductSearchService(
+			IBackgroundJobClient backgroundJobClient,
 			IUnitOfWork unitOfWork,
 			ILogger<ProductSearchService> logger,
 			IErrorNotificationService errorNotificationService,
 			ICacheManager cacheManager)
 		{
+			_backgroundJobClient = backgroundJobClient;
 			_unitOfWork = unitOfWork;
 			_logger = logger;
 			_errorNotificationService = errorNotificationService;
@@ -133,7 +136,7 @@ namespace E_Commers.Services.ProductServices
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in GetNewArrivalsAsync");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<ProductListItemDto>>.Fail("Error retrieving new arrivals", 500);
 			}
 		}
@@ -175,7 +178,6 @@ namespace E_Commers.Services.ProductServices
 				return cached;
 			try
 			{
-				// Join products with order items and group by product, sum quantities
 				var query = _unitOfWork.Product.GetAll();
 				query = BasicFilter(query, isActive, deletedOnly);
 
@@ -226,7 +228,7 @@ namespace E_Commers.Services.ProductServices
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in GetBestSellersAsync");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<ProductListItemDto>>.Fail("Error retrieving best sellers", 500);
 			}
 		}
@@ -367,7 +369,7 @@ namespace E_Commers.Services.ProductServices
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in AdvancedSearchAsync");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<ProductListItemDto>>.Fail("Error performing advanced search", 500);
 			}
 		}

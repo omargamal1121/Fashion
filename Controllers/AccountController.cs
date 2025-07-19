@@ -15,6 +15,7 @@ using E_Commers.Services.EmailServices;
 using Microsoft.AspNetCore.RateLimiting;
 using E_Commers.Services.AccountServices.Shared;
 using E_Commers.Services;
+using Hangfire;
 
 namespace E_Commers.Controllers
 {
@@ -27,17 +28,20 @@ namespace E_Commers.Controllers
 	{
 		private readonly ILogger<AccountController> _logger;
 		private readonly IAccountServices _accountServices;
-	
+		private readonly IBackgroundJobClient _backgroundJobClient;
+
 		private readonly IAccountLinkBuilder _linkBuilder;
 		private readonly IErrorNotificationService _errorNotificationService;
 
 		public AccountController(
-	
+			IBackgroundJobClient backgroundJobClient,
+
 			IAccountLinkBuilder linkBuilder, 
 			IAccountServices accountServices,
 			ILogger<AccountController> logger,
 			IErrorNotificationService errorNotificationService)
 		{
+			_backgroundJobClient = backgroundJobClient ?? throw new ArgumentNullException(nameof(backgroundJobClient));
 			
 			_linkBuilder = linkBuilder ?? throw new ArgumentNullException(nameof(linkBuilder));
 			_accountServices = accountServices ?? throw new ArgumentNullException(nameof(accountServices));
@@ -73,7 +77,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in {nameof(LoginAsync)}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<TokensDto>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An unexpected error occurred during login."), 500));
 			}
 		}
@@ -106,7 +110,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in {nameof(RegisterAsync)}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<RegisterResponse>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An unexpected error occurred during registration."), 500));
 			}
 		}
@@ -138,7 +142,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in {nameof(RefreshTokenAsync)}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<string>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An unexpected error occurred during token refresh."), 500));
 			}
 		}
@@ -178,7 +182,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in {nameof(ChangePasswordAsync)}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<string>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An unexpected error occurred during password change."), 500));
 			}
 		}
@@ -213,7 +217,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in {nameof(ChangeEmailAsync)}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<ChangeEmailResultDto>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An unexpected error occurred during email change."), 500));
 			}
 		}
@@ -246,7 +250,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in {nameof(LogoutAsync)}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<string>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An unexpected error occurred during logout."), 500));
 			}
 		}
@@ -277,7 +281,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in {nameof(DeleteAsync)}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<string>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An unexpected error occurred during account deletion."), 500));
 			}
 		}
@@ -317,7 +321,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in {nameof(UploadPhotoAsync)}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<UploadPhotoResponseDto>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An unexpected error occurred during photo upload."), 500));
 			}
 		}
@@ -351,7 +355,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in {nameof(ConfirmEmailAsync)}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<string>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An unexpected error occurred during email confirmation."), 500));
 			}
 		}
@@ -383,7 +387,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in {nameof(ResendConfirmationEmailAsync)}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<string>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An unexpected error occurred while resending confirmation email."), 500));
 			}
 		}
@@ -410,7 +414,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in {nameof(RequestPasswordReset)}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<string>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An unexpected error occurred while requesting password reset."), 500));
 			}
 		}
@@ -437,7 +441,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in {nameof(ResetPassword)}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<string>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An unexpected error occurred while resetting password."), 500));
 			}
 		}

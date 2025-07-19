@@ -780,7 +780,7 @@
       },
       {
         "Name": "includeDeleted",
-        "Type": "System.Boolean",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
       }
     ],
@@ -1235,13 +1235,13 @@
   {
     "ContainingType": "E_Commers.Controllers.CollectionController",
     "Method": "GetCollectionById",
-    "RelativePath": "api/Collection/{collectionId}",
+    "RelativePath": "api/Collection/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "collectionId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       }
@@ -1261,13 +1261,13 @@
   {
     "ContainingType": "E_Commers.Controllers.CollectionController",
     "Method": "UpdateCollection",
-    "RelativePath": "api/Collection/{collectionId}",
+    "RelativePath": "api/Collection/{id}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "collectionId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       },
@@ -1292,13 +1292,13 @@
   {
     "ContainingType": "E_Commers.Controllers.CollectionController",
     "Method": "DeleteCollection",
-    "RelativePath": "api/Collection/{collectionId}",
+    "RelativePath": "api/Collection/{id}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "collectionId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       }
@@ -1318,13 +1318,13 @@
   {
     "ContainingType": "E_Commers.Controllers.CollectionController",
     "Method": "UpdateCollectionDisplayOrder",
-    "RelativePath": "api/Collection/{collectionId}/display-order",
+    "RelativePath": "api/Collection/{id}/display-order",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "collectionId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       },
@@ -1349,13 +1349,13 @@
   {
     "ContainingType": "E_Commers.Controllers.CollectionController",
     "Method": "AddProductsToCollection",
-    "RelativePath": "api/Collection/{collectionId}/products",
+    "RelativePath": "api/Collection/{id}/products",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "collectionId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       },
@@ -1380,13 +1380,13 @@
   {
     "ContainingType": "E_Commers.Controllers.CollectionController",
     "Method": "RemoveProductsFromCollection",
-    "RelativePath": "api/Collection/{collectionId}/products",
+    "RelativePath": "api/Collection/{id}/products",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "collectionId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       },
@@ -1411,13 +1411,13 @@
   {
     "ContainingType": "E_Commers.Controllers.CollectionController",
     "Method": "UpdateCollectionStatus",
-    "RelativePath": "api/Collection/{collectionId}/status",
+    "RelativePath": "api/Collection/{id}/status",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "collectionId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       },
@@ -1442,13 +1442,13 @@
   {
     "ContainingType": "E_Commers.Controllers.CollectionController",
     "Method": "GetCollectionSummary",
-    "RelativePath": "api/Collection/{collectionId}/summary",
+    "RelativePath": "api/Collection/{id}/summary",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "collectionId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       }
@@ -1739,13 +1739,13 @@
   {
     "ContainingType": "E_Commers.Controllers.CustomerAddressController",
     "Method": "GetAddressById",
-    "RelativePath": "api/CustomerAddress/{addressId}",
+    "RelativePath": "api/CustomerAddress/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "addressId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       }
@@ -1801,13 +1801,13 @@
   {
     "ContainingType": "E_Commers.Controllers.CustomerAddressController",
     "Method": "UpdateAddress",
-    "RelativePath": "api/CustomerAddress/{addressId}",
+    "RelativePath": "api/CustomerAddress/{id}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "addressId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       },
@@ -1877,13 +1877,13 @@
   {
     "ContainingType": "E_Commers.Controllers.CustomerAddressController",
     "Method": "DeleteAddress",
-    "RelativePath": "api/CustomerAddress/{addressId}",
+    "RelativePath": "api/CustomerAddress/{id}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "addressId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       }
@@ -1930,13 +1930,13 @@
   {
     "ContainingType": "E_Commers.Controllers.CustomerAddressController",
     "Method": "SetDefaultAddress",
-    "RelativePath": "api/CustomerAddress/{addressId}/set-default",
+    "RelativePath": "api/CustomerAddress/{id}/set-default",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "addressId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       }
@@ -1983,13 +1983,13 @@
   {
     "ContainingType": "E_Commers.Controllers.CustomerAddressController",
     "Method": "GetAddressWithCustomer",
-    "RelativePath": "api/CustomerAddress/{addressId}/with-customer",
+    "RelativePath": "api/CustomerAddress/{id}/with-customer",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "addressId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       }
@@ -3958,6 +3958,444 @@
     ]
   },
   {
+    "ContainingType": "E_Commers.Controllers.ProductVariantController",
+    "Method": "GetVariantById",
+    "RelativePath": "api/ProductVariant/{variantId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "variantId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.ProductDtos.ProductVariantDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "E_Commers.Controllers.ProductVariantController",
+    "Method": "ActivateVariant",
+    "RelativePath": "api/ProductVariant/activate/{variantId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "variantId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "E_Commers.Controllers.ProductVariantController",
+    "Method": "AddVariant",
+    "RelativePath": "api/ProductVariant/add",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "productId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "dto",
+        "Type": "E_Commers.DtoModels.ProductDtos.CreateProductVariantDto",
+        "IsRequired": true
+      },
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.ProductDtos.ProductVariantDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "E_Commers.Controllers.ProductVariantController",
+    "Method": "AddVariantQuantity",
+    "RelativePath": "api/ProductVariant/add-quantity/{variantId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "variantId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "addQuantity",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "E_Commers.Controllers.ProductVariantController",
+    "Method": "GetProductVariantsAdmin",
+    "RelativePath": "api/ProductVariant/by-product-admin/{productId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "productId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "isActive",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "deletedOnly",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Collections.Generic.List\u00601[[E_Commers.DtoModels.ProductDtos.ProductVariantDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "E_Commers.Controllers.ProductVariantController",
+    "Method": "GetProductVariants",
+    "RelativePath": "api/ProductVariant/by-product/{productId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "productId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Collections.Generic.List\u00601[[E_Commers.DtoModels.ProductDtos.ProductVariantDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "E_Commers.Controllers.ProductVariantController",
+    "Method": "DeactivateVariant",
+    "RelativePath": "api/ProductVariant/deactivate/{variantId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "variantId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "E_Commers.Controllers.ProductVariantController",
+    "Method": "DeleteVariant",
+    "RelativePath": "api/ProductVariant/delete/{variantId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "variantId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "E_Commers.Controllers.ProductVariantController",
+    "Method": "RemoveVariantQuantity",
+    "RelativePath": "api/ProductVariant/remove-quantity/{variantId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "variantId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "removeQuantity",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "E_Commers.Controllers.ProductVariantController",
+    "Method": "RestoreVariant",
+    "RelativePath": "api/ProductVariant/restore/{variantId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "variantId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "E_Commers.Controllers.ProductVariantController",
+    "Method": "GetVariantsBySearch",
+    "RelativePath": "api/ProductVariant/search",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "productId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "color",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "size",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Collections.Generic.List\u00601[[E_Commers.DtoModels.ProductDtos.ProductVariantDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "E_Commers.Controllers.ProductVariantController",
+    "Method": "GetVariantsBySearchAdmin",
+    "RelativePath": "api/ProductVariant/search-admin",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "productId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "color",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "size",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "isActive",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "deletedOnly",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Collections.Generic.List\u00601[[E_Commers.DtoModels.ProductDtos.ProductVariantDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "E_Commers.Controllers.ProductVariantController",
+    "Method": "UpdateVariant",
+    "RelativePath": "api/ProductVariant/update/{variantId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "variantId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "E_Commers.DtoModels.ProductDtos.UpdateProductVariantDto",
+        "IsRequired": true
+      },
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.ProductDtos.ProductVariantDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
     "ContainingType": "E_Commers.Controllers.SubCategoryController",
     "Method": "CreateAsync",
     "RelativePath": "api/SubCategory",
@@ -4008,12 +4446,12 @@
       },
       {
         "Name": "isActive",
-        "Type": "System.Boolean",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
       },
       {
         "Name": "DeletedOnly",
-        "Type": "System.Boolean",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
       }
     ],

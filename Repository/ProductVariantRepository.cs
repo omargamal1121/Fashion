@@ -3,6 +3,7 @@ using E_Commers.Services;
 using E_Commers.Interfaces;
 using E_Commers.Models;
 using Microsoft.EntityFrameworkCore;
+using E_Commers.Enums;
 
 namespace E_Commers.Repository
 {
@@ -99,15 +100,7 @@ namespace E_Commers.Repository
 				.ToListAsync();
 		}
 
-		public async Task<List<ProductVariant>> GetVariantsBySizeAsync(string size)
-		{
-			_logger.LogInformation($"Getting variants by size: {size}");
-			return await _entity
-				.Where(v => v.Size == size && v.DeletedAt == null)
-				.Include(v => v.Product)
-				.AsNoTracking()
-				.ToListAsync();
-		}
+
 
 	
 		public async Task<List<ProductVariant>> GetVariantsInStockAsync()

@@ -7,8 +7,10 @@ using E_Commers.ErrorHnadling;
 using E_Commers.Interfaces;
 using E_Commers.Models;
 using E_Commers.Services.AdminOpreationServices;
+using E_Commers.Services.Cache;
 using E_Commers.Services.EmailServices;
 using E_Commers.UOW;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
 namespace E_Commers.Services.Product
@@ -27,15 +29,26 @@ namespace E_Commers.Services.Product
 	{
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly ILogger<ProductDiscountService> _logger;
+		private readonly IBackgroundJobClient _backgroundJobClient;
 		private readonly IAdminOpreationServices _adminOpreationServices;
 		private readonly IErrorNotificationService _errorNotificationService;
+		private readonly ICacheManager _cacheManager;
+		private const string CACHE_TAG_PRODUCT_SEARCH = "product_search";
+		private const string CACHE_TAG_SUBCATEGORY = "subcategory";
+		private static readonly string[] PRODUCT_CACHE_TAGS = new[] { CACHE_TAG_PRODUCT_SEARCH, CACHE_TAG_SUBCATEGORY, PRODUCT_WITH_VARIANT_TAG };
+		private const string PRODUCT_WITH_VARIANT_TAG = "productwithvariantdata";
+
 
 		public ProductDiscountService(
+			IBackgroundJobClient backgroundJobClient,
+			ICacheManager cacheManager,
 			IUnitOfWork unitOfWork,
 			ILogger<ProductDiscountService> logger,
 			IAdminOpreationServices adminOpreationServices,
 			IErrorNotificationService errorNotificationService)
-		{
+		{ 
+			_backgroundJobClient = backgroundJobClient;
+			_cacheManager = cacheManager;
 			_unitOfWork = unitOfWork;
 			_logger = logger;
 			_adminOpreationServices = adminOpreationServices;
@@ -73,9 +86,14 @@ namespace E_Commers.Services.Product
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in GetProductDiscountAsync for productId: {productId}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+			 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<DiscountDto>.Fail("Error retrieving product discount", 500);
 			}
+		}
+
+		private void RemoveProductCachesAsync()
+		{
+			_backgroundJobClient.Enqueue(() => _cacheManager.RemoveByTagsAsync(PRODUCT_CACHE_TAGS));
 		}
 
 		public async Task<Result<ProductDetailDto>> AddDiscountToProductAsync(int productId, int discountId, string userId)
@@ -110,6 +128,7 @@ namespace E_Commers.Services.Product
 
 				await _unitOfWork.CommitAsync();
 				await UpdateProductPriceAfteDiscount(productId);
+				RemoveProductCachesAsync();
 
 				// Retrieve updated product
 				var updatedProduct = await _unitOfWork.Product.GetAll()
@@ -146,7 +165,6 @@ namespace E_Commers.Services.Product
 							Size = v.Size,
 							Waist = v.Waist,
 							Length = v.Length,
-							FitType = v.FitType,
 							Quantity = v.Quantity,
 							ProductId = v.ProductId
 						}).ToList()
@@ -158,7 +176,7 @@ namespace E_Commers.Services.Product
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in AddDiscountToProductAsync for productId: {productId}, discountId: {discountId}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+			 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<ProductDetailDto>.Fail("Error adding discount", 500);
 			}
 		}
@@ -200,6 +218,7 @@ namespace E_Commers.Services.Product
 
 				await _unitOfWork.CommitAsync();
 				await UpdateProductPriceAfteDiscount(productId);
+				RemoveProductCachesAsync();
 
 				// Retrieve updated product
 				var updatedProduct = await _unitOfWork.Product.GetAll()
@@ -236,7 +255,7 @@ namespace E_Commers.Services.Product
 							Size = v.Size,
 							Waist = v.Waist,
 							Length = v.Length,
-							FitType = v.FitType,
+						
 							Quantity = v.Quantity,
 							ProductId = v.ProductId
 						}).ToList()
@@ -248,7 +267,7 @@ namespace E_Commers.Services.Product
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in UpdateProductDiscountAsync for productId: {productId}, discountId: {discountId}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+			 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<ProductDetailDto>.Fail("Error updating discount", 500);
 			}
 		}
@@ -287,6 +306,7 @@ namespace E_Commers.Services.Product
 
 				await _unitOfWork.CommitAsync();
 				await UpdateProductPriceAfteDiscount(productId);
+				RemoveProductCachesAsync();
 
 				// Retrieve updated product
 				var updatedProduct = await _unitOfWork.Product.GetAll()
@@ -323,7 +343,7 @@ namespace E_Commers.Services.Product
 							Size = v.Size,
 							Waist = v.Waist,
 							Length = v.Length,
-							FitType = v.FitType,
+						 
 							Quantity = v.Quantity,
 							ProductId = v.ProductId
 						}).ToList()
@@ -335,7 +355,7 @@ namespace E_Commers.Services.Product
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in RemoveDiscountFromProductAsync for productId: {productId}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+			 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<ProductDetailDto>.Fail("Error removing discount", 500);
 			}
 		}
@@ -397,7 +417,7 @@ namespace E_Commers.Services.Product
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in GetProductsWithActiveDiscountsAsync");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+			 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<ProductListItemDto>>.Fail("Error retrieving products with active discounts", 500);
 			}
 		}
@@ -443,7 +463,7 @@ namespace E_Commers.Services.Product
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in CalculateDiscountedPriceAsync for productId: {productId}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<bool>.Fail("Error calculating discounted price", 500);
 			}
 		}

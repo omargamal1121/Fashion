@@ -8,12 +8,14 @@ using E_Commers.Models;
 using E_Commers.Services.AdminOpreationServices;
 using E_Commers.Services.EmailServices;
 using E_Commers.UOW;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
 namespace E_Commers.Services.Product
 {
 	public interface IProductImageService
 	{
+
 		Task<Result<List<ImageDto>>> GetProductImagesAsync(int productId);
 		Task<Result<List<ImageDto>>> AddProductImagesAsync(int productId, List<IFormFile> images, string userId);
 		Task<Result<bool>> RemoveProductImageAsync(int productId, int imageId, string userId);
@@ -23,6 +25,7 @@ namespace E_Commers.Services.Product
 
 	public class ProductImageService : IProductImageService
 	{
+		private readonly IBackgroundJobClient _backgroundJobClient;
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly ILogger<ProductImageService> _logger;
 		private readonly IAdminOpreationServices _adminOpreationServices;
@@ -30,12 +33,14 @@ namespace E_Commers.Services.Product
 		private readonly IImagesServices _imagesServices;
 
 		public ProductImageService(
+			IBackgroundJobClient backgroundJobClient,
 			IUnitOfWork unitOfWork,
 			ILogger<ProductImageService> logger,
 			IAdminOpreationServices adminOpreationServices,
 			IErrorNotificationService errorNotificationService,
 			IImagesServices imagesServices)
 		{
+			_backgroundJobClient = backgroundJobClient;
 			_unitOfWork = unitOfWork;
 			_logger = logger;
 			_adminOpreationServices = adminOpreationServices;
@@ -66,7 +71,7 @@ namespace E_Commers.Services.Product
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in GetProductImagesAsync for productId: {productId}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<ImageDto>>.Fail("Error retrieving product images", 500);
 			}
 		}
@@ -121,7 +126,7 @@ namespace E_Commers.Services.Product
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in AddProductImageAsync for productId: {productId}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<ImageDto>>.Fail("Error adding images", 500);
 			}
 		}
@@ -178,7 +183,7 @@ namespace E_Commers.Services.Product
 			{
 				await transaction.RollbackAsync();
 				_logger.LogError(ex, $"Error in RemoveProductImageAsync for productId: {productId}, imageId: {imageId}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<bool>.Fail("Unexpected error while removing image", 500);
 			}
 		}
@@ -236,7 +241,7 @@ namespace E_Commers.Services.Product
 			{
 				await transaction.RollbackAsync();
 				_logger.LogError(ex, $"Error in AddMainImageAsync for productId: {productId}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<bool>.Fail("Error setting main image", 500);
 			}
 		}

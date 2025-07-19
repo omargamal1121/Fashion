@@ -50,7 +50,7 @@ namespace E_Commers.DtoModels.ProductDtos
 	public class ProductVariantDto : BaseDto
 	{
 		public string Color { get; set; } = string.Empty;
-		public string? Size { get; set; }
+		public VariantSize? Size { get; set; }
 		public int? Waist { get; set; }
 		public int? Length { get; set; }
 		public int? FitType { get; set; }

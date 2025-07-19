@@ -135,3 +135,11 @@ wwwroot\CategoryPhotos\96ba7cb2-a86c-4962-bedf-8c90cdea0119.png
 wwwroot\CategoryPhotos\2dc098ff-b78c-4f9f-beac-2791f5bf1b91.png
 wwwroot\SubCategoryPhotos\aa0caf54-87f5-460f-80fe-55ed545326e7.jpg
 wwwroot\SubCategoryPhotos\3552c78d-b58f-4eb4-8a0b-82dc19152009.jpg
+wwwroot\CategoryPhotos\86f6f9d6-e7b5-4aa1-ac2a-2e971fed3dd2.png
+wwwroot\CategoryPhotos\75b00e19-bee6-48c1-bd9a-dc4a3213b0f9.png
+wwwroot\CategoryPhotos\2a4eeedf-cb51-4260-a137-78c20ab97593.png
+wwwroot\CategoryPhotos\280642bb-f26f-417a-9397-47d3ff9efae0.png
+wwwroot\CategoryPhotos\7eb1aa37-245e-44f4-8a1e-09992294d45f.png
+wwwroot\CategoryPhotos\d412747f-9039-429d-a337-affc19b4f75e.png
+wwwroot\SubCategoryPhotos\6c7ec581-097f-4f7c-ad49-52dea2f52ada.png
+wwwroot\SubCategoryPhotos\9de5b62c-4757-4cf4-a54e-b0e6be82e9e6.png

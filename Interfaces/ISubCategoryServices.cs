@@ -22,7 +22,7 @@ namespace E_Commers.Interfaces
 
 		
         Task<Result<SubCategoryDto>> CreateAsync(CreateSubCategoryDto subCategory, string userid);
-        Task<Result<SubCategoryDto>> GetSubCategoryByIdAsync(int id, bool isActive = true, bool includeDeleted = false);
+        Task<Result<SubCategoryDto>> GetSubCategoryByIdAsync(int id, bool? isActive = true, bool? includeDeleted = false);
         Task<Result<string>> DeleteAsync(int id, string userid);
         Task<Result<SubCategoryDto>> UpdateAsync(int subCategoryId, UpdateSubCategoryDto subCategory, string userid);
         Task<Result<SubCategoryDto>> ReturnRemovedSubCategoryAsync(int id, string userid);

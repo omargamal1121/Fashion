@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using E_Commers.Enums;
+using E_Commers.Models;
 
 namespace E_Commers.DtoModels.ProductDtos
 {
@@ -9,8 +10,7 @@ namespace E_Commers.DtoModels.ProductDtos
 		[StringLength(20, MinimumLength = 2, ErrorMessage = "Color must be between 2 and 20 characters.")]
 		public string Color { get; set; } = string.Empty;
 		
-		[StringLength(10, ErrorMessage = "Size must not exceed 10 characters.")]
-		public string Size { get; set; }
+		public VariantSize? Size { get; set; }
 		
 		[StringLength(10, ErrorMessage = "Waist must not exceed 10 characters.")]
 		public int? Waist { get; set; }
@@ -25,5 +25,6 @@ namespace E_Commers.DtoModels.ProductDtos
 		[Required(ErrorMessage = "Price is required.")]
 		[Range(0, (double)decimal.MaxValue, ErrorMessage = "Price must be non-negative.")]
 		public decimal Price { get; set; }
+		public FitType  fitType { get; set; }
 	}
 }

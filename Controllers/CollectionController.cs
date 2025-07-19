@@ -63,14 +63,14 @@ namespace E_Commers.Controllers
         /// <summary>
         /// Get collection by ID
         /// </summary>
-        [HttpGet("{collectionId}")]
-        public async Task<ActionResult<ApiResponse<CollectionDto>>> GetCollectionById(int collectionId)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ApiResponse<CollectionDto>>> GetCollectionById(int id)
         {
             try
             {
-                _logger.LogInformation($"Executing GetCollectionById for ID: {collectionId}");
-                var result = await _collectionServices.GetCollectionByIdAsync(collectionId);
-                return HandleResult(result, nameof(GetCollectionById), collectionId);
+                _logger.LogInformation($"Executing GetCollectionById for ID: {id}");
+                var result = await _collectionServices.GetCollectionByIdAsync(id);
+                return HandleResult(result, nameof(GetCollectionById), id);
             }
             catch (Exception ex)
             {
@@ -223,14 +223,14 @@ namespace E_Commers.Controllers
         /// <summary>
         /// Get collection summary
         /// </summary>
-        [HttpGet("{collectionId}/summary")]
-        public async Task<ActionResult<ApiResponse<CollectionSummaryDto>>> GetCollectionSummary(int collectionId)
+        [HttpGet("{id}/summary")]
+        public async Task<ActionResult<ApiResponse<CollectionSummaryDto>>> GetCollectionSummary(int id)
         {
             try
             {
-                _logger.LogInformation($"Executing GetCollectionSummary for ID: {collectionId}");
-                var result = await _collectionServices.GetCollectionSummaryAsync(collectionId);
-                return HandleResult(result, nameof(GetCollectionSummary), collectionId);
+                _logger.LogInformation($"Executing GetCollectionSummary for ID: {id}");
+                var result = await _collectionServices.GetCollectionSummaryAsync(id);
+                return HandleResult(result, nameof(GetCollectionSummary), id);
             }
             catch (Exception ex)
             {
@@ -291,10 +291,10 @@ namespace E_Commers.Controllers
         /// <summary>
         /// Update collection (Admin only)
         /// </summary>
-        [HttpPut("{collectionId}")]
+        [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<CollectionDto>>> UpdateCollection(
-            int collectionId,
+            int id,
             [FromBody] UpdateCollectionDto collectionDto)
         {
             try
@@ -306,10 +306,10 @@ namespace E_Commers.Controllers
                     return BadRequest(ApiResponse<CollectionDto>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
                 }
 
-                _logger.LogInformation($"Executing UpdateCollection for ID: {collectionId}");
+                _logger.LogInformation($"Executing UpdateCollection for ID: {id}");
                 var userRole = GetUserRole();
-                var result = await _collectionServices.UpdateCollectionAsync(collectionId, collectionDto, userRole);
-                return HandleResult(result, nameof(UpdateCollection), collectionId);
+                var result = await _collectionServices.UpdateCollectionAsync(id, collectionDto, userRole);
+                return HandleResult(result, nameof(UpdateCollection), id);
             }
             catch (Exception ex)
             {
@@ -321,16 +321,16 @@ namespace E_Commers.Controllers
         /// <summary>
         /// Delete collection (Admin only)
         /// </summary>
-        [HttpDelete("{collectionId}")]
+        [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<string>>> DeleteCollection(int collectionId)
+        public async Task<ActionResult<ApiResponse<string>>> DeleteCollection(int id)
         {
             try
             {
-                _logger.LogInformation($"Executing DeleteCollection for ID: {collectionId}");
+                _logger.LogInformation($"Executing DeleteCollection for ID: {id}");
                 var userRole = GetUserRole();
-                var result = await _collectionServices.DeleteCollectionAsync(collectionId, userRole);
-                return HandleResult(result, nameof(DeleteCollection), collectionId);
+                var result = await _collectionServices.DeleteCollectionAsync(id, userRole);
+                return HandleResult(result, nameof(DeleteCollection), id);
             }
             catch (Exception ex)
             {
@@ -342,10 +342,10 @@ namespace E_Commers.Controllers
         /// <summary>
         /// Add products to collection (Admin only)
         /// </summary>
-        [HttpPost("{collectionId}/products")]
+        [HttpPost("{id}/products")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<string>>> AddProductsToCollection(
-            int collectionId,
+            int id,
             [FromBody] AddProductsToCollectionDto productsDto)
         {
             try
@@ -357,10 +357,10 @@ namespace E_Commers.Controllers
                     return BadRequest(ApiResponse<string>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
                 }
 
-                _logger.LogInformation($"Executing AddProductsToCollection for collection ID: {collectionId}");
+                _logger.LogInformation($"Executing AddProductsToCollection for collection ID: {id}");
                 var userRole = GetUserRole();
-                var result = await _collectionServices.AddProductsToCollectionAsync(collectionId, productsDto, userRole);
-                return HandleResult(result, nameof(AddProductsToCollection), collectionId);
+                var result = await _collectionServices.AddProductsToCollectionAsync(id, productsDto, userRole);
+                return HandleResult(result, nameof(AddProductsToCollection), id);
             }
             catch (Exception ex)
             {
@@ -372,10 +372,10 @@ namespace E_Commers.Controllers
         /// <summary>
         /// Remove products from collection (Admin only)
         /// </summary>
-        [HttpDelete("{collectionId}/products")]
+        [HttpDelete("{id}/products")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<string>>> RemoveProductsFromCollection(
-            int collectionId,
+            int id,
             [FromBody] RemoveProductsFromCollectionDto productsDto)
         {
             try
@@ -387,10 +387,10 @@ namespace E_Commers.Controllers
                     return BadRequest(ApiResponse<string>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
                 }
 
-                _logger.LogInformation($"Executing RemoveProductsFromCollection for collection ID: {collectionId}");
+                _logger.LogInformation($"Executing RemoveProductsFromCollection for collection ID: {id}");
                 var userRole = GetUserRole();
-                var result = await _collectionServices.RemoveProductsFromCollectionAsync(collectionId, productsDto, userRole);
-                return HandleResult(result, nameof(RemoveProductsFromCollection), collectionId);
+                var result = await _collectionServices.RemoveProductsFromCollectionAsync(id, productsDto, userRole);
+                return HandleResult(result, nameof(RemoveProductsFromCollection), id);
             }
             catch (Exception ex)
             {
@@ -402,18 +402,18 @@ namespace E_Commers.Controllers
         /// <summary>
         /// Update collection status (Admin only)
         /// </summary>
-        [HttpPut("{collectionId}/status")]
+        [HttpPut("{id}/status")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<string>>> UpdateCollectionStatus(
-            int collectionId,
+            int id,
             [FromBody] bool isActive)
         {
             try
             {
-                _logger.LogInformation($"Executing UpdateCollectionStatus for ID: {collectionId}, active: {isActive}");
+                _logger.LogInformation($"Executing UpdateCollectionStatus for ID: {id}, active: {isActive}");
                 var userRole = GetUserRole();
-                var result = await _collectionServices.UpdateCollectionStatusAsync(collectionId, isActive, userRole);
-                return HandleResult(result, nameof(UpdateCollectionStatus), collectionId);
+                var result = await _collectionServices.UpdateCollectionStatusAsync(id, isActive, userRole);
+                return HandleResult(result, nameof(UpdateCollectionStatus), id);
             }
             catch (Exception ex)
             {
@@ -425,18 +425,18 @@ namespace E_Commers.Controllers
         /// <summary>
         /// Update collection display order (Admin only)
         /// </summary>
-        [HttpPut("{collectionId}/display-order")]
+        [HttpPut("{id}/display-order")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<string>>> UpdateCollectionDisplayOrder(
-            int collectionId,
+            int id,
             [FromBody] int displayOrder)
         {
             try
             {
-                _logger.LogInformation($"Executing UpdateCollectionDisplayOrder for ID: {collectionId}, order: {displayOrder}");
+                _logger.LogInformation($"Executing UpdateCollectionDisplayOrder for ID: {id}, order: {displayOrder}");
                 var userRole = GetUserRole();
-                var result = await _collectionServices.UpdateCollectionDisplayOrderAsync(collectionId, displayOrder, userRole);
-                return HandleResult(result, nameof(UpdateCollectionDisplayOrder), collectionId);
+                var result = await _collectionServices.UpdateCollectionDisplayOrderAsync(id, displayOrder, userRole);
+                return HandleResult(result, nameof(UpdateCollectionDisplayOrder), id);
             }
             catch (Exception ex)
             {

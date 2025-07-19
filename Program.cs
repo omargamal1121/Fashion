@@ -163,6 +163,7 @@ namespace E_Commers
 			builder.Services.AddScoped<ISubCategoryRepository, SubCategoryRepository>();
 			builder.Services.AddScoped<IAdminOpreationServices, AdminOpreationServices>();
 			builder.Services.AddTransient<ISubCategoryLinkBuilder, SubCategoryLinkBuilder>();
+            builder.Services.AddResponseCaching();
 			builder.Services.AddSingleton<IConnectionMultiplexer>(
                 ConnectionMultiplexer.Connect("Localhost:6379")
             );

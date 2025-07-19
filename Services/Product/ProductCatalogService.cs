@@ -23,6 +23,7 @@ namespace E_Commers.Services.Product
 	{
 		
 		Task<Result<ProductDetailDto>> GetProductByIdAsync(int id, bool? isActive, bool? deletedOnly);
+		public void UpdateProductQuantity(Models.Product product);
 		Task<Result<ProductListItemDto>> CreateProductAsync(CreateProductDto dto, string userId);
 		Task<Result<ProductListItemDto>> UpdateProductAsync(int id, UpdateProductDto dto, string userId);
 		Task<Result<string>> DeleteProductAsync(int id, string userId);
@@ -34,15 +35,18 @@ namespace E_Commers.Services.Product
 	{
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly ISubCategoryServices _subCategoryServices;
+		private readonly IBackgroundJobClient _backgroundJobClient;
 		private readonly ILogger<ProductCatalogService> _logger;
 		private readonly IAdminOpreationServices _adminOpreationServices;
 		private readonly IErrorNotificationService _errorNotificationService;
 		private readonly ICacheManager _cacheManager;
 		private const string CACHE_TAG_PRODUCT_SEARCH = "product_search";
 		private const string CACHE_TAG_SUBCATEGORY = "subcategory";
-		private static readonly string[] PRODUCT_CACHE_TAGS = new[] { CACHE_TAG_PRODUCT_SEARCH, CACHE_TAG_SUBCATEGORY };
+		private static readonly string[] PRODUCT_CACHE_TAGS = new[] { CACHE_TAG_PRODUCT_SEARCH, CACHE_TAG_SUBCATEGORY,PRODUCT_WITH_VARIANT_TAG };
+		private const string PRODUCT_WITH_VARIANT_TAG = "productwithvariantdata";
 
-		public ProductCatalogService(
+		public ProductCatalogService( 
+						 IBackgroundJobClient backgroundJobClient,
 			IUnitOfWork unitOfWork,
 			 ISubCategoryServices subCategoryServices,
 			ILogger<ProductCatalogService> logger,
@@ -50,6 +54,7 @@ namespace E_Commers.Services.Product
 			IErrorNotificationService errorNotificationService,
 			ICacheManager cacheManager)
 		{
+			_backgroundJobClient = backgroundJobClient;
 			_unitOfWork = unitOfWork;
 			_subCategoryServices = subCategoryServices;
 			_logger = logger;
@@ -57,8 +62,20 @@ namespace E_Commers.Services.Product
 			_errorNotificationService = errorNotificationService;
 			_cacheManager = cacheManager;
 		}
+		private string GetProductByIdCacheKey(int id, bool? isActive, bool? deletedOnly) => $"product_detail:{id}:isActive={isActive}:deletedOnly={deletedOnly}";
+		private string GetProductsBySubCategoryCacheKey(int subCategoryId) => $"products_subcategory:{subCategoryId}";
+		private string[] GetProductCacheTags(int? subCategoryId = null)
+		{
+			if (subCategoryId.HasValue)
+				return new[] { CACHE_TAG_PRODUCT_SEARCH, $"subcategory:{subCategoryId.Value}" };
+			return new[] { CACHE_TAG_PRODUCT_SEARCH };
+		}
 		public async Task<Result<ProductDetailDto>> GetProductByIdAsync(int id, bool? isActive, bool? deletedOnly)
 		{
+			var cacheKey = GetProductByIdCacheKey(id, isActive, deletedOnly);
+			var cached = await _cacheManager.GetAsync<ProductDetailDto>(cacheKey);
+			if (cached != null)
+				return Result<ProductDetailDto>.Ok(cached, "Product retrieved from cache", 200);
 			try
 			{
 				var query = _unitOfWork.Product.GetAll().AsNoTracking().Where(p => p.Id == id);
@@ -103,12 +120,10 @@ namespace E_Commers.Services.Product
 						Variants = p.ProductVariants.Where(v => v.DeletedAt == null&&v.Quantity!=0).Select(v => new ProductVariantDto 
 						{ 
 							Id = v.Id, 
-
 							Color = v.Color, 
 							Size = v.Size, 
 							Waist = v.Waist,
 							Length = v.Length,
-							FitType = v.FitType,
 							Quantity = v.Quantity,
 							ProductId = v.ProductId
 						}).ToList()
@@ -118,19 +133,20 @@ namespace E_Commers.Services.Product
 				if (product == null)
 					return Result<ProductDetailDto>.Fail("Product not found", 404);
 
+				BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, product, null, new[] { PRODUCT_WITH_VARIANT_TAG }));
 				return Result<ProductDetailDto>.Ok(product, "Product retrieved successfully", 200);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in GetProductByIdAsync for id: {id}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<ProductDetailDto>.Fail("Error retrieving product", 500);
 			}
 		}
 
-		private async Task SaveAndRemoveProductCacheAsync()
+		private  void RemoveProductCachesAsync()
 		{
-			await _unitOfWork.CommitAsync();
+			
 			BackgroundJob.Enqueue(() => _cacheManager.RemoveByTagsAsync(PRODUCT_CACHE_TAGS));
 		}
 
@@ -180,7 +196,7 @@ namespace E_Commers.Services.Product
 					userId,
 					product.Id
 				);
-				await SaveAndRemoveProductCacheAsync();
+				 RemoveProductCachesAsync();
 				var productDetailDto = await GetProductByIdAsync(product.Id, false, false);
 				var productListItemDto = ProductListItemDto.FromDetail(productDetailDto.Data);
 				return Result<ProductListItemDto>.Ok(productListItemDto, "Product created successfully", 201);
@@ -188,7 +204,7 @@ namespace E_Commers.Services.Product
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Unexpected error in CreateProductAsync for product {dto.Name}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<ProductListItemDto>.Fail("Unexpected error occurred while creating product", 500);
 			}
 		}
@@ -242,7 +258,7 @@ namespace E_Commers.Services.Product
 					userId,
 					id
 				);
-				await SaveAndRemoveProductCacheAsync();
+				 RemoveProductCachesAsync();
 				
 				var productDetailDto = await GetProductByIdAsync(id, null, null);
 				if (!productDetailDto.Success)
@@ -253,7 +269,7 @@ namespace E_Commers.Services.Product
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in UpdateProductAsync for id: {id}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<ProductListItemDto>.Fail("Error updating product", 500);
 			}
 		}
@@ -278,13 +294,13 @@ namespace E_Commers.Services.Product
 					userId,
 					id
 				);
-				await SaveAndRemoveProductCacheAsync();
+				 RemoveProductCachesAsync();
 				return Result<string>.Ok("Product deleted successfully", "Product deleted", 200);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in DeleteProductAsync for id: {id}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<string>.Fail("Error deleting product", 500);
 			}
 		}
@@ -310,7 +326,7 @@ namespace E_Commers.Services.Product
 					userId,
 					id
 				);
-				await SaveAndRemoveProductCacheAsync();
+				 RemoveProductCachesAsync();
 				var productDetailDto = await GetProductByIdAsync(id, true, false);
 				var productListItemDto = ProductListItemDto.FromDetail(productDetailDto.Data);
 				return Result<ProductListItemDto>.Ok(productListItemDto, "Product restored successfully", 200);
@@ -318,13 +334,17 @@ namespace E_Commers.Services.Product
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in RestoreProductAsync for id: {id}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				BackgroundJob.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<ProductListItemDto>.Fail("Error restoring product", 500);
 			}
 		}
 
 		public async Task<Result<List<ProductListItemDto>>> GetProductsBySubCategoryId(int SubCategoryid)
 		{
+			var cacheKey = GetProductsBySubCategoryCacheKey(SubCategoryid);
+			var cached = await _cacheManager.GetAsync<List<ProductListItemDto>>(cacheKey);
+			if (cached != null)
+				return Result<List<ProductListItemDto>>.Ok(cached, "Products by Category (from cache)", 200);
 			try
 			{
 				var isfound = await _subCategoryServices.IsExsistAsync(SubCategoryid);
@@ -343,45 +363,32 @@ namespace E_Commers.Services.Product
 						Description = p.Description,
 						AvailableQuantity = p.Quantity,
 						Gender = p.Gender,
-						
 						Discount = p.Discount != null ? new DiscountDto { Id = p.Discount.Id, DiscountPercent = p.Discount.DiscountPercent, IsActive = p.Discount.IsActive, StartDate = p.Discount.StartDate, EndDate = p.Discount.EndDate, Name = p.Discount.Name, Description = p.Discount.Description } : null,
 						Images = p.Images.Where(i => i.DeletedAt == null).Select(i => new ImageDto { Id = i.Id, Url = i.Url }).ToList()
 					})
-					
 					.ToListAsync();
 
+				BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, products, null, GetProductCacheTags(SubCategoryid)));
 				return Result<List<ProductListItemDto>>.Ok(products, "Products by Category", 200);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in GetProductsByCategoryId for categoryId: {SubCategoryid}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<ProductListItemDto>>.Fail("Error retrieving products by category", 500);
 			}
 		}
 
 		// Updates the product's quantity based on the sum of all non-deleted variant quantities
-		private void UpdateProductQuantity(Models.Product product)
+		public void UpdateProductQuantity(Models.Product product)
 		{
 			if (product.ProductVariants != null)
 			{
 				product.Quantity = product.ProductVariants
-					.Where(v => v.DeletedAt == null)
+					.Where(v => v.DeletedAt == null&&v.IsActive)
 					.Sum(v => v.Quantity);
 			}
 		}
 
-		// Updates the product's FinalPrice based on the discount, if present
-		private void UpdateProductPriceAfterDiscount(Models.Product product)
-		{
-			if (product.Discount != null && product.Discount.IsActive && product.Discount.DiscountPercent > 0)
-			{
-				product.FinalPrice = product.Price - (product.Price * (product.Discount.DiscountPercent / 100m));
-			}
-			else
-			{
-				product.FinalPrice = product.Price;
-			}
-		}
 	}
 } 

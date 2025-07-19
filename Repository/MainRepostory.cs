@@ -67,7 +67,7 @@ public class MainRepository<T> : IRepository<T> where T : BaseEntity
 	public async Task<T?> GetByIdAsync(int id)
 	{
 		_logger.LogInformation($"Executing {nameof(GetByIdAsync)} for entity {typeof(T).Name} with ID: {id}");
-		var entity = await _entities.AsNoTracking()
+		var entity = await _entities
 			.FirstOrDefaultAsync(e => e.Id == id);
 
 		if (entity == null)

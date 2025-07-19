@@ -4,6 +4,7 @@ using E_Commers.ErrorHnadling;
 using E_Commers.Interfaces;
 using E_Commers.Services;
 using E_Commers.Services.EmailServices;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -17,13 +18,16 @@ namespace E_Commers.Controllers
 	{
 		private readonly ILogger<CustomerAddressController> _logger;
 		private readonly ICustomerAddressServices _addressServices;
+		private readonly IBackgroundJobClient _backgroundJobClient;
 		private readonly IErrorNotificationService _errorNotificationService;
 
 		public CustomerAddressController(
+			IBackgroundJobClient backgroundJobClient,
 			ILogger<CustomerAddressController> logger,
 			ICustomerAddressServices addressServices,
 			IErrorNotificationService errorNotificationService)
 		{
+			_backgroundJobClient = backgroundJobClient;
 			_logger = logger;
 			_addressServices = addressServices;
 			_errorNotificationService = errorNotificationService;
@@ -94,7 +98,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in GetCustomerAddresses");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<List<CustomerAddressDto>>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while retrieving addresses"), 500));
 			}
 		}
@@ -102,26 +106,26 @@ namespace E_Commers.Controllers
 		/// <summary>
 		/// Get a specific address by ID
 		/// </summary>
-		[HttpGet("{addressId}")]
+		[HttpGet("{id}")]
 		[ActionName(nameof(GetAddressById))]
 		[ProducesResponseType(typeof(ApiResponse<CustomerAddressDto>), StatusCodes.Status200OK)]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status401Unauthorized)]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status403Forbidden)]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-		public async Task<ActionResult<ApiResponse<CustomerAddressDto>>> GetAddressById(int addressId)
+		public async Task<ActionResult<ApiResponse<CustomerAddressDto>>> GetAddressById(int id)
 		{
 			try
 			{
-				_logger.LogInformation($"Executing GetAddressById for address ID: {addressId}");
+				_logger.LogInformation($"Executing GetAddressById for address ID: {id}");
 				var userId = GetUserId();
-				var result = await _addressServices.GetAddressByIdAsync(addressId, userId);
-				return HandleResult(result, nameof(GetAddressById), addressId);
+				var result = await _addressServices.GetAddressByIdAsync(id, userId);
+				return HandleResult(result, nameof(GetAddressById), id);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, $"Error in GetAddressById for address ID: {addressId}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				_logger.LogError(ex, $"Error in GetAddressById for address ID: {id}");
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<CustomerAddressDto>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while retrieving address"), 500));
 			}
 		}
@@ -147,7 +151,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in GetDefaultAddress");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<CustomerAddressDto>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while retrieving default address"), 500));
 			}
 		}
@@ -181,7 +185,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in CreateAddress");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<CustomerAddressDto>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while creating address"), 500));
 			}
 		}
@@ -189,7 +193,7 @@ namespace E_Commers.Controllers
 		/// <summary>
 		/// Update an existing address
 		/// </summary>
-		[HttpPut("{addressId}")]
+		[HttpPut("{id}")]
 		[ActionName(nameof(UpdateAddress))]
 		[ProducesResponseType(typeof(ApiResponse<CustomerAddressDto>), StatusCodes.Status200OK)]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
@@ -197,11 +201,11 @@ namespace E_Commers.Controllers
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status401Unauthorized)]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status403Forbidden)]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-		public async Task<ActionResult<ApiResponse<CustomerAddressDto>>> UpdateAddress(int addressId, [FromBody] UpdateCustomerAddressDto addressDto)
+		public async Task<ActionResult<ApiResponse<CustomerAddressDto>>> UpdateAddress(int id, [FromBody] UpdateCustomerAddressDto addressDto)
 		{
 			try
 			{
-				_logger.LogInformation($"Executing UpdateAddress for address ID: {addressId}");
+				_logger.LogInformation($"Executing UpdateAddress for address ID: {id}");
 				
 				if (!ModelState.IsValid)
 				{
@@ -211,13 +215,13 @@ namespace E_Commers.Controllers
 				}
 
 				var userId = GetUserId();
-				var result = await _addressServices.UpdateAddressAsync(addressId, addressDto, userId);
-				return HandleResult(result, nameof(UpdateAddress), addressId);
+				var result = await _addressServices.UpdateAddressAsync(id, addressDto, userId);
+				return HandleResult(result, nameof(UpdateAddress), id);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, $"Error in UpdateAddress for address ID: {addressId}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				_logger.LogError(ex, $"Error in UpdateAddress for address ID: {id}");
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<CustomerAddressDto>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while updating address"), 500));
 			}
 		}
@@ -225,25 +229,25 @@ namespace E_Commers.Controllers
 		/// <summary>
 		/// Delete an address
 		/// </summary>
-		[HttpDelete("{addressId}")]
+		[HttpDelete("{id}")]
 		[ActionName(nameof(DeleteAddress))]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status401Unauthorized)]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-		public async Task<ActionResult<ApiResponse<string>>> DeleteAddress(int addressId)
+		public async Task<ActionResult<ApiResponse<string>>> DeleteAddress(int id)
 		{
 			try
 			{
-				_logger.LogInformation($"Executing DeleteAddress for address ID: {addressId}");
+				_logger.LogInformation($"Executing DeleteAddress for address ID: {id}");
 				var userId = GetUserId();
-				var result = await _addressServices.DeleteAddressAsync(addressId, userId);
-				return HandleResult(result, nameof(DeleteAddress), addressId);
+				var result = await _addressServices.DeleteAddressAsync(id, userId);
+				return HandleResult(result, nameof(DeleteAddress), id);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, $"Error in DeleteAddress for address ID: {addressId}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				_logger.LogError(ex, $"Error in DeleteAddress for address ID: {id}");
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<string>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while deleting address"), 500));
 			}
 		}
@@ -251,25 +255,25 @@ namespace E_Commers.Controllers
 		/// <summary>
 		/// Set an address as default
 		/// </summary>
-		[HttpPost("{addressId}/set-default")]
+		[HttpPost("{id}/set-default")]
 		[ActionName(nameof(SetDefaultAddress))]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status401Unauthorized)]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-		public async Task<ActionResult<ApiResponse<string>>> SetDefaultAddress(int addressId)
+		public async Task<ActionResult<ApiResponse<string>>> SetDefaultAddress(int id)
 		{
 			try
 			{
-				_logger.LogInformation($"Executing SetDefaultAddress for address ID: {addressId}");
+				_logger.LogInformation($"Executing SetDefaultAddress for address ID: {id}");
 				var userId = GetUserId();
-				var result = await _addressServices.SetDefaultAddressAsync(addressId, userId);
-				return HandleResult(result, nameof(SetDefaultAddress), addressId);
+				var result = await _addressServices.SetDefaultAddressAsync(id, userId);
+				return HandleResult(result, nameof(SetDefaultAddress), id);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, $"Error in SetDefaultAddress for address ID: {addressId}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				_logger.LogError(ex, $"Error in SetDefaultAddress for address ID: {id}");
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<string>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while setting default address"), 500));
 			}
 		}
@@ -294,7 +298,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in GetAddressesByType for type: {addressType}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<List<CustomerAddressDto>>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while retrieving addresses by type"), 500));
 			}
 		}
@@ -319,7 +323,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in SearchAddresses with term: {searchTerm}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<List<CustomerAddressDto>>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while searching addresses"), 500));
 			}
 		}
@@ -344,7 +348,7 @@ namespace E_Commers.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in GetAddressCount");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<int>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while getting address count"), 500));
 			}
 		}
@@ -352,7 +356,7 @@ namespace E_Commers.Controllers
 		/// <summary>
 		/// Get address with customer details (Admin only)
 		/// </summary>
-		[HttpGet("{addressId}/with-customer")]
+		[HttpGet("{id}/with-customer")]
 		[Authorize(Roles = "Admin")]
 		[ActionName(nameof(GetAddressWithCustomer))]
 		[ProducesResponseType(typeof(ApiResponse<CustomerAddressDto>), StatusCodes.Status200OK)]
@@ -360,19 +364,19 @@ namespace E_Commers.Controllers
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status401Unauthorized)]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status403Forbidden)]
 		[ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-		public async Task<ActionResult<ApiResponse<CustomerAddressDto>>> GetAddressWithCustomer(int addressId)
+		public async Task<ActionResult<ApiResponse<CustomerAddressDto>>> GetAddressWithCustomer(int id)
 		{
 			try
 			{
-				_logger.LogInformation($"Executing GetAddressWithCustomer for address ID: {addressId}");
+				_logger.LogInformation($"Executing GetAddressWithCustomer for address ID: {id}");
 				var userRole = GetUserRole();
-				var result = await _addressServices.GetAddressWithCustomerAsync(addressId, userRole);
-				return HandleResult(result, nameof(GetAddressWithCustomer), addressId);
+				var result = await _addressServices.GetAddressWithCustomerAsync(id, userRole);
+				return HandleResult(result, nameof(GetAddressWithCustomer), id);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, $"Error in GetAddressWithCustomer for address ID: {addressId}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				_logger.LogError(ex, $"Error in GetAddressWithCustomer for address ID: {id}");
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return StatusCode(500, ApiResponse<CustomerAddressDto>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while retrieving address with customer details"), 500));
 			}
 		}

@@ -42,7 +42,6 @@ namespace E_Commers.Services.Product
 		Task<Result<ProductVariantDto>> AddVariantAsync(int productId, CreateProductVariantDto dto, string userId);
 		Task<Result<ProductVariantDto>> UpdateVariantAsync(int variantId, UpdateProductVariantDto dto, string userId);
 		Task<Result<string>> DeleteVariantAsync(int variantId, string userId);
-		Task<Result<string>> UpdateVariantPriceAsync(int variantId, decimal newPrice, string userId);
 		Task<Result<string>> UpdateVariantQuantityAsync(int variantId, int newQuantity, string userId);
 		// Discount operations (delegated to ProductDiscountService)
 		Task<Result<DiscountDto>> GetProductDiscountAsync(int productId);
@@ -148,10 +147,7 @@ namespace E_Commers.Services.Product
 		{
 			return await _productVariantService.DeleteVariantAsync(variantId, userId);
 		}
-		public async Task<Result<string>> UpdateVariantPriceAsync(int variantId, decimal newPrice, string userId)
-		{
-			return await _productVariantService.UpdateVariantPriceAsync(variantId, newPrice, userId);
-		}
+	
 		public async Task<Result<string>> UpdateVariantQuantityAsync(int variantId, int newQuantity, string userId)
 		{
 			return await _productVariantService.UpdateVariantQuantityAsync(variantId, newQuantity, userId);

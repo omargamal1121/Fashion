@@ -1455,8 +1455,7 @@
             "name": "includeDeleted",
             "in": "query",
             "schema": {
-              "type": "boolean",
-              "default": false
+              "type": "boolean"
             }
           }
         ],
@@ -2169,14 +2168,14 @@
         }
       }
     },
-    "/api/Collection/{collectionId}": {
+    "/api/Collection/{id}": {
       "get": {
         "tags": [
           "Collection"
         ],
         "parameters": [
           {
-            "name": "collectionId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -2214,7 +2213,7 @@
         ],
         "parameters": [
           {
-            "name": "collectionId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -2276,7 +2275,7 @@
         ],
         "parameters": [
           {
-            "name": "collectionId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -2629,14 +2628,14 @@
         }
       }
     },
-    "/api/Collection/{collectionId}/summary": {
+    "/api/Collection/{id}/summary": {
       "get": {
         "tags": [
           "Collection"
         ],
         "parameters": [
           {
-            "name": "collectionId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -2725,14 +2724,14 @@
         }
       }
     },
-    "/api/Collection/{collectionId}/products": {
+    "/api/Collection/{id}/products": {
       "post": {
         "tags": [
           "Collection"
         ],
         "parameters": [
           {
-            "name": "collectionId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -2794,7 +2793,7 @@
         ],
         "parameters": [
           {
-            "name": "collectionId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -2851,14 +2850,14 @@
         }
       }
     },
-    "/api/Collection/{collectionId}/status": {
+    "/api/Collection/{id}/status": {
       "put": {
         "tags": [
           "Collection"
         ],
         "parameters": [
           {
-            "name": "collectionId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -2915,14 +2914,14 @@
         }
       }
     },
-    "/api/Collection/{collectionId}/display-order": {
+    "/api/Collection/{id}/display-order": {
       "put": {
         "tags": [
           "Collection"
         ],
         "parameters": [
           {
-            "name": "collectionId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -3163,14 +3162,14 @@
         }
       }
     },
-    "/api/CustomerAddress/{addressId}": {
+    "/api/CustomerAddress/{id}": {
       "get": {
         "tags": [
           "CustomerAddress"
         ],
         "parameters": [
           {
-            "name": "addressId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -3288,7 +3287,7 @@
         ],
         "parameters": [
           {
-            "name": "addressId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -3450,7 +3449,7 @@
         ],
         "parameters": [
           {
-            "name": "addressId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -3632,14 +3631,14 @@
         }
       }
     },
-    "/api/CustomerAddress/{addressId}/set-default": {
+    "/api/CustomerAddress/{id}/set-default": {
       "post": {
         "tags": [
           "CustomerAddress"
         ],
         "parameters": [
           {
-            "name": "addressId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -3958,14 +3957,14 @@
         }
       }
     },
-    "/api/CustomerAddress/{addressId}/with-customer": {
+    "/api/CustomerAddress/{id}/with-customer": {
       "get": {
         "tags": [
           "CustomerAddress"
         ],
         "parameters": [
           {
-            "name": "addressId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -6974,6 +6973,699 @@
         }
       }
     },
+    "/api/ProductVariant/by-product/{productId}": {
+      "get": {
+        "tags": [
+          "ProductVariant"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoListApiResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoListApiResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoListApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ProductVariant/by-product-admin/{productId}": {
+      "get": {
+        "tags": [
+          "ProductVariant"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "deletedOnly",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoListApiResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoListApiResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoListApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ProductVariant/{variantId}": {
+      "get": {
+        "tags": [
+          "ProductVariant"
+        ],
+        "parameters": [
+          {
+            "name": "variantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoApiResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoApiResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ProductVariant/add": {
+      "post": {
+        "tags": [
+          "ProductVariant"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductVariantDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductVariantDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductVariantDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductVariantDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoApiResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoApiResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ProductVariant/update/{variantId}": {
+      "put": {
+        "tags": [
+          "ProductVariant"
+        ],
+        "parameters": [
+          {
+            "name": "variantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductVariantDto"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductVariantDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductVariantDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductVariantDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoApiResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoApiResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ProductVariant/delete/{variantId}": {
+      "delete": {
+        "tags": [
+          "ProductVariant"
+        ],
+        "parameters": [
+          {
+            "name": "variantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ProductVariant/add-quantity/{variantId}": {
+      "put": {
+        "tags": [
+          "ProductVariant"
+        ],
+        "parameters": [
+          {
+            "name": "variantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "addQuantity",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ProductVariant/remove-quantity/{variantId}": {
+      "put": {
+        "tags": [
+          "ProductVariant"
+        ],
+        "parameters": [
+          {
+            "name": "variantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "removeQuantity",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ProductVariant/activate/{variantId}": {
+      "put": {
+        "tags": [
+          "ProductVariant"
+        ],
+        "parameters": [
+          {
+            "name": "variantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ProductVariant/deactivate/{variantId}": {
+      "put": {
+        "tags": [
+          "ProductVariant"
+        ],
+        "parameters": [
+          {
+            "name": "variantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ProductVariant/restore/{variantId}": {
+      "put": {
+        "tags": [
+          "ProductVariant"
+        ],
+        "parameters": [
+          {
+            "name": "variantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ProductVariant/search": {
+      "get": {
+        "tags": [
+          "ProductVariant"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "color",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/VariantSize"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoListApiResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoListApiResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoListApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ProductVariant/search-admin": {
+      "get": {
+        "tags": [
+          "ProductVariant"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "color",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/VariantSize"
+            }
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "deletedOnly",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoListApiResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoListApiResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVariantDtoListApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/SubCategory/{id}": {
       "get": {
         "tags": [
@@ -6994,16 +7686,14 @@
             "name": "isActive",
             "in": "query",
             "schema": {
-              "type": "boolean",
-              "default": true
+              "type": "boolean"
             }
           },
           {
             "name": "DeletedOnly",
             "in": "query",
             "schema": {
-              "type": "boolean",
-              "default": false
+              "type": "boolean"
             }
           }
         ],
@@ -9151,6 +9841,53 @@
         },
         "additionalProperties": false
       },
+      "CreateProductVariantDto": {
+        "required": [
+          "color",
+          "price",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "color": {
+            "maxLength": 20,
+            "minLength": 2,
+            "type": "string"
+          },
+          "size": {
+            "$ref": "#/components/schemas/VariantSize"
+          },
+          "waist": {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "length": {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "quantity": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "price": {
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "fitType": {
+            "$ref": "#/components/schemas/FitType"
+          }
+        },
+        "additionalProperties": false
+      },
       "CustomerAddressDto": {
         "required": [
           "addressType",
@@ -10820,8 +11557,7 @@
             "nullable": true
           },
           "size": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/VariantSize"
           },
           "waist": {
             "type": "integer",
@@ -10849,6 +11585,19 @@
           "productId": {
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProductVariantDtoApiResponse": {
+        "type": "object",
+        "properties": {
+          "statuscode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "responseBody": {
+            "$ref": "#/components/schemas/ProductVariantDtoResponseBody"
           }
         },
         "additionalProperties": false
@@ -10889,6 +11638,36 @@
               "$ref": "#/components/schemas/ProductVariantDto"
             },
             "nullable": true
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LinkDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProductVariantDtoResponseBody": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "$ref": "#/components/schemas/ErrorResponse"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProductVariantDto"
           },
           "links": {
             "type": "array",
@@ -11713,6 +12492,35 @@
         },
         "additionalProperties": false
       },
+      "UpdateProductVariantDto": {
+        "type": "object",
+        "properties": {
+          "color": {
+            "maxLength": 20,
+            "minLength": 2,
+            "type": "string",
+            "nullable": true
+          },
+          "size": {
+            "$ref": "#/components/schemas/VariantSize"
+          },
+          "waist": {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "length": {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "UploadPhotoResponseDto": {
         "type": "object",
         "properties": {
@@ -11769,6 +12577,19 @@
           }
         },
         "additionalProperties": false
+      },
+      "VariantSize": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "type": "integer",
+        "format": "int32"
       },
       "WareHouseDto": {
         "required": [

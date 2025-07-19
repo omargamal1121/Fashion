@@ -648,3 +648,4 @@ D:\project_fashion\E-Commerce-API-main\obj\Debug\net9.0\refint\E-Commerce.dll
 D:\project_fashion\E-Commerce-API-main\obj\Debug\net9.0\E-Commerce.pdb
 D:\project_fashion\E-Commerce-API-main\obj\Debug\net9.0\E-Commerce.genruntimeconfig.cache
 D:\project_fashion\E-Commerce-API-main\obj\Debug\net9.0\ref\E-Commerce.dll
+D:\project_fashion\E-Commerce-API-main\obj\Debug\net9.0\E-Commerce.sourcelink.json

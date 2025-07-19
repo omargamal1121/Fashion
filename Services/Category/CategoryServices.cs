@@ -60,22 +60,38 @@ namespace E_Commers.Services.Category
 				_logger.LogInformation($"Cache hit for GetAllCategoriesAsync with key: {cacheKey}");
 				return Result<List<CategoryDto>>.Ok(cached, "Categories fetched from cache", 200);
 			}
-			(IQueryable<E_Commers.Models.Category> query, int totalCount) = _unitOfWork.Category.FindByNameContainsPaged("", isActive, isDeleted, page, pageSize);
-			var result = await query.Select(c => new CategoryDto
+			var query = _unitOfWork.Category.GetAll();
+			if (isActive.HasValue)
+				query = query.Where(c => c.IsActive == isActive.Value);
+			if (isDeleted.HasValue)
 			{
-				Id = c.Id,
-				Name = c.Name,
-				Description = c.Description,
-				IsActive = c.IsActive,
-				CreatedAt = c.CreatedAt,
-				UpdatedAt = null,
-				Images = c.Images.Where(i => i.DeletedAt == null).Select(i => new ImageDto
+				if (isDeleted.Value)
+					query = query.Where(c => c.DeletedAt != null);
+				else
+					query = query.Where(c => c.DeletedAt == null);
+			}
+			var result = await query
+				.OrderBy(c => c.DisplayOrder)
+				.Skip((page - 1) * pageSize)
+				.Take(pageSize)
+				.Select(c => new CategoryDto
 				{
-					Id = i.Id,
-					Url = i.Url,
-					IsMain = i.IsMain
-				}).ToList()
-			}).ToListAsync();
+					Id = c.Id,
+					Name = c.Name,
+					Description = c.Description,
+					IsActive = c.IsActive,
+					CreatedAt = c.CreatedAt,
+					UpdatedAt = null,
+					Images = c.Images
+						.Where(i => i.DeletedAt == null)
+						.Select(i => new ImageDto
+						{
+							Id = i.Id,
+							Url = i.Url,
+							IsMain = i.IsMain
+						}).ToList()
+				})
+				.ToListAsync();
 			BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, result, null, new[] { CACHE_TAG_CATEGORY }));
 			return Result<List<CategoryDto>>.Ok(result, "Categories fetched", 200);
 		}
@@ -94,8 +110,23 @@ namespace E_Commers.Services.Category
 			{
 				return await GetAllCategoriesAsync(isActive, isDeleted, page, pageSize);
 			}
-			(IQueryable<E_Commers.Models.Category> query, int totalCount) = _unitOfWork.Category.FindByNameContainsPaged(keyword, isActive, isDeleted, page, pageSize);
-			var result = await query.Select(c => new CategoryDto
+			var query = _unitOfWork.Category.GetAll();
+			if (!string.IsNullOrWhiteSpace(keyword))
+				query = query.Where(c => c.Name.Contains(keyword));
+			if (isActive.HasValue)
+				query = query.Where(c => c.IsActive == isActive.Value);
+			if (isDeleted.HasValue)
+			{
+				if (isDeleted.Value)
+					query = query.Where(c => c.DeletedAt != null);
+				else
+					query = query.Where(c => c.DeletedAt == null);
+			}
+			var result = await query
+				.OrderBy(c => c.DisplayOrder)
+				.Skip((page - 1) * pageSize)
+				.Take(pageSize)
+				.Select(c => new CategoryDto
 				{
 					Id = c.Id,
 					Name = c.Name,
@@ -109,7 +140,8 @@ namespace E_Commers.Services.Category
 						Url = i.Url,
 						IsMain = i.IsMain
 					}).ToList()
-			}).ToListAsync();
+				})
+				.ToListAsync();
 			BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, result,null,  new[] { CACHE_TAG_CATEGORY }));
 			return Result<List<CategoryDto>>.Ok(result, "Categories fetched", 200);
 		}
@@ -125,9 +157,10 @@ namespace E_Commers.Services.Category
 				return Result<string>.Fail($"No Categoty with this id:{id}", 404);
 		}
 
-		public async Task<Result<CategorywithdataDto>> GetCategoryByIdAsync(int id, bool? isActive = null, bool IsDeleted = false)
+		public async Task<Result<CategorywithdataDto>> GetCategoryByIdAsync(int id, bool? isActive = null, bool? IsDeleted = false)
 		{
-			_logger.LogInformation($"Execute:{nameof(GetCategoryByIdAsync)} in services for id: {id}, isActive: {isActive}, includeDeleted: {IsDeleted}");
+			_logger.LogInformation($"Execute: {nameof(GetCategoryByIdAsync)} in services for id: {id}, isActive: {isActive}, includeDeleted: {IsDeleted}");
+
 			var cacheKey = $"{CACHE_TAG_CATEGORY}id:{id}_active:{isActive}_deleted:{IsDeleted}";
 			var cachedCategory = await _cacheManager.GetAsync<CategorywithdataDto>(cacheKey);
 			if (cachedCategory != null)
@@ -135,8 +168,13 @@ namespace E_Commers.Services.Category
 				_logger.LogInformation($"Cache hit for category {id} with filters");
 				return Result<CategorywithdataDto>.Ok(cachedCategory, "Category found in cache", 200);
 			}
+
 			var query = _unitOfWork.Category.GetAll()
-				.Where(c => c.Id == id && (IsDeleted || c.DeletedAt == null) && (isActive == null || c.IsActive == isActive))
+				.Where(c =>
+					c.Id == id &&
+					(IsDeleted == null || (IsDeleted == true && c.DeletedAt != null) || (IsDeleted == false && c.DeletedAt == null)) &&
+					(isActive == null || c.IsActive == isActive)
+				)
 				.Select(category => new CategorywithdataDto
 				{
 					Id = category.Id,
@@ -145,36 +183,46 @@ namespace E_Commers.Services.Category
 					DisplayOrder = category.DisplayOrder,
 					IsActive = category.IsActive,
 					CreatedAt = category.CreatedAt,
-					UpdatedAt = null,
-					
-					Images = category.Images.Where(i=>i.DeletedAt==null).Select(i => new ImageDto
-					{
-						Id = i.Id,
-						Url = i.Url,
-						IsMain = i.IsMain
-					}).ToList(),
-					SubCategories = category.SubCategories.Where(sc => sc.DeletedAt == null&&sc.IsActive).Select(sc => new SubCategoryDto
-					{
-						Id = sc.Id,
-						Name = sc.Name,
-						CreatedAt = sc.CreatedAt,
-						Description = sc.Description,
-						IsActive = sc.IsActive,
-						Images = sc.Images.Where(i=>i.DeletedAt==null).Select(i => new ImageDto
+					UpdatedAt = category.ModifiedAt,
+					DeletedAt = category.DeletedAt,
+
+					Images = category.Images
+						.Where(i => i.DeletedAt == null)
+						.Select(i => new ImageDto
 						{
 							Id = i.Id,
 							Url = i.Url,
 							IsMain = i.IsMain
+						}).ToList(),
+
+					SubCategories = category.SubCategories
+						.Where(sc => sc.DeletedAt == null && sc.IsActive)
+						.Select(sc => new SubCategoryDto
+						{
+							Id = sc.Id,
+							Name = sc.Name,
+							CreatedAt = sc.CreatedAt,
+							Description = sc.Description,
+							IsActive = sc.IsActive,
+							Images = sc.Images
+								.Where(i => i.DeletedAt == null)
+								.Select(i => new ImageDto
+								{
+									Id = i.Id,
+									Url = i.Url,
+									IsMain = i.IsMain
+								}).ToList()
 						}).ToList()
-					}).ToList()
 				});
+
 			var categoryDto = await query.FirstOrDefaultAsync();
 			if (categoryDto == null)
 			{
 				_logger.LogWarning($"Category with id: {id} not found");
 				return Result<CategorywithdataDto>.Fail($"Category with id: {id} not found", 404);
 			}
-			BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, categoryDto,null,  new[] { CACHE_TAG_CATEGORY }));
+
+			BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, categoryDto, null, new[] { CACHE_TAG_CATEGORY }));
 			return Result<CategorywithdataDto>.Ok(categoryDto, "Category found", 200);
 		}
 
@@ -283,6 +331,7 @@ namespace E_Commers.Services.Category
 				await transaction.CommitAsync();
 				
 				var mapped = _mapping.Map<List<ImageDto>>(category.Images);
+				BackgroundJob.Enqueue(() => _cacheManager.RemoveByTagAsync(CACHE_TAG_CATEGORY));
 				return Result<List<ImageDto>>.Ok(mapped, $"Added {imageResult.Data.Count} images to category", 200, warnings: imageResult.Warnings);
 			}
 			catch (Exception ex)
@@ -418,7 +467,7 @@ namespace E_Commers.Services.Category
 			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
-				var category = await _unitOfWork.Category.GetCategoryById(id);
+				var category = await _unitOfWork.Category.GetByIdAsync(id);
 				if (category == null || category.DeletedAt == null)
 				{
 					await transaction.RollbackAsync();

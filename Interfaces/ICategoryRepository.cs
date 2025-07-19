@@ -15,7 +15,7 @@ namespace E_Commers.Interfaces
 		Task<bool> HasSubCategoriesAsync(int categoryId);
 		Task<Category?> FindByNameAsync(string name);
 	//	IQueryable<Category> FindByNameContains(string partialName);
-		(IQueryable<Category> Query, int TotalCount) FindByNameContainsPaged(string partialName, bool? activeOnly, bool? dletedOnly, int page, int pageSize);
+		IQueryable<Category>  FindByNameContainsPaged(string partialName, bool? activeOnly, bool? dletedOnly, int page, int pageSize);
 
 	}
 }

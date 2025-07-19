@@ -13,7 +13,7 @@ namespace E_Commers.Interfaces
 		Task<Result<List<CategoryDto>>> GetAllCategoriesAsync(bool? isActive = null, bool? isDeleted = null, int page = 1, int pageSize = 10);
 		Task<Result<List<CategoryDto>>> SearchAsync(string key, bool? isActive = null, bool? isDeleted = null, int page = 1, int pageSize = 10);
 		Task<Result<CategoryDto>> CreateAsync(CreateCategotyDto categoty, string userid);
-		Task<Result<CategorywithdataDto>> GetCategoryByIdAsync(int id, bool? isActive = null, bool includeDeleted = false);
+		Task<Result<CategorywithdataDto>> GetCategoryByIdAsync(int id, bool? isActive = null, bool? includeDeleted = null);
 		Task<Result<string>> DeleteAsync(int id, string userid);
 		public Task<Result<bool>> ChangeActiveStatus(int categoryId, string userId);
 		Task<Result<CategoryDto>> UpdateAsync(int categoryid, UpdateCategoryDto category, string userid);

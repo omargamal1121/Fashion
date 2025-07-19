@@ -16,7 +16,7 @@ namespace E_Commers.Interfaces
 		
 		// Search and Filter
 		public Task<List<ProductVariant>> GetVariantsByColorAsync(string color);
-		public Task<List<ProductVariant>> GetVariantsBySizeAsync(string size);
+	
 		//public Task<List<ProductVariant>> GetVariantsByPriceRangeAsync(decimal minPrice, decimal maxPrice);
 		public Task<List<ProductVariant>> GetVariantsInStockAsync();
 		

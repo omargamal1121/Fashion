@@ -7,23 +7,27 @@ using E_Commers.Models;
 using E_Commers.Services.AdminOpreationServices;
 using E_Commers.Services.EmailServices;
 using E_Commers.UOW;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
 namespace E_Commers.Services.Discount
 {
 	public class DiscountService : IDiscountService
 	{
+		private readonly IBackgroundJobClient _backgroundJobClient;
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly ILogger<DiscountService> _logger;
 		private readonly IAdminOpreationServices _adminOpreationServices;
 		private readonly IErrorNotificationService _errorNotificationService;
 
-		public DiscountService(
+		public DiscountService( 
+			IBackgroundJobClient backgroundJobClient,	
 			IUnitOfWork unitOfWork,
 			ILogger<DiscountService> logger,
 			IAdminOpreationServices adminOpreationServices,
 			IErrorNotificationService errorNotificationService)
 		{
+			_backgroundJobClient = backgroundJobClient;
 			_unitOfWork = unitOfWork;
 			_logger = logger;
 			_adminOpreationServices = adminOpreationServices;
@@ -58,7 +62,7 @@ namespace E_Commers.Services.Discount
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in GetAllAsync");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<DiscountDto>>.Fail("Error retrieving discounts", 500);
 			}
 		}
@@ -99,7 +103,7 @@ namespace E_Commers.Services.Discount
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in GetDiscountByIdAsync for id: {id}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<DiscountDto>.Fail("Error retrieving discount", 500);
 			}
 		}
@@ -166,7 +170,7 @@ namespace E_Commers.Services.Discount
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in CreateDiscountAsync for discount {dto.Name}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<DiscountDto>.Fail("Error creating discount", 500);
 			}
 		}
@@ -235,7 +239,7 @@ namespace E_Commers.Services.Discount
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in UpdateDiscountAsync for id: {id}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<DiscountDto>.Fail("Error updating discount", 500);
 			}
 		}
@@ -272,7 +276,7 @@ namespace E_Commers.Services.Discount
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in DeleteDiscountAsync for id: {id}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<string>.Fail("Error deleting discount", 500);
 			}
 		}
@@ -324,7 +328,7 @@ namespace E_Commers.Services.Discount
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in RestoreDiscountAsync for id: {id}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<DiscountDto>.Fail("Error restoring discount", 500);
 			}
 		}
@@ -372,7 +376,7 @@ namespace E_Commers.Services.Discount
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in FilterAsync");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<DiscountDto>>.Fail("Error filtering discounts", 500);
 			}
 		}
@@ -408,7 +412,7 @@ namespace E_Commers.Services.Discount
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in GetActiveDiscountsAsync");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<DiscountDto>>.Fail("Error retrieving active discounts", 500);
 			}
 		}
@@ -441,7 +445,7 @@ namespace E_Commers.Services.Discount
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in GetExpiredDiscountsAsync");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<DiscountDto>>.Fail("Error retrieving expired discounts", 500);
 			}
 		}
@@ -474,7 +478,7 @@ namespace E_Commers.Services.Discount
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in GetUpcomingDiscountsAsync");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<DiscountDto>>.Fail("Error retrieving upcoming discounts", 500);
 			}
 		}
@@ -506,7 +510,7 @@ namespace E_Commers.Services.Discount
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in GetDiscountsByCategoryAsync for categoryId: {categoryId}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<DiscountDto>>.Fail("Error retrieving category discounts", 500);
 			}
 		}
@@ -547,7 +551,7 @@ namespace E_Commers.Services.Discount
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in ActivateDiscountAsync for id: {id}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<string>.Fail("Error activating discount", 500);
 			}
 		}
@@ -588,7 +592,7 @@ namespace E_Commers.Services.Discount
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in DeactivateDiscountAsync for id: {id}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<string>.Fail("Error deactivating discount", 500);
 			}
 		}
@@ -614,7 +618,7 @@ namespace E_Commers.Services.Discount
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in IsDiscountValidAsync for id: {id}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<bool>.Fail("Error validating discount", 500);
 			}
 		}
@@ -639,7 +643,7 @@ namespace E_Commers.Services.Discount
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in CalculateDiscountedPriceAsync for discountId: {discountId}");
-				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
+				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<decimal>.Fail("Error calculating discounted price", 500);
 			}
 		}

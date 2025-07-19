@@ -65,8 +65,8 @@ namespace E_Commers.Controllers
 		[ActionName(nameof(GetByIdAsync))]
 		public async Task<ActionResult<ApiResponse<SubCategoryDto>>> GetByIdAsync(
 			int id,
-			[FromQuery] bool isActive = true,
-			[FromQuery] bool DeletedOnly = false)
+			[FromQuery] bool? isActive = null,
+			[FromQuery] bool? DeletedOnly = null)
 		{
 			_logger.LogInformation($"Executing {nameof(GetByIdAsync)} for id: {id}, isActive: {isActive}, includeDeleted: {DeletedOnly}");
 			var result = await _subCategoryServices.GetSubCategoryByIdAsync(id, isActive, DeletedOnly);

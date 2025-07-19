@@ -86,12 +86,12 @@ public class CategoryRepository : MainRepository<Category>, ICategoryRepository
 		return query;
 	}
 
-	public (IQueryable<Category> Query, int TotalCount) FindByNameContainsPaged(string partialName, bool? activeOnly, bool? dletedOnly, int page, int pageSize)
+	public IQueryable<Category>FindByNameContainsPaged(string partialName, bool? activeOnly, bool? dletedOnly, int page, int pageSize)
 	{
 		var query = FindByNameContains(partialName, activeOnly, dletedOnly);
 		int totalCount = query.Count();
 		var paged = query.Skip((page - 1) * pageSize).Take(pageSize);
-		return (paged, totalCount);
+		return paged;
 	}
 
 	public async Task<bool> HasSubCategoriesAsync(int categoryId)

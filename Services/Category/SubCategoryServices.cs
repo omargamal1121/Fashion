@@ -34,7 +34,8 @@ namespace E_Commers.Services.Category
         private readonly IImagesServices _imagesServices;
         private const string CACHE_TAG_SUBCATEGORY = "subcategory";
         private const string CACHE_TAG_CATEGORY = "category";
-        private static readonly string[] SUBCATEGORY_CACHE_TAGS = new[] { CACHE_TAG_SUBCATEGORY, CACHE_TAG_CATEGORY };
+        private const string SUBCATEGORY_DATA_TAG = "subcategorydata";
+        private static readonly string[] SUBCATEGORY_CACHE_TAGS = new[] { SUBCATEGORY_DATA_TAG, CACHE_TAG_CATEGORY, CACHE_TAG_SUBCATEGORY };
 
         public SubCategoryServices(
             IImagesServices imagesServices,
@@ -83,6 +84,11 @@ namespace E_Commers.Services.Category
             BackgroundJob.Enqueue(() => _cacheManager.RemoveByTagsAsync(SUBCATEGORY_CACHE_TAGS));
         }
 
+        private void RemoveSubCategoryCachesAsync()
+        {
+            BackgroundJob.Enqueue(() => _cacheManager.RemoveByTagsAsync(SUBCATEGORY_CACHE_TAGS));
+        }
+
      
 
         public async Task<Result<string>> IsExsistAsync(int id)
@@ -98,45 +104,50 @@ namespace E_Commers.Services.Category
                 Result<string>.Fail($"No SubCategory with this id:{id}", 404);
         }
 
-        public async Task<Result<SubCategoryDto>> GetSubCategoryByIdAsync(int id, bool isActive = true, bool includeDeleted = false)
-        {
-            _logger.LogInformation($"Execute:{nameof(GetSubCategoryByIdAsync)} in services for id: {id}, isActive: {isActive}, includeDeleted: {includeDeleted}");
-       
-            var cacheKey = $"{CACHE_TAG_SUBCATEGORY}id:{id}_active:{isActive}_deleted:{includeDeleted}";
-            var cached = await _cacheManager.GetAsync<SubCategoryDto>(cacheKey);
-            if (cached != null)
-            {
-                _logger.LogInformation($"Cache hit for subcategory {id} with filters");
-                return Result<SubCategoryDto>.Ok(cached, "SubCategory found in cache", 200);
-            }
-            
-            var subCategory = await _unitOfWork.SubCategory.GetSubCategoryById(id, isActive);
-            
-            if (!includeDeleted && subCategory?.DeletedAt != null)
-            {
-                _logger.LogWarning($"SubCategory with id: {id} is deleted and includeDeleted is false");
-                return Result<SubCategoryDto>.Fail($"SubCategory with id: {id} not found", 404);
-            }
-            
-            if (subCategory == null)
-            {
-                _logger.LogWarning($"SubCategory with id: {id} not found");
-                return Result<SubCategoryDto>.Fail($"SubCategory with id: {id} not found", 404);
-            }
-            
-            // Additional filtering for active status if specified
-            if (isActive!=subCategory.IsActive)
-            {
-                _logger.LogWarning($"SubCategory with id: {id} active status ({subCategory.IsActive}) doesn't match requested ({isActive})");
-                return Result<SubCategoryDto>.Fail($"SubCategory with id: {id} not found", 404);
-            }
-            
-            var dto = _mapping.Map<SubCategoryDto>(subCategory);
-            await _cacheManager.SetAsync(cacheKey, dto, tags: new[] { CACHE_TAG_SUBCATEGORY });
-            return Result<SubCategoryDto>.Ok(dto, "SubCategory found", 200);
-        }
+		private IQueryable<E_Commers.Models.SubCategory> BasicFilter(IQueryable<E_Commers.Models.SubCategory> query, bool? isActive, bool? DeletedOnly)
+		{
+			if (isActive.HasValue)
+			{
+				if (isActive.Value)
+					query = query.Where(p => p.IsActive);
+				else
+					query = query.Where(p => !p.IsActive);
+			}
+			if (DeletedOnly.HasValue)
+			{
+				if (DeletedOnly.Value)
+					query = query.Where(p => p.DeletedAt != null);
+				else
+					query = query.Where(p => p.DeletedAt == null);
+			}
+			return query;
+		}
 
-        public async Task<Result<SubCategoryDto>> CreateAsync(CreateSubCategoryDto subCategory, string userid)
+		public async Task<Result<SubCategoryDto>> GetSubCategoryByIdAsync(int id, bool? isActive = null, bool? includeDeleted = null)
+		{
+			_logger.LogInformation($"Execute: {nameof(GetSubCategoryByIdAsync)} in services for id: {id}, isActive: {isActive}, includeDeleted: {includeDeleted}");
+
+			var cacheKey = $"{SUBCATEGORY_DATA_TAG}id:{id}_active:{isActive}_deleted:{includeDeleted}";
+			var cached = await _cacheManager.GetAsync<SubCategoryDto>(cacheKey);
+			if (cached != null)
+			{
+				_logger.LogInformation($"Cache hit for subcategory {id} with filters");
+				return Result<SubCategoryDto>.Ok(cached, "SubCategory found in cache", 200);
+			}
+            var query = _unitOfWork.SubCategory.GetAll();
+            var subCategory = await BasicFilter(query.Where(sc => sc.Id == id), isActive, includeDeleted).FirstOrDefaultAsync();
+			if (subCategory == null)
+			{
+				_logger.LogWarning($"SubCategory with id: {id} not found");
+				return Result<SubCategoryDto>.Fail($"SubCategory with id: {id} not found", 404);
+			}
+			var dto = _mapping.Map<SubCategoryDto>(subCategory);
+			BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, dto, null, SUBCATEGORY_CACHE_TAGS));
+			return Result<SubCategoryDto>.Ok(dto, "SubCategory found", 200);
+		}
+
+
+		public async Task<Result<SubCategoryDto>> CreateAsync(CreateSubCategoryDto subCategory, string userid)
         {
             _logger.LogInformation($"Execute {nameof(CreateAsync)}");
             if (string.IsNullOrWhiteSpace(subCategory.Name))
@@ -301,7 +312,7 @@ namespace E_Commers.Services.Category
             {
                 var subCategory = await _unitOfWork.SubCategory.GetAll()
                     .Where(sc => sc.Id == id&&sc.DeletedAt==null)
-                    .Select(sc => new { sc.Id, sc.DeletedAt })
+               
                     .FirstOrDefaultAsync();
                 if (subCategory == null)
                 {
@@ -365,47 +376,28 @@ namespace E_Commers.Services.Category
             )
         {
             _logger.LogInformation($"Executing {nameof(FilterAsync)} with filters");
-
-           
-               
-
             var query = _unitOfWork.SubCategory.GetAll();
-
             if (!string.IsNullOrWhiteSpace(search))
                 query = query.Where(sc => sc.Name.Contains(search));
-
-            if (isActive.HasValue)
-                query = query.Where(sc => sc.IsActive == isActive.Value);
-
-			if (includeDeleted.HasValue) {
-                if (includeDeleted.Value)
-                    query = query.Where(sc => sc.DeletedAt != null);
-                else
-					query = query.Where(sc => sc.DeletedAt == null);
-			}
-
-			bool canCache = string.IsNullOrWhiteSpace(search)
+            query= BasicFilter(query, isActive, includeDeleted);
+            bool canCache = string.IsNullOrWhiteSpace(search)
                 && page == 1
                 && pageSize == 10
                 && (isActive ?? true)
-                && !includeDeleted.Value;
-
+                && (includeDeleted.HasValue && !includeDeleted.Value);
             string cacheKey = $"{CACHE_TAG_SUBCATEGORY}_filtered_{isActive}_{includeDeleted}_p{page}_ps{pageSize}_{search}";
-
             if (canCache)
             {
                 var cachedData = await _cacheManager.GetAsync<List<SubCategoryDto>>(cacheKey);
                 if (cachedData != null)
                     return Result<List<SubCategoryDto>>.Ok(cachedData, "Subcategories from cache", 200);
             }
-
             var subCategories = await query
                 .OrderBy(sc => sc.Id)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(sc => new SubCategoryDto
 				{
-                    
                     Id= sc.Id,
                     Name= sc.Name,
                    Description=  sc.Description,
@@ -418,8 +410,6 @@ namespace E_Commers.Services.Category
                       Id=   i.Id,
                        Url=  i.Url,
                         IsMain= i.IsMain,
-    
-               
                     }).ToList(),
                     Products = sc.Products.Where(p => p.DeletedAt == null).Select(p => new ProductDto
                     {
@@ -433,7 +423,6 @@ namespace E_Commers.Services.Category
                         SubCategoryId = p.SubCategoryId,
                         CreatedAt = p.CreatedAt,
                         Images = p.Images.Select(i => new ImageDto { Id = i.Id, IsMain = i.IsMain, Url = i.Url }).ToList(),
-                        
                         FinalPrice = (p.Discount != null && p.Discount.IsActive) ? (p.FinalPrice ?? p.Price) : p.Price,
                         EndAt = (p.Discount != null && p.Discount.IsActive) ? p.Discount.EndDate : null,
                         DiscountName = (p.Discount != null && p.Discount.IsActive) ? p.Discount.Name : null,
@@ -441,16 +430,12 @@ namespace E_Commers.Services.Category
                     }).ToList()
                 })
                 .ToListAsync();
-           
-
             if (!subCategories.Any())
                 return Result<List<SubCategoryDto>>.Fail("No subcategories found", 404);
-
             if (canCache)
             {
-                await _cacheManager.SetAsync(cacheKey, subCategories, tags: new[] { CACHE_TAG_SUBCATEGORY });
+                BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, subCategories, null, SUBCATEGORY_CACHE_TAGS));
             }
-
             return Result<List<SubCategoryDto>>.Ok(subCategories, "Filtered subcategories retrieved", 200);
         }
 
@@ -463,10 +448,8 @@ namespace E_Commers.Services.Category
             try
             {
                 var subCategory = await _unitOfWork.SubCategory.GetAll()
-                    .Where(sc => sc.Id == id)
-                    .Select(sc => new { sc.Id, sc.DeletedAt })
-                    .FirstOrDefaultAsync();
-                if (subCategory == null || subCategory.DeletedAt == null)
+                    .Where(sc => sc.Id == id&&sc.DeletedAt!=null).Include(s=>s.Images).FirstOrDefaultAsync();
+                if (subCategory == null)
                 {
                     await transaction.RollbackAsync();
                     _logger.LogWarning($"Can't Found SubCategory with this id:{id}");
@@ -495,12 +478,8 @@ namespace E_Commers.Services.Category
                 await _unitOfWork.CommitAsync();
                 await transaction.CommitAsync();
                 await SaveAndRemoveSubCategoryCacheAsync();
-                
-                var dto = new SubCategoryDto
-                {
-                    Id = subCategory.Id,
-                    DeletedAt = subCategory.DeletedAt
-                };
+
+                var dto = _mapping.Map<SubCategoryDto>(subCategory);
                 return Result<SubCategoryDto>.Ok(dto, "SubCategory restored successfully", 200);
             }
             catch (Exception ex)
@@ -964,7 +943,7 @@ namespace E_Commers.Services.Category
                         Images = p.Images.Select(i => new ImageDto { Id = i.Id, Url = i.Url, IsMain = i.IsMain }).ToList()
                     }).ToList()
                 }).ToListAsync();
-            await _cacheManager.SetAsync(cacheKey, result, tags: new[] { CACHE_TAG_SUBCATEGORY });
+            BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, result, null, SUBCATEGORY_CACHE_TAGS));
             return Result<List<SubCategoryDto>>.Ok(result, "Subcategories fetched", 200);
         }
 
