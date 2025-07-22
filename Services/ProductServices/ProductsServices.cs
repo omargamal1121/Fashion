@@ -17,17 +17,17 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using E_Commers.Services.ProductServices; // For IProductSearchService and AdvancedSearchDto
 
-namespace E_Commers.Services.Product
+namespace E_Commers.Services.ProductServices
 {
 	public interface IProductsServices
 	{
 		// Core product operations (delegated to ProductCatalogService)
 		Task<Result<ProductDetailDto>> GetProductByIdAsync(int id, bool? isActive = null, bool? deletedOnly = null);
-		Task<Result<ProductListItemDto>> CreateProductAsync(CreateProductDto dto, string userId);
-		Task<Result<ProductListItemDto>> UpdateProductAsync(int id, UpdateProductDto dto, string userId);
-		Task<Result<string>> DeleteProductAsync(int id, string userId);
-		Task<Result<ProductListItemDto>> RestoreProductAsync(int id, string userId);
-		Task<Result<List<ProductListItemDto>>> GetProductsBySubCategoryId(int subCategoryId);
+		Task<Result<ProductDto>> CreateProductAsync(CreateProductDto dto, string userId);
+		Task<Result<ProductDto>> UpdateProductAsync(int id, UpdateProductDto dto, string userId);
+		Task<Result<bool>> DeleteProductAsync(int id, string userId);
+		Task<Result<ProductDto>> RestoreProductAsync(int id, string userId);
+		Task<Result<List<ProductDto>>> GetProductsBySubCategoryId(int subCategoryId, bool? isActive, bool? deletedOnly);
 		// Search operations (delegated to ProductSearchService)
 		Task<Result<List<ProductListItemDto>>> GetNewArrivalsAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
 		Task<Result<List<ProductListItemDto>>> GetBestSellersAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
@@ -41,8 +41,8 @@ namespace E_Commers.Services.Product
 		Task<Result<List<ProductVariantDto>>> GetProductVariantsAsync(int productId);
 		Task<Result<ProductVariantDto>> AddVariantAsync(int productId, CreateProductVariantDto dto, string userId);
 		Task<Result<ProductVariantDto>> UpdateVariantAsync(int variantId, UpdateProductVariantDto dto, string userId);
-		Task<Result<string>> DeleteVariantAsync(int variantId, string userId);
-		Task<Result<string>> UpdateVariantQuantityAsync(int variantId, int newQuantity, string userId);
+		Task<Result<bool>> DeleteVariantAsync(int variantId, string userId);
+		Task<Result<bool>> UpdateVariantQuantityAsync(int variantId, int newQuantity, string userId);
 		// Discount operations (delegated to ProductDiscountService)
 		Task<Result<DiscountDto>> GetProductDiscountAsync(int productId);
 		Task<Result<ProductDetailDto>> AddDiscountToProductAsync(int productId, int discountId, string userId);
@@ -80,25 +80,25 @@ namespace E_Commers.Services.Product
 		{
 			return await _productCatalogService.GetProductByIdAsync(id, isActive, deletedOnly);
 		}
-		public async Task<Result<ProductListItemDto>> CreateProductAsync(CreateProductDto dto, string userId)
+		public async Task<Result<ProductDto>> CreateProductAsync(CreateProductDto dto, string userId)
 		{
 			return await _productCatalogService.CreateProductAsync(dto, userId);
 		}
-		public async Task<Result<ProductListItemDto>> UpdateProductAsync(int id, UpdateProductDto dto, string userId)
+		public async Task<Result<ProductDto>> UpdateProductAsync(int id, UpdateProductDto dto, string userId)
 		{
 			return await _productCatalogService.UpdateProductAsync(id, dto, userId);
 		}
-		public async Task<Result<string>> DeleteProductAsync(int id, string userId)
+		public async Task<Result<bool>> DeleteProductAsync(int id, string userId)
 		{
 			return await _productCatalogService.DeleteProductAsync(id, userId);
 		}
-		public async Task<Result<ProductListItemDto>> RestoreProductAsync(int id, string userId)
+		public async Task<Result<ProductDto>> RestoreProductAsync(int id, string userId)
 		{
 			return await _productCatalogService.RestoreProductAsync(id, userId);
 		}
-		public async Task<Result<List<ProductListItemDto>>> GetProductsBySubCategoryId(int subCategoryId)
+		public async Task<Result<List<ProductDto>>> GetProductsBySubCategoryId(int subCategoryId, bool? isActive, bool? deletedOnly)
 		{
-			return await _productCatalogService.GetProductsBySubCategoryId(subCategoryId);
+			return await _productCatalogService.GetProductsBySubCategoryId(subCategoryId, isActive, deletedOnly);
 		}
 		// Search Operations
 		public async Task<Result<List<ProductListItemDto>>> GetNewArrivalsAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
@@ -143,12 +143,12 @@ namespace E_Commers.Services.Product
 		{
 			return await _productVariantService.UpdateVariantAsync(variantId, dto, userId);
 		}
-		public async Task<Result<string>> DeleteVariantAsync(int variantId, string userId)
+		public async Task<Result<bool>> DeleteVariantAsync(int variantId, string userId)
 		{
 			return await _productVariantService.DeleteVariantAsync(variantId, userId);
 		}
 	
-		public async Task<Result<string>> UpdateVariantQuantityAsync(int variantId, int newQuantity, string userId)
+		public async Task<Result<bool>> UpdateVariantQuantityAsync(int variantId, int newQuantity, string userId)
 		{
 			return await _productVariantService.UpdateVariantQuantityAsync(variantId, newQuantity, userId);
 		}

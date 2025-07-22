@@ -4,8 +4,9 @@ using E_Commers.Interfaces;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using E_Commers.Services.Category;
 
-namespace E_Commers.Services.Category
+namespace E_Commers.Services.SubCategoryServices
 {
     public class SubCategoryLinkBuilder : BaseLinkBuilder, ISubCategoryLinkBuilder
     {

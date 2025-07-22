@@ -6,12 +6,11 @@ namespace E_Commers.Interfaces
 {
     public interface ISubCategoryRepository : IRepository<SubCategory>
     {
-        Task<bool> SubCategoryExistsAsync(int id);
-        Task<SubCategory?> GetSubCategoryById(int id, bool isActiveFilter = false);
-        public  Task<SubCategory?> FindByNameAsync(string name, bool? isDelete = null);
-        public  Task<bool> IsExsistByNameAsync(string name);
 
-		IQueryable<SubCategory> FindByNameContains(string partialName);
+        public Task<SubCategory?> GetSubCategoryById(int id, bool? isActive = null, bool? isDeleted = null);
+        public  Task<SubCategory?> GetSubCategoryWithImageById(int id, bool? isActive = null, bool? isDeleted = null);
+
+		public bool IsExsistByName(string name);
         Task<bool> HasProductsAsync(int subCategoryId);
     }
 } 

@@ -83,7 +83,7 @@ public class MainRepository<T> : IRepository<T> where T : BaseEntity
 		
 		
 	
-		
+		model.ModifiedAt = DateTime.UtcNow;
 		var isupdated=_context.Update(model);
 if(isupdated==null)
 return false;

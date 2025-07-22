@@ -64,8 +64,13 @@ namespace E_Commers.Models
 		public Gender Gender { get; set; }
 		public  bool IsActive { get; set; }
 	}
- public	enum FitType
+	public enum FitType
 	{
-
+		Regular,
+		Slim,
+		Loose,
+		Skinny,
+		Relaxed,
+		Oversized
 	}
 }

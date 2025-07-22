@@ -16,29 +16,34 @@ public class CategoryRepository : MainRepository<Category>, ICategoryRepository
 		_logger = logger;
 	}
 
-	public async Task<bool> CategoryExistsAsync(int id)
+
+
+	public async Task<Category?> GetCategoryByIdAsync(int id, bool? isActive = null, bool? isDeleted = null)
 	{
-		_logger.LogInformation($"Executing {nameof(CategoryExistsAsync)} Id: {id}");
-		var category = await GetByIdAsync(id);
-		if (category == null)
+		_logger.LogInformation($"Executing {nameof(GetCategoryByIdAsync)} for id: {id}");
+
+		var query = _categories.AsQueryable();
+
+		query = query.Where(c => c.Id == id);
+
+		if (isActive.HasValue)
 		{
-			_logger.LogWarning($"No Category With this id:{id}");
-			return false;
+			query = query.Where(c => c.IsActive == isActive.Value);
 		}
-		_logger.LogInformation("Category found");
-		return true;
-	}
 
-	public async Task<Category?> GetCategoryById(int id, bool isActiveFilter = false)
-	{
-		_logger.LogInformation($"Executing {nameof(GetCategoryById)} for id: {id}");
-		var query = _categories
+		if (isDeleted.HasValue)
+		{
+			if (isDeleted.Value)
+				query = query.Where(c => c.DeletedAt != null);
+			else
+				query = query.Where(c => c.DeletedAt == null);
+		}
+
+		var category = await query
 			.Include(c => c.Images)
-			.Include(c => c.SubCategories
-				.Where(s => s.DeletedAt == null && (!isActiveFilter || s.IsActive)))
-			.ThenInclude(s => s.Images);
-
-		var category = await query.FirstOrDefaultAsync(c => c.Id == id && c.DeletedAt == null);
+			.Include(c => c.SubCategories.Where(sc => sc.DeletedAt == null && sc.IsActive))
+				.ThenInclude(sc => sc.Images)
+			.FirstOrDefaultAsync();
 
 		if (category == null)
 		{
@@ -50,52 +55,24 @@ public class CategoryRepository : MainRepository<Category>, ICategoryRepository
 		return category;
 	}
 
-	public async Task<Category?> FindByNameAsync(string name)
+
+	public bool IsExsistsByName(string name)
 	{
-		return await _categories.FirstOrDefaultAsync(c => c.Name == name && c.DeletedAt == null);
-	}
+		_logger.LogInformation($"Executing {nameof(IsExsistsByName)} for name: {name}");
 
-	public IQueryable<Category> FindByNameContains(string partialName, bool? activeOnly = null, bool? dletedOnly = null)
-	{
-		if (string.IsNullOrWhiteSpace(partialName))
-			return Enumerable.Empty<Category>().AsQueryable();
+		var exists = _categories.Any(c => c.Name == name);
 
-		var query = _categories
-			.Include(c => c.Images)
-			.Include(c => c.SubCategories.Where(s => s.DeletedAt == null))
-				.ThenInclude(s => s.Images)
-			.Where(c => EF.Functions.Like(c.Name, $"%{partialName}%"));
-
-		if (dletedOnly.HasValue)
-		{
-			if (dletedOnly.Value)
-				query = query.Where(c => c.DeletedAt != null);
-			else
-				query = query.Where(c => c.DeletedAt == null);
-		}
+		if (exists)
+			_logger.LogInformation($"Category with name: {name} already exists");
 		else
-		{
-			query = query.Where(c => c.DeletedAt == null);
-		}
+			_logger.LogInformation($"Category with name: {name} does not exist");
 
-		if (activeOnly.HasValue && activeOnly.Value)
-		{
-			query = query.Where(c => c.IsActive);
-		}
-
-		return query;
+		return exists;
 	}
 
-	public IQueryable<Category>FindByNameContainsPaged(string partialName, bool? activeOnly, bool? dletedOnly, int page, int pageSize)
-	{
-		var query = FindByNameContains(partialName, activeOnly, dletedOnly);
-		int totalCount = query.Count();
-		var paged = query.Skip((page - 1) * pageSize).Take(pageSize);
-		return paged;
-	}
 
 	public async Task<bool> HasSubCategoriesAsync(int categoryId)
 	{
-		return await _categories.AnyAsync(c => c.Id == categoryId && c.SubCategories.Any(sc => sc.DeletedAt == null));
+		return await _categories.AnyAsync(c => c.Id == categoryId && c.SubCategories.Any());
 	}
 }

@@ -143,3 +143,10 @@ wwwroot\CategoryPhotos\7eb1aa37-245e-44f4-8a1e-09992294d45f.png
 wwwroot\CategoryPhotos\d412747f-9039-429d-a337-affc19b4f75e.png
 wwwroot\SubCategoryPhotos\6c7ec581-097f-4f7c-ad49-52dea2f52ada.png
 wwwroot\SubCategoryPhotos\9de5b62c-4757-4cf4-a54e-b0e6be82e9e6.png
+wwwroot\SubCategoryPhotos\911dbe72-70d7-47c4-8b09-d9677f341e28.png
+wwwroot\CategoryPhotos\86293f75-5a2d-4018-a9f9-4abd74db723f.png
+wwwroot\CategoryPhotos\c9c32236-e46d-46fe-b143-755d1bca44dc.png
+wwwroot\CategoryPhotos\6b4b674e-1cf0-463b-b625-817c9740f63f.png
+wwwroot\SubCategoryPhotos\90bbd417-6a66-409e-9bf0-1aef3767928d.png
+wwwroot\SubCategoryPhotos\9cdd831a-8320-4742-83f5-de233a643ca5.png
+wwwroot\ProductPhotos\b7b0fbe9-1816-4ebf-b576-13ba7a412846.png

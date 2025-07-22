@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.ComponentModel.DataAnnotations;
+using E_Commers.DtoModels.SubCategorydto;
 
 namespace E_Commers.Controllers
 {
@@ -63,7 +64,7 @@ namespace E_Commers.Controllers
 
 		[HttpGet("{id}", Name = "GetSubCategoryById")]
 		[ActionName(nameof(GetByIdAsync))]
-		public async Task<ActionResult<ApiResponse<SubCategoryDto>>> GetByIdAsync(
+		public async Task<ActionResult<ApiResponse<SubCategoryDtoWithData>>> GetByIdAsync(
 			int id,
 			[FromQuery] bool? isActive = null,
 			[FromQuery] bool? DeletedOnly = null)
@@ -92,7 +93,7 @@ namespace E_Commers.Controllers
 
 		[HttpDelete("{id}")]
 		[ActionName(nameof(DeleteAsync))]
-		public async Task<ActionResult<ApiResponse<string>>> DeleteAsync(int id)
+		public async Task<ActionResult<ApiResponse<bool>>> DeleteAsync(int id)
 		{
 			_logger.LogInformation($"Executing {nameof(DeleteAsync)} for id: {id}");
 			var userId = HttpContext.Items["UserId"]?.ToString();

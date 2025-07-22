@@ -11,7 +11,7 @@ using E_Commers.UOW;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
-namespace E_Commers.Services.Product
+namespace E_Commers.Services.ProductServices
 {
 	public interface IProductImageService
 	{
@@ -31,6 +31,8 @@ namespace E_Commers.Services.Product
 		private readonly IAdminOpreationServices _adminOpreationServices;
 		private readonly IErrorNotificationService _errorNotificationService;
 		private readonly IImagesServices _imagesServices;
+		private readonly ISubCategoryServices _subCategoryServices;
+		private readonly IProductCatalogService _productCatalogService;
 
 		public ProductImageService(
 			IBackgroundJobClient backgroundJobClient,
@@ -38,7 +40,9 @@ namespace E_Commers.Services.Product
 			ILogger<ProductImageService> logger,
 			IAdminOpreationServices adminOpreationServices,
 			IErrorNotificationService errorNotificationService,
-			IImagesServices imagesServices)
+			IImagesServices imagesServices,
+			ISubCategoryServices subCategoryServices,
+			IProductCatalogService productCatalogService)
 		{
 			_backgroundJobClient = backgroundJobClient;
 			_unitOfWork = unitOfWork;
@@ -46,20 +50,21 @@ namespace E_Commers.Services.Product
 			_adminOpreationServices = adminOpreationServices;
 			_errorNotificationService = errorNotificationService;
 			_imagesServices = imagesServices;
+			_subCategoryServices = subCategoryServices;
+			_productCatalogService = productCatalogService;
 		}
 
 		public async Task<Result<List<ImageDto>>> GetProductImagesAsync(int productId)
 		{
 			try
 			{
-				var images = await _unitOfWork.Product.GetAll()
-					.Where(p => p.Id == productId)
-					.SelectMany(p => p.Images.Where(i => i.DeletedAt == null))
+				var images = await _unitOfWork.Image.GetAll()
+					.Where(i => i.ProductId == productId && i.DeletedAt == null)
 					.Select(i => new ImageDto
 					{
 						Id = i.Id,
 						Url = i.Url,
-					
+						IsMain = i.IsMain
 					})
 					.ToListAsync();
 
@@ -79,18 +84,17 @@ namespace E_Commers.Services.Product
 		public async Task<Result<List<ImageDto>>> AddProductImagesAsync(int productId, List<IFormFile> images, string userId)
 		{
 			_logger.LogInformation($"Adding images to product: {productId}");
-
+			
+			if (images == null || !images.Any())
+				return Result<List<ImageDto>>.Fail("No images provided", 400);
+			
+			var product = await _unitOfWork.Product.GetByIdAsync(productId);
+			if (product == null)
+				return Result<List<ImageDto>>.Fail("Product not found", 404);
+			
+			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
-				if (images == null || !images.Any())
-					return Result<List<ImageDto>>.Fail("No images provided", 400);
-
-				var product = await _unitOfWork.Product.GetByIdAsync(productId);
-				if (product == null)
-					return Result<List<ImageDto>>.Fail("Product not found", 404);
-
-				using var transaction = await _unitOfWork.BeginTransactionAsync();
-
 				var saveResult = await _imagesServices.SaveProductImagesAsync(images, userId);
 				if (!saveResult.Success || saveResult.Data == null)
 				{
@@ -118,6 +122,7 @@ namespace E_Commers.Services.Product
 				);
 
 				await _unitOfWork.CommitAsync();
+				await transaction.CommitAsync();
 
 				_logger.LogInformation($"Successfully added {addedImages.Count} images to product {productId}");
 
@@ -125,6 +130,7 @@ namespace E_Commers.Services.Product
 			}
 			catch (Exception ex)
 			{
+				await transaction.RollbackAsync();
 				_logger.LogError(ex, $"Error in AddProductImageAsync for productId: {productId}");
 				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<ImageDto>>.Fail("Error adding images", 500);
@@ -135,35 +141,52 @@ namespace E_Commers.Services.Product
 		{
 			_logger.LogInformation($"Removing image {imageId} from product: {productId}");
 
-				var image = await _unitOfWork.Image.GetAll()
-					.Where(i => i.Id == imageId && i.ProductId == productId && i.DeletedAt == null)
-					.FirstOrDefaultAsync();
-
-				if (image == null)
-					return Result<bool>.Fail("Image not found", 404);
-				using var transaction = await _unitOfWork.BeginTransactionAsync();
+			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
+				var product = await _unitOfWork.Product.GetByIdAsync(productId);
+				if (product == null)
+				{
+					await transaction.RollbackAsync();
+					return Result<bool>.Fail("Product not found", 404);
+				}
 
+				var productImages = await _unitOfWork.Image.GetAll()
+					.Where(i => i.ProductId == productId && i.DeletedAt == null)
+					.ToListAsync();
 
-				var deleteResult = await _imagesServices.DeleteImageAsync(image);
+				var imageToRemove = productImages.FirstOrDefault(i => i.Id == imageId);
+
+				if (imageToRemove == null)
+				{
+					await transaction.RollbackAsync();
+					return Result<bool>.Fail("Image not found on this product or already deleted", 404);
+				}
+
+				var deleteResult = await _imagesServices.DeleteImageAsync(imageToRemove);
 				if (!deleteResult.Success)
 				{
 					await transaction.RollbackAsync();
 					return Result<bool>.Fail(deleteResult.Message ?? "Failed to remove image", 400);
 				}
 
-				if (image.IsMain)
+				if (imageToRemove.IsMain)
 				{
-					var nextMainImage = await _unitOfWork.Image.GetAll()
-						.Where(i => i.ProductId == productId && i.Id != imageId && i.DeletedAt == null)
-						.FirstOrDefaultAsync();
-
+					var nextMainImage = productImages.FirstOrDefault(i => i.Id != imageId);
 					if (nextMainImage != null)
 					{
 						nextMainImage.IsMain = true;
 						_unitOfWork.Image.Update(nextMainImage);
 					}
+				}
+
+				bool productShouldBeDeactivated = (productImages.Count == 1);
+				var warnings = new List<string>();
+
+				if (productShouldBeDeactivated && product.IsActive)
+				{
+					await _productCatalogService.DeactivateProductAsync(productId, userId);
+					warnings.Add("Product was deactivated because its last image was removed.");
 				}
 
 				await _adminOpreationServices.AddAdminOpreationAsync(
@@ -174,10 +197,16 @@ namespace E_Commers.Services.Product
 				);
 
 				await _unitOfWork.CommitAsync();
+				await transaction.CommitAsync();
+
+				if (productShouldBeDeactivated)
+				{
+					await _subCategoryServices.DeactivateSubCategoryIfAllProductsAreInactiveAsync(product.SubCategoryId, userId);
+				}
 
 				_logger.LogInformation($"Image {imageId} removed from product {productId}");
 
-				return Result<bool>.Ok(true, "Image removed", 200);
+				return Result<bool>.Ok(true, "Image removed", 200, warnings: warnings);
 			}
 			catch (Exception ex)
 			{
@@ -192,15 +221,14 @@ namespace E_Commers.Services.Product
 		public async Task<Result<bool>> UploadAndSetMainImageAsync(int productId, IFormFile mainImage, string userId)
 		{
 			_logger.LogInformation($"Setting new main image for product: {productId}");
-
-				var product = await _unitOfWork.Product.GetByIdAsync(productId);
-				if (product == null)
-					return Result<bool>.Fail("Product not found", 404);
-
-				using var transaction = await _unitOfWork.BeginTransactionAsync();
+			
+			var product = await _unitOfWork.Product.GetByIdAsync(productId);
+			if (product == null)
+				return Result<bool>.Fail("Product not found", 404);
+			
+			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
-
 				// Unset previous main images
 				var existingMainImages = await _unitOfWork.Image.GetAll()
 					.Where(i => i.ProductId == productId && i.DeletedAt == null && i.IsMain)
@@ -234,6 +262,7 @@ namespace E_Commers.Services.Product
 				);
 
 				await _unitOfWork.CommitAsync();
+				await transaction.CommitAsync();
 				_logger.LogInformation($"Main image set successfully for product {productId}");
 				return Result<bool>.Ok(true, "Main image updated", 200);
 			}

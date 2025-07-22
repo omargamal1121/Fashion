@@ -79,7 +79,7 @@ namespace E_Commers.Controllers
 		}
 
 		[HttpPost]
-		public async Task<ActionResult<ApiResponse<ProductListItemDto>>> CreateProduct(CreateProductDto model)
+		public async Task<ActionResult<ApiResponse<ProductDto>>> CreateProduct(CreateProductDto model)
 		{
 			_logger.LogInformation($"Executing {nameof(CreateProduct)}");
 			if (!ModelState.IsValid)
@@ -89,14 +89,14 @@ namespace E_Commers.Controllers
 					.Select(e => e.ErrorMessage)
 					.ToList());
 				_logger.LogError($"Validation Errors: {errors}");
-				return BadRequest(ApiResponse<ProductListItemDto>.CreateErrorResponse("Check on data", new ErrorResponse("Invalid data", errors)));
+				return BadRequest(ApiResponse<ProductDto>.CreateErrorResponse("Check on data", new ErrorResponse("Invalid data", errors)));
 			}
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var response = await _productsServices.CreateProductAsync(model, userId);
-			return HandleResult<ProductListItemDto>(response, nameof(CreateProduct), response.Data?.Id);
+			return HandleResult<ProductDto>(response, nameof(CreateProduct), response.Data?.Id);
 		}
 		[HttpPut("{id}")]
-		public async Task<ActionResult<ApiResponse<ProductListItemDto>>> UpdateProduct(int id, UpdateProductDto model)
+		public async Task<ActionResult<ApiResponse<ProductDto>>> UpdateProduct(int id, UpdateProductDto model)
 		{
 			_logger.LogInformation($"Executing {nameof(UpdateProduct)} for ID: {id}");
 			if (!ModelState.IsValid)
@@ -106,36 +106,37 @@ namespace E_Commers.Controllers
 					.Select(e => e.ErrorMessage)
 					.ToList());
 				_logger.LogError($"Validation Errors: {errors}");
-				return BadRequest(ApiResponse<ProductListItemDto>.CreateErrorResponse("", new ErrorResponse("Invalid data", errors)));
+				return BadRequest(ApiResponse<ProductDto>.CreateErrorResponse("", new ErrorResponse("Invalid data", errors)));
 			}
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var response = await _productsServices.UpdateProductAsync(id, model, userId);
-			return HandleResult<ProductListItemDto>(response, nameof(UpdateProduct), id);
+			return HandleResult<ProductDto>(response, nameof(UpdateProduct), id);
 		}
 
 		[HttpDelete("{id}")]
 		[ActionName(nameof(DeleteProduct))]
-		public async Task<ActionResult<ApiResponse<string>>> DeleteProduct(int id)
+		public async Task<ActionResult<ApiResponse<bool>>> DeleteProduct(int id)
 		{
 			_logger.LogInformation($"Executing {nameof(DeleteProduct)} for ID: {id}");
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var response = await _productsServices.DeleteProductAsync(id, userId);
-			return HandleResult<string>(response, nameof(DeleteProduct), id);
+			return HandleResult<bool>(response, nameof(DeleteProduct), id);
 		}
 
 		[HttpGet("subcategory/{subCategoryId}")]
-		public async Task<ActionResult<ApiResponse<List<ProductListItemDto>>>> GetProductsBySubCategory(
+		[AllowAnonymous]
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetProductsBySubCategoryId(
 			int subCategoryId,
-			[FromQuery] int page = 1,
-			[FromQuery] int pageSize = 10)
+			[FromQuery] bool? isActive,
+			[FromQuery] bool? deletedOnly)
 		{
-			var response = await _productsServices.AdvancedSearchAsync(
-				new AdvancedSearchDto { Subcategoryid = subCategoryId }, page, pageSize, isActive: true, deletedOnly: false);
-			return HandleResult(response, nameof(GetProductsBySubCategory), subCategoryId);
+			var response = await _productsServices.GetProductsBySubCategoryId(subCategoryId, isActive, deletedOnly);
+
+			return HandleResult(response, nameof(GetProductsBySubCategoryId), subCategoryId);
 		}
 
 		[HttpPatch("{id}/restore")]
-		public async Task<ActionResult<ApiResponse<ProductListItemDto>>> RestoreProductAsync(int id)
+		public async Task<ActionResult<ApiResponse<ProductDto>>> RestoreProductAsync(int id)
 		{
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var result = await _productsServices.RestoreProductAsync(id, userId);

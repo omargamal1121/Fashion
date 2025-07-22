@@ -9,22 +9,20 @@ namespace E_Commers.DtoModels.ProductDtos
 		[Required(ErrorMessage = "Color is required.")]
 		[StringLength(20, MinimumLength = 2, ErrorMessage = "Color must be between 2 and 20 characters.")]
 		public string Color { get; set; } = string.Empty;
-		
+
 		public VariantSize? Size { get; set; }
-		
-		[StringLength(10, ErrorMessage = "Waist must not exceed 10 characters.")]
+
+		[Range(0, 100, ErrorMessage = "Waist must be between 0 and 100.")]
 		public int? Waist { get; set; }
-		
-		[StringLength(10, ErrorMessage = "Length must not exceed 10 characters.")]
+
+		[Range(0, 200, ErrorMessage = "Length must be between 0 and 200.")]
 		public int? Length { get; set; }
 
 		[Required(ErrorMessage = "Quantity is required.")]
 		[Range(0, int.MaxValue, ErrorMessage = "Quantity must be non-negative.")]
 		public int Quantity { get; set; }
 
-		[Required(ErrorMessage = "Price is required.")]
-		[Range(0, (double)decimal.MaxValue, ErrorMessage = "Price must be non-negative.")]
-		public decimal Price { get; set; }
-		public FitType  fitType { get; set; }
+	
 	}
+
 }

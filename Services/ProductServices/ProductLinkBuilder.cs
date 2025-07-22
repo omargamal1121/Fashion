@@ -3,7 +3,7 @@ using E_Commers.DtoModels.Shared;
 using E_Commers.Interfaces;
 using E_Commers.Services.Category;
 
-namespace E_Commers.Services.Product
+namespace E_Commers.Services.ProductServices
 {
     public class ProductLinkBuilder : BaseLinkBuilder,IProductLinkBuilder
     {

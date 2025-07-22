@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 
-namespace E_Commers.DtoModels.CategoryDtos
+namespace E_Commers.DtoModels.SubCategorydto
 {
     public class UpdateSubCategoryDto
     {
@@ -14,8 +14,6 @@ namespace E_Commers.DtoModels.CategoryDtos
         public string? Description { get; set; } = string.Empty;
         public int? CategoryId { get; set; }
         
-        
-        
-        public bool IsActive { get; set; }
+
     }
 } 

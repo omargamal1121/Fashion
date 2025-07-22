@@ -11,6 +11,7 @@ using E_Commers.DtoModels.ProductDtos;
 using E_Commers.DtoModels.WareHouseDtos;
 using E_Commers.Models;
 using E_Commers.DtoModels.CustomerAddressDtos;
+using E_Commers.DtoModels.SubCategorydto;
 
 namespace E_Commers.Mappings
 {
@@ -20,7 +21,7 @@ namespace E_Commers.Mappings
 		{
 			//CreateMap<Product,ProductDto>().ForMember(c => c.FinalPrice, op => op.MapFrom(c => c.Discount==null?c.Price: c.Price - c.Discount.DiscountPercent * c.Price)).ForMember(p=>p.AvailabeQuantity,op=>op.MapFrom(p=>p.InventoryEntries.Sum(x=>x.Quantity))).ReverseMap();
 			CreateMap<Category, CategoryDto>()
-			
+
 				.ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
 				.ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
 				.ForMember(dest => dest.DisplayOrder, opt => opt.MapFrom(src => src.DisplayOrder))
@@ -29,8 +30,8 @@ namespace E_Commers.Mappings
 				.ForMember(dest => dest.ModifiedAt, opt => opt.MapFrom(src => src.ModifiedAt))
 				.AfterMap((src, dest) =>
 				{
-					
-					
+
+
 				})
 				.ReverseMap();
 
@@ -39,11 +40,11 @@ namespace E_Commers.Mappings
 				.ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name.Trim()))
 				.ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description.Trim()))
 				.ForMember(dest => dest.DisplayOrder, opt => opt.MapFrom(src => src.DisplayOrder))
-				.ForMember(dest => dest.Images, opt => opt.Ignore()) 
-				.ForMember(dest => dest.Id, opt => opt.Ignore()) 
+				.ForMember(dest => dest.Images, opt => opt.Ignore())
+				.ForMember(dest => dest.Id, opt => opt.Ignore())
 				.ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
-				.ForMember(dest => dest.ModifiedAt, opt => opt.Ignore()) 
-				.ForMember(dest => dest.DeletedAt, opt => opt.Ignore()) 
+				.ForMember(dest => dest.ModifiedAt, opt => opt.Ignore())
+				.ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
 				.ForMember(dest => dest.SubCategories, opt => opt.Ignore());
 			CreateMap<UpdateCategoryDto, Category>()
 				.ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name.Trim()))
@@ -54,15 +55,15 @@ namespace E_Commers.Mappings
 				.ForMember(dest => dest.DeletedAt, opt => opt.Ignore()) // Don't update deletion date
 				.ForMember(dest => dest.Images, opt => opt.Ignore()) // Don't update images
 				.ForMember(dest => dest.SubCategories, opt => opt.Ignore()); // Don't update subcategories
-	
-			CreateMap< CreateCategotyDto, CategoryDto>().ReverseMap();
+
+			CreateMap<CreateCategotyDto, CategoryDto>().ReverseMap();
 			CreateMap<RegisterDto, Customer>().ReverseMap();
 			CreateMap<RegisterDto, RegisterResponse>().ReverseMap();
-			CreateMap<WareHouseDto,Warehouse>().ReverseMap();
+			CreateMap<WareHouseDto, Warehouse>().ReverseMap();
 			CreateMap<Customer, RegisterResponse>()
 			.ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id.ToString()))
 			.ReverseMap()
-			.ForMember(dest => dest.Id, opt => opt.MapFrom(src =>src.UserId));
+			.ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.UserId));
 
 			// Inventory mappings
 			CreateMap<ProductInventory, InventoryDto>()
@@ -74,31 +75,24 @@ namespace E_Commers.Mappings
 			CreateMap<CreateProductDto, Product>()
 				.ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
 				.ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
-			 
+
 				.ForMember(dest => dest.SubCategoryId, opt => opt.MapFrom(src => src.Subcategoryid));
 
 			CreateMap<UpdateProductDto, Product>()
 				.ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
 				.ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
-			 
+
 				.ForMember(dest => dest.SubCategoryId, opt => opt.MapFrom(src => src.SubCategoryid));
 
 			CreateMap<Product, ProductDto>()
 				.ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
 				.ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
 				.ForMember(dest => dest.AvailableQuantity, opt => opt.MapFrom(src => src.Quantity))
-			
-				.ForMember(dest => dest.FinalPrice, opt => opt.MapFrom(src => CalculateFinalPrice(src)))
-				
-				.ForMember(dest => dest.SubCategory, opt => opt.MapFrom(src => src.SubCategory))
-				.ForMember(dest => dest.Discount, opt => opt.MapFrom(src => src.Discount))
-				.ForMember(dest => dest.Variants, opt => opt.MapFrom(src => src.ProductVariants))
-				.ForMember(dest => dest.Collections, opt => opt.MapFrom(src => src.ProductCollections))
-				.ForMember(dest => dest.Reviews, opt => opt.MapFrom(src => src.Reviews))
-				.ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images))
-				.ForMember(dest => dest.Inventory, opt => opt.MapFrom(src => src.InventoryEntries))
-				.ForMember(dest => dest.WishlistItems, opt => opt.MapFrom(src => src.WishlistItems))
-				.ForMember(dest => dest.ReturnRequests, opt => opt.MapFrom(src => src.ReturnRequestProducts));
+
+				.ForMember(dest => dest.FinalPrice, opt => opt.MapFrom(src => CalculateFinalPrice(src)));
+
+
+
 			CreateMap<CreateProductVariantDto, ProductVariant>();
 			CreateMap<UpdateProductVariantDto, ProductVariant>();
 			CreateMap<ProductVariant, ProductVariantDto>();
@@ -115,7 +109,7 @@ namespace E_Commers.Mappings
 			CreateMap<CartItem, CartItemDto>()
 				.ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
 				.ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product))
-			 
+
 				.ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => CalculateUnitPrice(src)))
 				.ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => CalculateCartItemTotalPrice(src)))
 				.ForMember(dest => dest.AddedAt, opt => opt.MapFrom(src => src.AddedAt));
@@ -148,7 +142,7 @@ namespace E_Commers.Mappings
 				.ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product))
 				.ForMember(dest => dest.ProductVariantId, opt => opt.MapFrom(src => src.ProductVariantId))
 				.ForMember(dest => dest.ProductVariant, opt => opt.MapFrom(src => src.ProductVariant))
-			 
+
 				.ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.UnitPrice))
 				.ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.TotalPrice))
 				.ForMember(dest => dest.OrderedAt, opt => opt.MapFrom(src => src.OrderedAt));
@@ -167,7 +161,7 @@ namespace E_Commers.Mappings
 			CreateMap<PaymentMethod, PaymentMethodDto>();
 			CreateMap<PaymentProvider, PaymentProviderDto>();
 
-			// Collection mappings
+
 			CreateMap<Collection, CollectionDto>()
 				.ForMember(dest => dest.MainImage, opt => opt.Ignore())
 				.ForMember(dest => dest.Images, opt => opt.Ignore())
@@ -189,7 +183,7 @@ namespace E_Commers.Mappings
 						{
 							Id = main.Id,
 							Url = main.Url,
-						
+
 						};
 					}
 					else
@@ -203,7 +197,7 @@ namespace E_Commers.Mappings
 						{
 							Id = i.Id,
 							Url = i.Url,
-						
+
 						})
 						.ToList();
 				});
@@ -250,7 +244,7 @@ namespace E_Commers.Mappings
 						{
 							Id = main.Id,
 							Url = main.Url,
-						
+
 						};
 					}
 					else
@@ -303,105 +297,28 @@ namespace E_Commers.Mappings
 				.ForMember(dest => dest.Url, opt => opt.MapFrom(src => src.Url));
 
 			CreateMap<SubCategory, SubCategoryDto>()
-				.ForMember(dest => dest.MainImage, opt => opt.Ignore()) 
-				.ForMember(dest => dest.Images, opt => opt.Ignore()) 
-				.ForMember(dest => dest.Products, opt => opt.Ignore()) // Ignore automatic mapping
+
+				.ForMember(dest => dest.Images, opt => opt.Ignore())
+
 				.ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
 				.ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
 				.ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive))
 				.ForMember(dest => dest.DeletedAt, opt => opt.MapFrom(src => src.DeletedAt))
-				.ForMember(dest => dest.ModifiedAt, opt => opt.MapFrom(src => src.ModifiedAt))
-				.AfterMap((src, dest) =>
-				{
-					if (src.Images == null)
-					{
-						dest.MainImage = null;
-						dest.Images = new List<ImageDto>();
-					}
-					else
-					{
-						var main = src.Images.FirstOrDefault(i => i.IsMain && i.DeletedAt == null);
-						if (main != null)
-						{
-							dest.MainImage = new ImageDto
-							{
-								Id = main.Id,
-								Url = main.Url
-							};
-						}
-						else
-						{
-							dest.MainImage = null;
-						}
+				.ForMember(dest => dest.ModifiedAt, opt => opt.MapFrom(src => src.ModifiedAt));
 
-						dest.Images = src.Images
-							.Where(i => !i.IsMain && i.DeletedAt == null)
-							.Select(i => new ImageDto
-							{
-								Id = i.Id,
-								Url = i.Url
-							})
-							.ToList();
-					}
 
-					// Map Products if they exist
-					if (src.Products != null)
-					{
-						dest.Products = src.Products
-							.Where(p => p.DeletedAt == null)
-							.Select(p => new ProductDto
-							{
-								Id = p.Id,
-								Name = p.Name,
-								Description = p.Description,
-								AvailableQuantity = p.Quantity,
-								Gender = p.Gender,
-								SubCategoryId = p.SubCategoryId,
 
-								FinalPrice = CalculateFinalPrice(p),
-							
-								Discount = p.Discount != null ? new DiscountDto
-								{
-									Id = p.Discount.Id,
-									Name = p.Discount.Name,
-									Description = p.Discount.Description,
-									DiscountPercent = p.Discount.DiscountPercent,
-									StartDate = p.Discount.StartDate,
-									EndDate = p.Discount.EndDate,
-									IsActive = p.Discount.IsActive
-								} : null,
-								Images = p.Images?.Where(i => i.DeletedAt == null).Select(i => new ImageDto
-								{
-									Id = i.Id,
-									Url = i.Url
-								}).ToList(),
-								Variants = p.ProductVariants?.Where(v => v.DeletedAt == null).Select(v => new ProductVariantDto
-								{
-									Id = v.Id,
-									Color = v.Color,
-
-									Quantity = v.Quantity
-								}).ToList()
-							})
-							.ToList();
-					}
-					else
-					{
-						dest.Products = new List<ProductDto>();
-					}
-				})
-				.ReverseMap();
 
 			CreateMap<CreateSubCategoryDto, SubCategory>()
 				.ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name.Trim()))
 				.ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description.Trim()))
 				.ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
-				
+
 				.ForMember(dest => dest.Images, opt => opt.Ignore())
-				.ForMember(dest => dest.Id, opt => opt.Ignore()) 
+				.ForMember(dest => dest.Id, opt => opt.Ignore())
 				.ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
-				.ForMember(dest => dest.ModifiedAt, opt => opt.Ignore()) 
-				.ForMember(dest => dest.DeletedAt, opt => opt.Ignore()) 
+				.ForMember(dest => dest.ModifiedAt, opt => opt.Ignore())
+				.ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
 				.ForMember(dest => dest.Category, opt => opt.Ignore())
 				.ForMember(dest => dest.Products, opt => opt.Ignore());
 			CreateMap<UpdateSubCategoryDto, SubCategory>()
@@ -411,23 +328,11 @@ namespace E_Commers.Mappings
 				.ForMember(dest => dest.ModifiedAt, opt => opt.Ignore())
 				.ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
 				.ForMember(dest => dest.Category, opt => opt.Ignore())
-				.ForMember(dest => dest.Products, opt => opt.Ignore())
-				 .AfterMap((src, dest) =>
-				{
-					if (src.Name != null)
-						dest.Name = src.Name.Trim();
-
-					if (src.Description != null)
-						dest.Description = src.Description.Trim();
-
-					if (src.CategoryId.HasValue)
-						dest.CategoryId = src.CategoryId.Value;
-
-					if (src.IsActive)
-						dest.IsActive = src.IsActive;
-				});
-
+				.ForMember(dest => dest.Products, opt => opt.Ignore()); 
 		}
+			
+			
+				
 
 		private static decimal CalculateFinalPrice(Product product)
 		{

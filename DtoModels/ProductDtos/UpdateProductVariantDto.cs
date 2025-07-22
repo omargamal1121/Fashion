@@ -11,13 +11,13 @@ namespace E_Commers.DtoModels.ProductDtos
 		public string? Color { get; set; }
 		
 		public VariantSize? Size { get; set; }
-		
-		[StringLength(10, ErrorMessage = "Waist must not exceed 10 characters.")]
+		[Range(0, 100, ErrorMessage = "Waist must be between 0 and 100.")]
 		public int? Waist { get; set; }
-		
-		[StringLength(10, ErrorMessage = "Length must not exceed 10 characters.")]
+
+		[Range(0, 200, ErrorMessage = "Length must be between 0 and 200.")]
 		public int? Length { get; set; }
-		
-	
+
+
+
 	}
 }

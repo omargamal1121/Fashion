@@ -86,7 +86,7 @@ namespace E_Commers.Controllers
 		[HttpPatch("{id}/activate")]
 		[Authorize(Roles = "Admin")]
 		[ActionName(nameof(ActivateCategory))]
-		public async Task<ActionResult<ApiResponse<string>>> ActivateCategory(int id)
+		public async Task<ActionResult<ApiResponse<bool>>> ActivateCategory(int id)
 		{
 			_logger.LogInformation($"Executing {nameof(ActivateCategory)} for id: {id}");
 			var userId = HttpContext.Items["UserId"]?.ToString();
@@ -97,7 +97,7 @@ namespace E_Commers.Controllers
 		[HttpPatch("{id}/deactivate")]
 		[Authorize(Roles = "Admin")]
 		[ActionName(nameof(DeactivateCategory))]
-		public async Task<ActionResult<ApiResponse<string>>> DeactivateCategory(int id)
+		public async Task<ActionResult<ApiResponse<bool>>> DeactivateCategory(int id)
 		{
 			_logger.LogInformation($"Executing {nameof(DeactivateCategory)} for id: {id}");
 			var userId = HttpContext.Items["UserId"]?.ToString();
@@ -140,7 +140,7 @@ namespace E_Commers.Controllers
 		[HttpDelete("{id}")]
 		[Authorize(Roles = "Admin")]
 		[ActionName(nameof(DeleteAsync))]
-		public async Task<ActionResult<ApiResponse<string>>> DeleteAsync(int id)
+		public async Task<ActionResult<ApiResponse<bool>>> DeleteAsync(int id)
 		{
 			_logger.LogInformation($"Executing {nameof(DeleteAsync)} for id: {id}");
 			var userId = HttpContext.Items["UserId"]?.ToString();
@@ -218,17 +218,18 @@ namespace E_Commers.Controllers
 			var result = await _categoryServices.GetAllCategoriesAsync(true, false, page, pageSize);
 			return StatusCode(result.StatusCode, result);
 		}
-
-		[HttpGet("search")]
+		[HttpGet("user-search")]
 		[AllowAnonymous]
-		public async Task<IActionResult> Search([FromQuery] string keyword, [FromQuery] bool? isActive = null, [FromQuery] bool? isDeleted = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+		public async Task<IActionResult> SearchForUsers([FromQuery] string keyword, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
-			// For anonymous or non-admin users, always search only active and not deleted categories
-			if (!User.Identity.IsAuthenticated || !User.IsInRole("Admin"))
-			{
-				isActive = true;
-				isDeleted = false;
-			}
+			var result = await _categoryServices.FilterAsync(keyword, isActive: true,  false, page, pageSize);
+			return StatusCode(result.StatusCode, result);
+		}
+
+		[HttpGet("admin-search")]
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> SearchForAdmin([FromQuery] string keyword, [FromQuery] bool? isActive = null, [FromQuery] bool? isDeleted = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+		{
 			var result = await _categoryServices.FilterAsync(keyword, isActive, isDeleted, page, pageSize);
 			return StatusCode(result.StatusCode, result);
 		}

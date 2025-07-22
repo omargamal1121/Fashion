@@ -4,6 +4,7 @@ using E_Commers.DtoModels.CategoryDtos;
 using E_Commers.DtoModels.ImagesDtos;
 using E_Commers.DtoModels.ProductDtos;
 using E_Commers.DtoModels.Responses;
+using E_Commers.DtoModels.SubCategorydto;
 using E_Commers.Enums;
 using E_Commers.ErrorHnadling;
 using E_Commers.Interfaces;
@@ -14,6 +15,8 @@ using E_Commers.Services.EmailServices;
 using E_Commers.UOW;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace E_Commers.Services.Category
 {
@@ -23,11 +26,17 @@ namespace E_Commers.Services.Category
 		private readonly IMapper _mapping;
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly IAdminOpreationServices _adminopreationservices;
+		private readonly IBackgroundJobClient _backgroundJobClient;
 		private readonly ICacheManager _cacheManager;
 		private readonly IImagesServices _imagesServices;
 		private const string CACHE_TAG_CATEGORY = "category";
+		public const string CACHE_TAG_CATEGORY_WITH_DATA = "categorywithdata";
+		private  readonly string[] CACHE_TAGS_CATEGORY = new string[] { CACHE_TAG_CATEGORY, CACHE_TAG_CATEGORY_WITH_DATA };
 
 		public CategoryServices(
+
+			IBackgroundJobClient backgroundJobClient,
+			
 			 IImagesServices imagesServices,
 			IAdminOpreationServices adminopreationservices,
 			ICacheManager cacheManager,
@@ -35,7 +44,9 @@ namespace E_Commers.Services.Category
 			IUnitOfWork unitOfWork,
 			ILogger<CategoryServices> logger
 		)
-		{
+		{ 
+			 _backgroundJobClient = backgroundJobClient ?? throw new ArgumentNullException(nameof(backgroundJobClient));
+			
 			_imagesServices = imagesServices;
 			_adminopreationservices = adminopreationservices;
 			_cacheManager = cacheManager;
@@ -44,12 +55,42 @@ namespace E_Commers.Services.Category
 			_unitOfWork = unitOfWork;
 		}
 
-		private async Task SaveAndRemoveCategoryCacheAsync()
+		private   void RemoveCategoryCacheAsync()
 		{
-			await _unitOfWork.CommitAsync();
-			BackgroundJob.Enqueue(() => _cacheManager.RemoveByTagAsync(CACHE_TAG_CATEGORY));
+			
+			_backgroundJobClient.Enqueue( ()=>  _cacheManager.RemoveByTagsAsync(CACHE_TAGS_CATEGORY));
 		}
 
+		private static readonly Expression<Func<E_Commers.Models. Category, CategoryDto>> CategorySelector = c => new CategoryDto
+		{
+			Id = c.Id,
+			Name = c.Name,
+			Description = c.Description,
+			IsActive = c.IsActive,
+			CreatedAt = c.ModifiedAt,
+			DeletedAt = c.DeletedAt,
+			ModifiedAt = c.ModifiedAt,
+			DisplayOrder= c.DisplayOrder,
+			Images = c.Images.Select(i => new ImageDto
+			{
+				Id = i.Id,
+				Url = i.Url,
+				IsMain = i.IsMain
+			}).ToList()
+		};
+		private IQueryable<E_Commers.Models. Category> BasicFilter(IQueryable<E_Commers.Models. Category> query, bool? isActive = null, bool? isDeleted = null)
+		{
+			if (isActive.HasValue)
+				query = query.Where(c => c.IsActive == isActive.Value);
+			if (isDeleted.HasValue)
+			{
+				if (isDeleted.Value)
+					query = query.Where(c => c.DeletedAt != null);
+				else
+					query = query.Where(c => c.DeletedAt == null);
+			}
+			return query;
+		}
 		public async Task<Result<List<CategoryDto>>> GetAllCategoriesAsync(bool? isActive = null, bool? isDeleted = null, int page = 1, int pageSize = 10)
 		{
 			_logger.LogInformation($"Executing {nameof(GetAllCategoriesAsync)} in CategoryService with isActive: {isActive}, isDeleted: {isDeleted}, page: {page}, pageSize: {pageSize}");
@@ -60,37 +101,14 @@ namespace E_Commers.Services.Category
 				_logger.LogInformation($"Cache hit for GetAllCategoriesAsync with key: {cacheKey}");
 				return Result<List<CategoryDto>>.Ok(cached, "Categories fetched from cache", 200);
 			}
-			var query = _unitOfWork.Category.GetAll();
-			if (isActive.HasValue)
-				query = query.Where(c => c.IsActive == isActive.Value);
-			if (isDeleted.HasValue)
-			{
-				if (isDeleted.Value)
-					query = query.Where(c => c.DeletedAt != null);
-				else
-					query = query.Where(c => c.DeletedAt == null);
-			}
+			var query = _unitOfWork.Category.GetAll(); 
+			query = BasicFilter(query, isActive, isDeleted);
+
 			var result = await query
 				.OrderBy(c => c.DisplayOrder)
 				.Skip((page - 1) * pageSize)
 				.Take(pageSize)
-				.Select(c => new CategoryDto
-				{
-					Id = c.Id,
-					Name = c.Name,
-					Description = c.Description,
-					IsActive = c.IsActive,
-					CreatedAt = c.CreatedAt,
-					UpdatedAt = null,
-					Images = c.Images
-						.Where(i => i.DeletedAt == null)
-						.Select(i => new ImageDto
-						{
-							Id = i.Id,
-							Url = i.Url,
-							IsMain = i.IsMain
-						}).ToList()
-				})
+				.Select(CategorySelector)
 				.ToListAsync();
 			BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, result, null, new[] { CACHE_TAG_CATEGORY }));
 			return Result<List<CategoryDto>>.Ok(result, "Categories fetched", 200);
@@ -112,49 +130,27 @@ namespace E_Commers.Services.Category
 			}
 			var query = _unitOfWork.Category.GetAll();
 			if (!string.IsNullOrWhiteSpace(keyword))
-				query = query.Where(c => c.Name.Contains(keyword));
-			if (isActive.HasValue)
-				query = query.Where(c => c.IsActive == isActive.Value);
-			if (isDeleted.HasValue)
-			{
-				if (isDeleted.Value)
-					query = query.Where(c => c.DeletedAt != null);
-				else
-					query = query.Where(c => c.DeletedAt == null);
-			}
+				query = query.Where(c => c.Name.Contains(keyword) || c.Description.Contains(keyword));
+			query = BasicFilter(query, isActive, isDeleted);
 			var result = await query
 				.OrderBy(c => c.DisplayOrder)
 				.Skip((page - 1) * pageSize)
 				.Take(pageSize)
-				.Select(c => new CategoryDto
-				{
-					Id = c.Id,
-					Name = c.Name,
-					Description = c.Description,
-					IsActive = c.IsActive,
-					CreatedAt = c.CreatedAt,
-					UpdatedAt = null,
-					Images = c.Images.Select(i => new ImageDto
-					{
-						Id = i.Id,
-						Url = i.Url,
-						IsMain = i.IsMain
-					}).ToList()
-				})
+				.Select(CategorySelector)
 				.ToListAsync();
 			BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, result,null,  new[] { CACHE_TAG_CATEGORY }));
 			return Result<List<CategoryDto>>.Ok(result, "Categories fetched", 200);
 		}
 
 
-		public async Task<Result<string>> IsExsistAsync(int id)
+		public async Task<Result<bool>> IsExsistAsync(int id)
 		{
 			_logger.LogInformation($"Execute:{nameof(IsExsistAsync)} in Category Services");
-			var exists = await _unitOfWork.Category.GetByIdAsync(id) != null;
+			var exists = await _unitOfWork.Category.IsExsistAsync(id);
 			if (exists)
-				return Result<string>.Ok(null, "category Exsist", 200);
+				return Result<bool>.Ok(true, "category Exsist", 200);
 			else
-				return Result<string>.Fail($"No Categoty with this id:{id}", 404);
+				return Result<bool>.Fail($"No Categoty with this id:{id}", 404);
 		}
 
 		public async Task<Result<CategorywithdataDto>> GetCategoryByIdAsync(int id, bool? isActive = null, bool? IsDeleted = false)
@@ -169,67 +165,53 @@ namespace E_Commers.Services.Category
 				return Result<CategorywithdataDto>.Ok(cachedCategory, "Category found in cache", 200);
 			}
 
-			var query = _unitOfWork.Category.GetAll()
-				.Where(c =>
-					c.Id == id &&
-					(IsDeleted == null || (IsDeleted == true && c.DeletedAt != null) || (IsDeleted == false && c.DeletedAt == null)) &&
-					(isActive == null || c.IsActive == isActive)
-				)
-				.Select(category => new CategorywithdataDto
-				{
-					Id = category.Id,
-					Name = category.Name,
-					Description = category.Description,
-					DisplayOrder = category.DisplayOrder,
-					IsActive = category.IsActive,
-					CreatedAt = category.CreatedAt,
-					UpdatedAt = category.ModifiedAt,
-					DeletedAt = category.DeletedAt,
-
-					Images = category.Images
-						.Where(i => i.DeletedAt == null)
-						.Select(i => new ImageDto
-						{
-							Id = i.Id,
-							Url = i.Url,
-							IsMain = i.IsMain
-						}).ToList(),
-
-					SubCategories = category.SubCategories
-						.Where(sc => sc.DeletedAt == null && sc.IsActive)
-						.Select(sc => new SubCategoryDto
-						{
-							Id = sc.Id,
-							Name = sc.Name,
-							CreatedAt = sc.CreatedAt,
-							Description = sc.Description,
-							IsActive = sc.IsActive,
-							Images = sc.Images
-								.Where(i => i.DeletedAt == null)
-								.Select(i => new ImageDto
-								{
-									Id = i.Id,
-									Url = i.Url,
-									IsMain = i.IsMain
-								}).ToList()
-						}).ToList()
-				});
-
-			var categoryDto = await query.FirstOrDefaultAsync();
-			if (categoryDto == null)
+			var category = await _unitOfWork.Category.GetCategoryByIdAsync(id, isActive, IsDeleted);
+			
+				
+			if (category == null)
 			{
 				_logger.LogWarning($"Category with id: {id} not found");
 				return Result<CategorywithdataDto>.Fail($"Category with id: {id} not found", 404);
 			}
 
-			BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, categoryDto, null, new[] { CACHE_TAG_CATEGORY }));
+
+			var categoryDto= MapToCategoryWithDataDto(category);
+			BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, categoryDto, null, new[] { CACHE_TAG_CATEGORY_WITH_DATA }));
 			return Result<CategorywithdataDto>.Ok(categoryDto, "Category found", 200);
 		}
 
 		private void NotifyAdminOfError(string message, string? stackTrace = null)
 		{
-			BackgroundJob.Enqueue<IErrorNotificationService>(_ => _.SendErrorNotificationAsync(message, stackTrace));
+			_backgroundJobClient.Enqueue<IErrorNotificationService>(_ => _.SendErrorNotificationAsync(message, stackTrace));
 		}
+
+		private CategorywithdataDto MapToCategoryWithDataDto(E_Commers.Models. Category c)
+		{
+			return new CategorywithdataDto
+			{
+				Id = c.Id,
+				Name = c.Name,
+				Description = c.Description,
+				DisplayOrder = c.DisplayOrder,
+				IsActive = c.IsActive,
+				CreatedAt = c.CreatedAt,
+				ModifiedAt = c.ModifiedAt,
+				Images = c.Images.Select(i => new ImageDto
+				{
+					Id = i.Id,
+					Url = i.Url,
+					IsMain = i.IsMain
+				}).ToList(),
+				SubCategories = c.SubCategories.Select(s => new SubCategoryDto
+				{
+					Id = s.Id,
+					Name = s.Name,
+					IsActive = s.IsActive, CreatedAt = s.CreatedAt, ModifiedAt = s.ModifiedAt, Description = s.Description,
+					Images = s.Images.Select(i => new ImageDto { Id = i.Id, Url = i.Url, IsMain = i.IsMain }).ToList()
+				}).ToList()
+			};
+		}
+
 
 		public async Task<Result<CategoryDto>> CreateAsync(CreateCategotyDto model, string userId)
 		{
@@ -238,8 +220,8 @@ namespace E_Commers.Services.Category
 			{
 				return Result<CategoryDto>.Fail("Category name cannot be empty", 400);
 			}
-			var isexsist = await _unitOfWork.Category.FindByNameAsync(model.Name);
-			if (isexsist != null)
+			var isexsist =  _unitOfWork.Category.IsExsistsByName(model.Name);
+			if (isexsist)
 			{
 				return Result<CategoryDto>.Fail($"thier's category with this name:{model.Name}", 409);
 			}
@@ -270,15 +252,15 @@ namespace E_Commers.Services.Category
 					NotifyAdminOfError($"Failed to log admin operation for category '{model.Name}' (ID: {category.Id})");
 					return Result<CategoryDto>.Fail("Try Again later", 500);
 				}
-				await SaveAndRemoveCategoryCacheAsync();
-				var categoryWithImages = await _unitOfWork.Category.GetCategoryById(category.Id);
+				 RemoveCategoryCacheAsync();
+				var categoryWithImages = await _unitOfWork.Category.GetCategoryByIdAsync(category.Id);
 				if (categoryWithImages == null)
 				{
 					_logger.LogError("Failed to retrieve created category");
 					NotifyAdminOfError($"Failed to retrieve created category with ID {category.Id} after creation");
 					return Result<CategoryDto>.Fail("Category created but failed to retrieve details", 500);
 				}
-					var categoryDto = _mapping.Map<CategoryDto>(categoryWithImages);
+					var categoryDto =MapToCategoryWithDataDto(categoryWithImages);
 				return Result<CategoryDto>.Ok(categoryDto, "Created", 201);
 			}
 			catch (Exception ex)
@@ -301,7 +283,7 @@ namespace E_Commers.Services.Category
 			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
-				var category = await _unitOfWork.Category.GetCategoryById(categoryId);
+				var category = await _unitOfWork.Category.GetCategoryByIdAsync(categoryId, deleted: false);
 				if (category == null)
 				{
 					await transaction.RollbackAsync();
@@ -331,7 +313,7 @@ namespace E_Commers.Services.Category
 				await transaction.CommitAsync();
 				
 				var mapped = _mapping.Map<List<ImageDto>>(category.Images);
-				BackgroundJob.Enqueue(() => _cacheManager.RemoveByTagAsync(CACHE_TAG_CATEGORY));
+				RemoveCategoryCacheAsync();
 				return Result<List<ImageDto>>.Ok(mapped, $"Added {imageResult.Data.Count} images to category", 200, warnings: imageResult.Warnings);
 			}
 			catch (Exception ex)
@@ -343,34 +325,34 @@ namespace E_Commers.Services.Category
 			}
 		}
 
-		public async Task<Result<string>> DeleteAsync(int categoryId, string userid)
+		public async Task<Result<bool>> DeleteAsync(int categoryId, string userid)
 		{
 			_logger.LogInformation($"Executing {nameof(DeleteAsync)} for categoryId: {categoryId}");
 			
 			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
-				var category = await _unitOfWork.Category.GetCategoryById(categoryId);
+				var category = await _unitOfWork.Category.GetCategoryByIdAsync(categoryId, deleted: false);
 				if (category == null)
 				{
 					await transaction.RollbackAsync();
-					return Result<string>.Fail($"Category with id {categoryId} not found", 404);
+					return Result<bool>.Fail($"Category with id {categoryId} not found", 404);
 				}
 				
-				// Check if category has subcategories
+		
 				var hasSubCategories = await _unitOfWork.Category.HasSubCategoriesAsync(categoryId);
 				if (hasSubCategories)
 				{
 					await transaction.RollbackAsync();
 					_logger.LogWarning($"Category {categoryId} contains subcategories");
-					return Result<string>.Fail("Can't delete category because it has subcategories", 400);
+					return Result<bool>.Fail("Can't delete category because it has subcategories", 400);
 				}
 				
 				var deleteResult = await _unitOfWork.Category.SoftDeleteAsync(categoryId);
 				if (!deleteResult)
 				{
 					await transaction.RollbackAsync();
-					return Result<string>.Fail($"Failed to delete category", 500);
+					return Result<bool>.Fail($"Failed to delete category", 500);
 				}
 				
 				var adminLog = await _adminopreationservices.AddAdminOpreationAsync(
@@ -387,16 +369,16 @@ namespace E_Commers.Services.Category
 				
 				await _unitOfWork.CommitAsync();
 				await transaction.CommitAsync();
-				await SaveAndRemoveCategoryCacheAsync();
+				 RemoveCategoryCacheAsync();
 				
-				return Result<string>.Ok(null, $"Category with ID {categoryId} deleted successfully", 200);
+				return Result<bool>.Ok(true, $"Category with ID {categoryId} deleted successfully", 200);
 			}
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync();
 				_logger.LogError($"Exception in DeleteAsync: {ex.Message}");
 				NotifyAdminOfError($"Exception in DeleteAsync: {ex.Message}", ex.StackTrace);
-				return Result<string>.Fail("An error occurred while deleting category", 500);
+				return Result<bool>.Fail("An error occurred while deleting category", 500);
 			}
 		}
 
@@ -438,19 +420,7 @@ namespace E_Commers.Services.Category
 				.OrderBy(c => c.DisplayOrder)
 				.Skip((page - 1) * pageSize)
 				.Take(pageSize)
-				.Select(c => new CategoryDto
-				{
-					Id = c.Id,
-					Name = c.Name,
-					IsActive = c.IsActive,
-					UpdatedAt=c.ModifiedAt,
-					CreatedAt=c.CreatedAt,
-					Images=c.Images.Select(i=>new ImageDto { Id=i.Id,IsMain=i.IsMain,Url=i.Url}).ToList(),
-					Description=c.Description,
-					DisplayOrder=c.DisplayOrder,
-					DeletedAt=c.DeletedAt,
-					
-				})
+				.Select(CategorySelector)
 				.ToListAsync();
 
 			if (!result.Any())
@@ -467,7 +437,7 @@ namespace E_Commers.Services.Category
 			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
-				var category = await _unitOfWork.Category.GetByIdAsync(id);
+				var category = await _unitOfWork.Category.GetCategoryByIdAsync(id,deleted:true);
 				if (category == null || category.DeletedAt == null)
 				{
 					await transaction.RollbackAsync();
@@ -496,9 +466,9 @@ namespace E_Commers.Services.Category
 				
 				await _unitOfWork.CommitAsync();
 				await transaction.CommitAsync();
-				await SaveAndRemoveCategoryCacheAsync();
+				 RemoveCategoryCacheAsync();
 				
-				var categorydto = _mapping.Map<CategoryDto>(category);
+				var categorydto = MapToCategoryWithDataDto(category);
 				return Result<CategoryDto>.Ok(categorydto, "Category restored successfully", 200);
 			}
 			catch (Exception ex)
@@ -513,89 +483,48 @@ namespace E_Commers.Services.Category
 
 
 	
-		public async Task<Result<string>> ActivateCategoryAsync(int categoryId, string userId)
+		public async Task<Result<bool>> ActivateCategoryAsync(int categoryId, string userId)
 		{
 			_logger.LogInformation($"Activating category {categoryId}");
-			var category = await _unitOfWork.Category.GetCategoryById(categoryId);
+			var category = await _unitOfWork.Category.GetCategoryByIdAsync(categoryId, deleted: false);
 			if (category == null)
-				return Result<string>.Fail($"Category with id {categoryId} not found", 404);
+				return Result<bool>.Fail($"Category with id {categoryId} not found", 404);
 			if (category.Images == null || !category.Images.Any(i => i.DeletedAt == null))
-				return Result<string>.Fail("Cannot activate category without at least one image", 400);
+				return Result<bool>.Fail("Cannot activate category without at least one image", 400);
 			if (category.SubCategories == null || !category.SubCategories.Any(sc => sc.IsActive && sc.DeletedAt == null))
-				return Result<string>.Fail("Cannot activate category without at least one active subcategory", 400);
+				return Result<bool>.Fail("Cannot activate category without at least one active subcategory", 400);
 			if (category.IsActive)
-				return Result<string>.Ok(null, "Category is already active", 200);
+				return Result<bool>.Fail( "Category is already active", 200);
 			category.IsActive = true;
 			var updateResult = _unitOfWork.Category.Update(category);
 			if (!updateResult)
-				return Result<string>.Fail("Failed to activate category", 500);
+				return Result<bool>.Fail("Failed to activate category", 500);
 			await _unitOfWork.CommitAsync();
-			await SaveAndRemoveCategoryCacheAsync();
-			return Result<string>.Ok(null, "Category activated successfully", 200);
+			 RemoveCategoryCacheAsync();
+			return Result< bool>.Ok(true, "Category activated successfully", 200);
 		}
-		public async Task<Result<string>> DeactivateCategoryAsync(int categoryId, string userId)
+		public async Task<Result<bool>> DeactivateCategoryAsync(int categoryId, string userId)
 		{
 			_logger.LogInformation($"Deactivating category {categoryId}");
-			var category = await _unitOfWork.Category.GetCategoryById(categoryId);
+			var category = await _unitOfWork.Category.GetCategoryByIdAsync(categoryId, deleted: false);
 			if (category == null)
-				return Result<string>.Fail($"Category with id {categoryId} not found", 404);
+				return Result<bool>.Fail($"Category with id {categoryId} not found", 404);
 			if (!category.IsActive)
-				return Result<string>.Ok(null, "Category is already inactive", 200);
+				return Result<bool>.Fail( "Category is already inactive", 200);
 			category.IsActive = false;
 			var updateResult = _unitOfWork.Category.Update(category);
 			if (!updateResult)
-				return Result<string>.Fail("Failed to deactivate category", 500);
+				return Result<bool>.Fail("Failed to deactivate category", 500);
 			await _unitOfWork.CommitAsync();
-			await SaveAndRemoveCategoryCacheAsync();
-			return Result<string>.Ok(null, "Category deactivated successfully", 200);
+			 RemoveCategoryCacheAsync();
+			return Result<bool>.Ok(true, "Category deactivated successfully", 200);
 		}
-		public async Task<Result<bool>> ChangeActiveStatus(int categoryId, string userId)
-		{
-			_logger.LogInformation($"Executing {nameof(ChangeActiveStatus)} for categoryId: {categoryId}");
-			
-			using var transaction = await _unitOfWork.BeginTransactionAsync();
-			try
-			{
-				var category = await _unitOfWork.Category.GetCategoryById(categoryId);
-				if (category == null)
-				{
-					await transaction.RollbackAsync();
-					return Result<bool>.Fail($"Category with id {categoryId} not found", 404);
-				}
-
-				category.IsActive = !category.IsActive;
-
-				var adminOpResult = await _adminopreationservices.AddAdminOpreationAsync(
-					category.IsActive ? "Activate Category" : "Deactivate Category",
-					 Opreations.UpdateOpreation,
-					userId,
-					category.Id
-				);
-				
-				if (!adminOpResult.Success)
-				{
-					_logger.LogWarning($"Failed to log admin operation: {adminOpResult.Message}");
-				}
-				
-				await _unitOfWork.CommitAsync();
-				await transaction.CommitAsync();
-				await SaveAndRemoveCategoryCacheAsync();
-
-				return Result<bool>.Ok(category.IsActive, $"Category with ID {categoryId} has been {(category.IsActive ? "activated" : "deactivated")}", 200);
-			}
-			catch (Exception ex)
-			{
-				await transaction.RollbackAsync();
-				_logger.LogError($"Exception in ChangeActiveStatus: {ex.Message}");
-				NotifyAdminOfError($"Exception in ChangeActiveStatus: {ex.Message}", ex.StackTrace);
-				return Result<bool>.Fail("An error occurred while changing category status", 500);
-			}
-		}
+	
 		public async Task<Result<CategoryDto>> UpdateAsync(int categoryId, UpdateCategoryDto category, string userid)
 		{
 			_logger.LogInformation($"Executing {nameof(UpdateAsync)} for categoryId: {categoryId}");
 
-			var existingCategory = await _unitOfWork.Category.GetCategoryById(categoryId);
+			var existingCategory = await _unitOfWork.Category.GetCategoryByIdAsync(categoryId,deleted:false);
 			if (existingCategory == null)
 			{
 				return Result<CategoryDto>.Fail($"Category with id {categoryId} not found", 404);
@@ -632,9 +561,9 @@ namespace E_Commers.Services.Category
 				await _unitOfWork.CommitAsync();
 				await transaction.CommitAsync();
 
-				await SaveAndRemoveCategoryCacheAsync();
+				 RemoveCategoryCacheAsync();
 
-				var dto = _mapping.Map<CategoryDto>(existingCategory);
+				var dto = MapToCategoryWithDataDto(existingCategory);
 				return Result<CategoryDto>.Ok(dto, "Updated", 200, warnings: warings);
 			}
 				
@@ -648,23 +577,6 @@ namespace E_Commers.Services.Category
 
 
 
-		//public async Task<ApiResponse<List<SubCategoryDto>>> GetSubCategoriesAsync(int categoryId)
-		//      {
-		//          var subcategoriesQuery = _unitOfWork.Category.GetSubCategories(categoryId);
-		//          var dtos = await subcategoriesQuery.Select(sc => new SubCategoryDto
-		//          {
-		//              Id = sc.Id,
-		//              Name = sc.Name,
-		//              Description = sc.Description,
-		//          }).ToListAsync();
-		//          if (!dtos.Any())
-		//              return ApiResponse<List<SubCategoryDto>>.CreateErrorResponse(
-		//                  new ErrorResponse("SubCategory", $"No subcategories found for category {categoryId}"),
-		//                  404
-		//              );
-		//          return ApiResponse<List<SubCategoryDto>>.CreateSuccessResponse("Subcategories found", dtos);
-		//      }
-
 
 		public async Task<Result<ImageDto>> AddMainImageToCategoryAsync(int categoryId, IFormFile mainImage, string userId)
 		{
@@ -677,7 +589,7 @@ namespace E_Commers.Services.Category
 			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
-				var category = await _unitOfWork.Category.GetCategoryById(categoryId);
+				var category = await _unitOfWork.Category.GetCategoryByIdAsync(categoryId,deleted:false);
 				if (category == null)
 				{
 					await transaction.RollbackAsync();
@@ -717,6 +629,8 @@ namespace E_Commers.Services.Category
 				await _unitOfWork.CommitAsync();
 				await transaction.CommitAsync();
 				
+				RemoveCategoryCacheAsync();
+
 				var mapped = _mapping.Map<ImageDto>(mainImageResult.Data);
 				return Result<ImageDto>.Ok(mapped, "Main image added to category", 200);
 			}
@@ -735,7 +649,7 @@ namespace E_Commers.Services.Category
 			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
-				var category = await _unitOfWork.Category.GetCategoryById(categoryId);
+				var category = await _unitOfWork.Category.GetCategoryByIdAsync(categoryId, deleted: false);
 				if (category == null)
 				{
 					await transaction.RollbackAsync();
@@ -791,6 +705,7 @@ namespace E_Commers.Services.Category
 				{
 					warnings.Add("Category was deactivated because it has no images left.");
 				}
+				RemoveCategoryCacheAsync();
 				return Result<CategoryDto>.Ok(categoryDto, "Image removed successfully", 200, warnings: warnings);
 			}
 			catch (Exception ex)

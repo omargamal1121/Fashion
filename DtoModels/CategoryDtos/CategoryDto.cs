@@ -1,6 +1,7 @@
 ﻿using E_Commers.DtoModels.ImagesDtos;
 using E_Commers.DtoModels.ProductDtos;
 using E_Commers.DtoModels.Shared;
+using E_Commers.DtoModels.SubCategorydto;
 using E_Commers.Models;
 using System.ComponentModel.DataAnnotations;
 
@@ -13,11 +14,8 @@ namespace E_Commers.DtoModels.CategoryDtos
 		[RegularExpression(@"^[\w\s.,\-()'\""]{0,500}$", ErrorMessage = "Description can contain up to 500 characters: letters, numbers, spaces, and .,-()'\"")]
 		public string Description { get; set; } = string.Empty;
 		public int DisplayOrder { get; set; }
-		public ImageDto? mainimage { get; set; }
 		public List<ImageDto> Images { get; set; } = new List<ImageDto>();
 		public bool IsActive { get; set; }
-		public DateTime? CreatedAt { get; set; }
-		public DateTime? UpdatedAt { get; set; }
 	}
 	public class CategorywithdataDto : CategoryDto 
 	{

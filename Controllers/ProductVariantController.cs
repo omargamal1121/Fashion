@@ -6,6 +6,7 @@ using E_Commers.Enums;
 using Microsoft.AspNetCore.Authorization;
 using E_Commers.DtoModels.Responses;
 using E_Commers.ErrorHnadling;
+using E_Commers.Services.ProductServices;
 
 namespace E_Commers.Controllers
 {
@@ -63,77 +64,85 @@ namespace E_Commers.Controllers
             return HandleResult<List<ProductVariantDto>>(result);
         }
 
-        [HttpGet("{variantId}")]
+        [HttpGet("{id}")]
         [AllowAnonymous]
-        public async Task<ActionResult<ApiResponse<ProductVariantDto>>> GetVariantById(int variantId)
+        public async Task<ActionResult<ApiResponse<ProductVariantDto>>> GetVariantById(int id)
         {
-            var result = await _variantService.GetVariantByIdAsync(variantId);
+            var result = await _variantService.GetVariantByIdAsync(id);
             return HandleResult<ProductVariantDto>(result);
         }
 
-        [HttpPost("add")] 
+        [HttpPost("add")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<ProductVariantDto>>> AddVariant([FromQuery] int productId, [FromBody] CreateProductVariantDto dto, [FromQuery] string userId)
+        public async Task<ActionResult<ApiResponse<ProductVariantDto>>> AddVariant([FromQuery] int productId, [FromBody] CreateProductVariantDto dto)
         {
+            var userId = HttpContext.Items["UserId"]?.ToString();
             var result = await _variantService.AddVariantAsync(productId, dto, userId);
-            return HandleResult<ProductVariantDto>(result, nameof(AddVariant), productId);
+            return HandleResult<ProductVariantDto>(result, nameof(GetVariantById), result.Data?.Id);
         }
 
-        [HttpPut("update/{variantId}")]
+        [HttpPut("update/{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<ProductVariantDto>>> UpdateVariant(int variantId, [FromBody] UpdateProductVariantDto dto, [FromQuery] string userId)
+        public async Task<ActionResult<ApiResponse<ProductVariantDto>>> UpdateVariant(int id, [FromBody] UpdateProductVariantDto dto)
         {
-            var result = await _variantService.UpdateVariantAsync(variantId, dto, userId);
+            var userId = HttpContext.Items["UserId"]?.ToString();
+            var result = await _variantService.UpdateVariantAsync(id, dto, userId);
             return HandleResult<ProductVariantDto>(result);
         }
 
-        [HttpDelete("delete/{variantId}")]
+        [HttpDelete("delete/{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<string>>> DeleteVariant(int variantId, [FromQuery] string userId)
+        public async Task<ActionResult<ApiResponse<bool>>> DeleteVariant(int id)
         {
-            var result = await _variantService.DeleteVariantAsync(variantId, userId);
-            return HandleResult<string>(result);
+            var userId = HttpContext.Items["UserId"]?.ToString();
+            var result = await _variantService.DeleteVariantAsync(id, userId);
+            return HandleResult<bool>(result);
         }
 
         
-        [HttpPut("add-quantity/{variantId}")]
+        [HttpPut("add-quantity/{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<string>>> AddVariantQuantity(int variantId, [FromQuery] int addQuantity, [FromQuery] string userId)
+        public async Task<ActionResult<ApiResponse<bool>>> AddVariantQuantity(int id, [FromQuery] int addQuantity)
         {
-            var result = await _variantService.AddVariantQuantityAsync(variantId, addQuantity, userId);
-            return HandleResult<string>(result);
+            var userId = HttpContext.Items["UserId"]?.ToString();
+            var result = await _variantService.AddVariantQuantityAsync(id, addQuantity, userId);
+            return HandleResult<bool>(result);
         }
 
-        [HttpPut("remove-quantity/{variantId}")]
+        [HttpPut("remove-quantity/{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<string>>> RemoveVariantQuantity(int variantId, [FromQuery] int removeQuantity, [FromQuery] string userId)
+        public async Task<ActionResult<ApiResponse<bool>>> RemoveVariantQuantity(int id, [FromQuery] int removeQuantity)
         {
-            var result = await _variantService.RemoveVariantQuantityAsync(variantId, removeQuantity, userId);
-            return HandleResult<string>(result);
+            var userId = HttpContext.Items["UserId"]?.ToString();
+            var result = await _variantService.RemoveVariantQuantityAsync(id, removeQuantity, userId);
+            return HandleResult<bool>(result);
         }
 
-        [HttpPut("activate/{variantId}")]
+        [HttpPut("activate/{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<string>>> ActivateVariant(int variantId, [FromQuery] string userId)
+        public async Task<ActionResult<ApiResponse<bool>>> ActivateVariant(int id)
         {
-            var result = await _variantService.ActivateVariantAsync(variantId, userId);
-            return HandleResult<string>(result);
+            var userId = HttpContext.Items["UserId"]?.ToString();
+            var result = await _variantService.ActivateVariantAsync(id, userId);
+            return HandleResult<bool>(result);
         }
 
-        [HttpPut("deactivate/{variantId}")]
+        [HttpPut("deactivate/{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<string>>> DeactivateVariant(int variantId, [FromQuery] string userId)
+        public async Task<ActionResult<ApiResponse<bool>>> DeactivateVariant(int id)
         {
-            var result = await _variantService.DeactivateVariantAsync(variantId, userId);
-            return HandleResult<string>(result);
+            var userId = HttpContext.Items["UserId"]?.ToString();
+            var result = await _variantService.DeactivateVariantAsync(id, userId);
+            return HandleResult<bool>(result);
         }
 
-        [HttpPut("restore/{variantId}")]
+        [HttpPut("restore/{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<string>>> RestoreVariant(int variantId, [FromQuery] string userId)
+        public async Task<ActionResult<ApiResponse<bool>>> RestoreVariant(int id)
         {
-            var result = await _variantService.RestoreVariantAsync(variantId, userId);
-            return HandleResult<string>(result);
+            var userId = HttpContext.Items["UserId"]?.ToString();
+            var result = await _variantService.RestoreVariantAsync(id, userId);
+            return HandleResult<bool>(result);
         }
 
         [HttpGet("search")]

@@ -1,5 +1,4 @@
-﻿using E_Commers.DtoModels.CategoryDtos;
-using E_Commers.DtoModels.DiscoutDtos;
+﻿using E_Commers.DtoModels.DiscoutDtos;
 using E_Commers.DtoModels.Shared;
 using E_Commers.Models;
 using System.ComponentModel.DataAnnotations;
@@ -9,6 +8,7 @@ using E_Commers.DtoModels.Responses;
 using E_Commers.DtoModels.ProductDtos;
 using E_Commers.Enums;
 using E_Commers.DtoModels.CollectionDtos;
+using E_Commers.DtoModels.SubCategorydto;
 
 namespace E_Commers.DtoModels.ProductDtos
 {
@@ -21,8 +21,6 @@ namespace E_Commers.DtoModels.ProductDtos
 		public string Description { get; set; } = string.Empty;
 		
 		public int SubCategoryId { get; set; }
-		public SubCategoryDto? SubCategory { get; set; }
-		public DiscountDto? Discount { get; set; }
 		public int AvailableQuantity { get; set; }
 		public decimal Price { get; set; }
 		public decimal? FinalPrice { get; set; }
@@ -35,16 +33,10 @@ namespace E_Commers.DtoModels.ProductDtos
 
 
 		public bool IsActive { get; set; }
+		public IEnumerable<ImageDto> images { get; set; }
 
 
 
-		public List<ProductVariantDto>? Variants { get; set; }
-		public List<CollectionDto>? Collections { get; set; }
-		public List<ReviewDto>? Reviews { get; set; }
-		public List<ImageDto>? Images { get; set; }
-		public List<InventoryDto>? Inventory { get; set; }
-		public List<WishlistItemDto>? WishlistItems { get; set; }
-		public List<ReturnRequestProductDto>? ReturnRequests { get; set; }
 	}
 
 	public class ProductVariantDto : BaseDto
@@ -53,10 +45,9 @@ namespace E_Commers.DtoModels.ProductDtos
 		public VariantSize? Size { get; set; }
 		public int? Waist { get; set; }
 		public int? Length { get; set; }
-		public int? FitType { get; set; }
 		public int Quantity { get; set; }
-		public decimal Price { get; set; }
 		public int ProductId { get; set; }
+
 	}
 
 	

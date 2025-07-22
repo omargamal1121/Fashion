@@ -11,8 +11,9 @@ using Microsoft.EntityFrameworkCore;
 using Hangfire;
 using E_Commers.Services.Cache;
 using E_Commers.Services.Product;
+using E_Commers.Services.ProductServices;
 
-namespace E_Commers.Services.Product
+namespace E_Commers.Services.ProductServices
 {
 	public interface IProductVariantService
 	{
@@ -21,14 +22,14 @@ namespace E_Commers.Services.Product
 		Task<Result<ProductVariantDto>> GetVariantByIdAsync(int id);
 		Task<Result<ProductVariantDto>> AddVariantAsync(int productId, CreateProductVariantDto dto, string userId);
 		Task<Result<ProductVariantDto>> UpdateVariantAsync(int id, UpdateProductVariantDto dto, string userId);
-		Task<Result<string>> DeleteVariantAsync(int id, string userId);
-		Task<Result<string>> UpdateVariantQuantityAsync(int id, int newQuantity, string userId);
+		Task<Result<bool>> DeleteVariantAsync(int id, string userId);
+		Task<Result<bool>> UpdateVariantQuantityAsync(int id, int newQuantity, string userId);
 		Task<Result<List<ProductVariantDto>>> GetVariantsBySearchAsync(int productId, string color = null, VariantSize? size = null, bool? isActive = null, bool? deletedOnly = null);
-		Task<Result<string>> ActivateVariantAsync(int id, string userId);
-		Task<Result<string>> DeactivateVariantAsync(int id, string userId);
-		Task<Result<string>> AddVariantQuantityAsync(int id, int addQuantity, string userId);
-		Task<Result<string>> RemoveVariantQuantityAsync(int id, int removeQuantity, string userId);
-		Task<Result<string>> RestoreVariantAsync(int id, string userId);
+		Task<Result<bool>> ActivateVariantAsync(int id, string userId);
+		Task<Result<bool>> DeactivateVariantAsync(int id, string userId);
+		Task<Result<bool>> AddVariantQuantityAsync(int id, int addQuantity, string userId);
+		Task<Result<bool>> RemoveVariantQuantityAsync(int id, int removeQuantity, string userId);
+		Task<Result<bool>> RestoreVariantAsync(int id, string userId);
 	}
 
 	public class ProductVariantService : IProductVariantService
@@ -73,6 +74,37 @@ namespace E_Commers.Services.Product
 			_backgroundJobClient.Enqueue(() => _cacheManager.RemoveByTagsAsync(PRODUCT_CACHE_TAGS));
 		}
 
+		private async Task CheckAndDeactivateProductIfAllVariantsInactiveOrZeroAsync(int productId)
+		{
+			var variants = await _unitOfWork.Repository<ProductVariant>().GetAll()
+				.Where(v => v.ProductId == productId && v.DeletedAt == null)
+				.ToListAsync();
+			if (variants.Count == 0 || variants.All(v => !v.IsActive || v.Quantity == 0))
+			{
+				var product = await _unitOfWork.Product.GetByIdAsync(productId);
+				if (product != null && product.IsActive)
+				{
+					// Use ProductCatalogService for deactivation
+					await _productCatalogService.DeactivateProductAsync(productId, "system");
+				}
+			}
+		}
+
+		private async Task CheckAndActivateProductIfAnyVariantActiveAndHasQuantity(int productId, string userId)
+		{
+			var variants = await _unitOfWork.Repository<ProductVariant>().GetAll()
+				.Where(v => v.ProductId == productId && v.DeletedAt == null)
+				.ToListAsync();
+			if (variants.Any(v => v.IsActive && v.Quantity > 0))
+			{
+				var product = await _unitOfWork.Product.GetByIdAsync(productId);
+				if (product != null && !product.IsActive)
+				{
+					await _productCatalogService.ActivateProductAsync(productId, userId ?? "system");
+				}
+			}
+		}
+
 		public async Task<Result<List<ProductVariantDto>>> GetProductVariantsAsync(int productId)
 		{
 			var cacheKey = GetProductVariantsCacheKey(productId);
@@ -92,18 +124,24 @@ namespace E_Commers.Services.Product
 		{
 			try
 			{
-				var query = _unitOfWork.Product.GetAll().Where(p => p.Id == productId);
+				var query = _unitOfWork.Repository<ProductVariant>().GetAll().Where(v => v.ProductId == productId);
+
 				if (isActive.HasValue)
-					query = query.Where(p => p.IsActive == isActive.Value);
+					query = query.Where(v => v.IsActive == isActive.Value);
+
 				if (deletedOnly.HasValue)
 				{
 					if (deletedOnly.Value)
-						query = query.Where(p => p.DeletedAt != null);
+						query = query.Where(v => v.DeletedAt != null);
 					else
-						query = query.Where(p => p.DeletedAt == null);
+						query = query.Where(v => v.DeletedAt == null);
 				}
+				else
+				{
+					query = query.Where(v => v.DeletedAt == null);
+				}
+
 				var variants = await query
-					.SelectMany(p => p.ProductVariants.Where(v => v.DeletedAt == null))
 					.Select(v => new ProductVariantDto
 					{
 						Id = v.Id,
@@ -112,7 +150,8 @@ namespace E_Commers.Services.Product
 						Waist = v.Waist,
 						Length = v.Length,
 						Quantity = v.Quantity,
-						ProductId = v.ProductId
+						ProductId = v.ProductId,
+
 					})
 					.ToListAsync();
 
@@ -169,40 +208,35 @@ namespace E_Commers.Services.Product
 		public async Task<Result<ProductVariantDto>> AddVariantAsync(int productId, CreateProductVariantDto dto, string userId)
 		{
 			_logger.LogInformation($"Adding variant to product: {productId}");
+			
+			var product = await _unitOfWork.Product.GetProductWithVariants(productId);
+			if (product == null)
+				return Result<ProductVariantDto>.Fail("Product not found", 404);
+			
+			if (string.IsNullOrEmpty(dto.Color) || dto.Size == null)
+				return Result<ProductVariantDto>.Fail("Color and Size are required", 400);
+
+			if (dto.Quantity < 0)
+				return Result<ProductVariantDto>.Fail("Quantity cannot be negative", 400);
+
+			var existingVariant = product.ProductVariants
+				.FirstOrDefault(v => v.Color == dto.Color && v.Size == dto.Size && v.DeletedAt == null);
+
+			if (existingVariant != null)
+				return Result<ProductVariantDto>.Fail("Variant with this color and size already exists", 400);
+			
+			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
-				// Validate product exists
-				var product = await _unitOfWork.Product.GetByIdAsync(productId);
-				if (product == null)
-					return Result<ProductVariantDto>.Fail("Product not found", 404);
-
-				//// Validate required fields
-				if (string.IsNullOrEmpty(dto.Color) || dto.Size == null)
-					return Result<ProductVariantDto>.Fail("Color and Size are required", 400);
-
-				if (dto.Price <= 0)
-					return Result<ProductVariantDto>.Fail("Price must be greater than zero", 400);
-
-				if (dto.Quantity < 0)
-					return Result<ProductVariantDto>.Fail("Quantity cannot be negative", 400);
-
-				// Check for duplicate variant
-				var existingVariant = await _unitOfWork.Product.GetAll()
-					.Where(p => p.Id == productId)
-					.SelectMany(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-					.FirstOrDefaultAsync(v => v.Color == dto.Color && v.Size == dto.Size);
-
-				if (existingVariant != null)
-					return Result<ProductVariantDto>.Fail("Variant with this color and size already exists", 400);
-
-				using var transaction = await _unitOfWork.BeginTransactionAsync();
-
 				var variant = new ProductVariant
 				{
 					ProductId = productId,
 					Color = dto.Color,
+					Length= dto.Length,
 					Size = dto.Size,
-					Quantity = dto.Quantity
+					Quantity = dto.Quantity,
+					IsActive = true ,
+					Waist= dto.Waist
 				};
 
 				var result = await _unitOfWork.Repository<ProductVariant>().CreateAsync(variant);
@@ -211,8 +245,11 @@ namespace E_Commers.Services.Product
 					await transaction.RollbackAsync();
 					return Result<ProductVariantDto>.Fail("Failed to add variant", 400);
 				}
+				
+				product.ProductVariants.Add(variant);
+				_productCatalogService.UpdateProductQuantity(product);
+				_unitOfWork.Product.Update(product);
 
-				// Log admin operation
 				await _adminOpreationServices.AddAdminOpreationAsync(
 					$"Add Variant to Product {productId}",
 					Opreations.AddOpreation,
@@ -221,6 +258,7 @@ namespace E_Commers.Services.Product
 				);
 
 				await _unitOfWork.CommitAsync();
+				await transaction.CommitAsync();
 
 				var variantDto = new ProductVariantDto
 				{
@@ -230,16 +268,19 @@ namespace E_Commers.Services.Product
 					Waist = variant.Waist,
 					Length = variant.Length,
 					Quantity = variant.Quantity,
-					ProductId = variant.ProductId
+					ProductId = variant.ProductId,
+					CreatedAt=variant.CreatedAt,
+					DeletedAt = variant.DeletedAt
+					
 				};
 
-				// Remove cache for product and subcategory
 				RemoveProductCachesAsync();
 
 				return Result<ProductVariantDto>.Ok(variantDto, "Variant added successfully", 201);
 			}
 			catch (Exception ex)
 			{
+				await transaction.RollbackAsync();
 				_logger.LogError(ex, $"Error in AddVariantAsync for productId: {productId}");
 				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<ProductVariantDto>.Fail("Error adding variant", 500);
@@ -249,6 +290,7 @@ namespace E_Commers.Services.Product
 		public async Task<Result<ProductVariantDto>> UpdateVariantAsync(int id, UpdateProductVariantDto dto, string userId)
 		{
 			_logger.LogInformation($"Updating variant: {id}");
+			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
 				var variant = await _unitOfWork.Repository<ProductVariant>().GetByIdAsync(id);
@@ -266,13 +308,28 @@ namespace E_Commers.Services.Product
 						return Result<ProductVariantDto>.Fail("Variant with this color and size already exists", 400);
 				}
 
-				using var transaction = await _unitOfWork.BeginTransactionAsync();
+				// Check if any updates are provided
+				bool hasChanges = false;
+				if (!string.IsNullOrEmpty(dto.Color) && dto.Color != variant.Color) hasChanges = true;
+				if (dto.Size != null && dto.Size != variant.Size) hasChanges = true;
+				if (dto.Waist.HasValue && dto.Waist != variant.Waist) hasChanges = true;
+				if (dto.Length.HasValue && dto.Length != variant.Length) hasChanges = true;
+			
 
-				// Update fields
+				if (!hasChanges)
+					return Result<ProductVariantDto>.Fail("No updates provided", 400);
+
+				// Update fields if provided
 				if (!string.IsNullOrEmpty(dto.Color))
 					variant.Color = dto.Color;
-				variant.Size = dto.Size;
+				if (dto.Size != null)
+					variant.Size = dto.Size;
+				if (dto.Waist.HasValue)
+					variant.Waist = dto.Waist;
+				if (dto.Length.HasValue)
+					variant.Length = dto.Length;
 				
+
 				var result = _unitOfWork.Repository<ProductVariant>().Update(variant);
 				if (!result)
 				{
@@ -289,6 +346,18 @@ namespace E_Commers.Services.Product
 				);
 
 				await _unitOfWork.CommitAsync();
+				await transaction.CommitAsync();
+
+				// Update parent product's quantity if needed
+				var product = await _unitOfWork.Product.GetProductWithVariants(variant.ProductId);
+				if (product != null)
+				{
+					_productCatalogService.UpdateProductQuantity(product);
+					_unitOfWork.Product.Update(product);
+					await _unitOfWork.CommitAsync();
+				}
+
+				RemoveProductCachesAsync();
 
 				var variantDto = new ProductVariantDto
 				{
@@ -298,40 +367,54 @@ namespace E_Commers.Services.Product
 					Waist = variant.Waist,
 					Length = variant.Length,
 					Quantity = variant.Quantity,
-					ProductId = variant.ProductId
+					ProductId = variant.ProductId,
+					CreatedAt = variant.CreatedAt,
+					DeletedAt = variant.DeletedAt,
+					ModifiedAt = variant.ModifiedAt
 				};
-				var product = await _unitOfWork.Product.GetByIdAsync(variant.ProductId);
-				RemoveProductCachesAsync();
 
 				return Result<ProductVariantDto>.Ok(variantDto, "Variant updated successfully", 200);
 			}
 			catch (Exception ex)
 			{
+				await transaction.RollbackAsync();
 				_logger.LogError(ex, $"Error in UpdateVariantAsync for id: {id}");
-				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
+				_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<ProductVariantDto>.Fail("Error updating variant", 500);
 			}
 		}
 
-		public async Task<Result<string>> DeleteVariantAsync(int id, string userId)
+		public async Task<Result<bool>> DeleteVariantAsync(int id, string userId)
 		{
 			_logger.LogInformation($"Deleting variant: {id}");
+
+			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
 				var variant = await _unitOfWork.Repository<ProductVariant>().GetByIdAsync(id);
 				if (variant == null)
-					return Result<string>.Fail("Variant not found", 404);
+					return Result<bool>.Fail("Variant not found", 404);
 
-				using var transaction = await _unitOfWork.BeginTransactionAsync();
+				var product = await _unitOfWork.Product.GetProductWithVariants(variant.ProductId);
+				if (product == null)
+					return Result<bool>.Fail("Associated product not found", 404);
 
 				var result = await _unitOfWork.Repository<ProductVariant>().SoftDeleteAsync(id);
 				if (!result)
 				{
 					await transaction.RollbackAsync();
-					return Result<string>.Fail("Failed to delete variant", 400);
+					return Result<bool>.Fail("Failed to delete variant", 400);
 				}
 
-		
+				var variantInProduct = product.ProductVariants.FirstOrDefault(v => v.Id == id);
+				if (variantInProduct != null)
+				{
+					variantInProduct.DeletedAt = DateTime.UtcNow;
+				}
+
+				_productCatalogService.UpdateProductQuantity(product);
+				_unitOfWork.Product.Update(product);
+
 				await _adminOpreationServices.AddAdminOpreationAsync(
 					$"Delete Variant {id}",
 					Opreations.DeleteOpreation,
@@ -340,39 +423,41 @@ namespace E_Commers.Services.Product
 				);
 
 				await _unitOfWork.CommitAsync();
-				// Remove cache for product and subcategory
-				var product = await _unitOfWork.Product.GetByIdAsync(variant.ProductId);
+				await transaction.CommitAsync();
+
 				RemoveProductCachesAsync();
-				return Result<string>.Ok("Variant deleted successfully", "Variant deleted", 200);
+				await CheckAndDeactivateProductIfAllVariantsInactiveOrZeroAsync(variant.ProductId);
+				return Result<bool>.Ok(true, "Variant deleted successfully", 200);
 			}
 			catch (Exception ex)
 			{
+				await transaction.RollbackAsync();
 				_logger.LogError(ex, $"Error in DeleteVariantAsync for id: {id}");
-				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<string>.Fail("Error deleting variant", 500);
+				_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
+				return Result<bool>.Fail("Error deleting variant", 500);
 			}
 		}
 
-		public async Task<Result<string>> UpdateVariantQuantityAsync(int id, int newQuantity, string userId)
+		public async Task<Result<bool>> UpdateVariantQuantityAsync(int id, int newQuantity, string userId)
 		{
 			_logger.LogInformation($"Updating quantity for variant: {id}");
+			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
 				if (newQuantity < 0)
-					return Result<string>.Fail("Quantity cannot be negative", 400);
+					return Result<bool>.Fail("Quantity cannot be negative", 400);
 
 				var variant = await _unitOfWork.Repository<ProductVariant>().GetByIdAsync(id);
 				if (variant == null)
-					return Result<string>.Fail("Variant not found", 404);
+					return Result<bool>.Fail("Variant not found", 404);
 
-				using var transaction = await _unitOfWork.BeginTransactionAsync();
 
 				variant.Quantity = newQuantity;
 				var result = _unitOfWork.Repository<ProductVariant>().Update(variant);
 				if (!result)
 				{
 					await transaction.RollbackAsync();
-					return Result<string>.Fail("Failed to update quantity", 400);
+					return Result<bool>.Fail("Failed to update quantity", 400);
 				}
 
 				// Log admin operation
@@ -384,21 +469,26 @@ namespace E_Commers.Services.Product
 				);
 
 				await _unitOfWork.CommitAsync();
+				await transaction.CommitAsync();
 				// Update parent product's quantity using injected catalog service
-				var product = await _unitOfWork.Product.GetByIdAsync(variant.ProductId);
+				var product = await _unitOfWork.Product.GetProductWithVariants(variant.ProductId);
 				if (product != null)
 				{
 					_productCatalogService.UpdateProductQuantity(product);
+					_unitOfWork.Product.Update(product);
+					await _unitOfWork.CommitAsync();
 				}
 				// Remove cache for product
 				RemoveProductCachesAsync();
-				return Result<string>.Ok("Quantity updated successfully", "Quantity updated", 200);
+				await CheckAndDeactivateProductIfAllVariantsInactiveOrZeroAsync(variant.ProductId);
+				return Result<bool>.Ok(true, "Quantity updated successfully", 200);
 			}
 			catch (Exception ex)
 			{
+				await transaction.RollbackAsync();
 				_logger.LogError(ex, $"Error in UpdateVariantQuantityAsync for id: {id}");
-				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<string>.Fail("Error updating quantity", 500);
+				_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
+				return Result<bool>.Fail("Error updating quantity", 500);
 			}
 		}
 
@@ -446,25 +536,34 @@ namespace E_Commers.Services.Product
 			}
 		}
 
-		public async Task<Result<string>> ActivateVariantAsync(int id, string userId)
+		public async Task<Result<bool>> ActivateVariantAsync(int id, string userId)
 		{
 			_logger.LogInformation($"Activating variant: {id}");
+			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
 				var variant = await _unitOfWork.Repository<ProductVariant>().GetByIdAsync(id);
 				if (variant == null)
-					return Result<string>.Fail("Variant not found", 404);
+					return Result<bool>.Fail("Variant not found", 404);
 
+				var product = await _unitOfWork.Product.GetProductWithVariants(variant.ProductId);
+				if (product == null)
+					return Result<bool>.Fail("Associated product not found", 404);
 				// To activate: must have (length and waist) or size, and quantity > 0
 				bool hasLengthAndWaist = variant.Length.HasValue && variant.Waist.HasValue;
 				bool hasSize = variant.Size.HasValue;
 				if (!(variant.Quantity > 0 && (hasLengthAndWaist || hasSize)))
-					return Result<string>.Fail("To activate, variant must have (length and waist) or size, and quantity > 0", 400);
+					return Result<bool>.Fail("To activate, variant must have (length and waist) or size, and quantity > 0", 400);
 
 				variant.IsActive = true;
 				var result = _unitOfWork.Repository<ProductVariant>().Update(variant);
 				if (!result)
-					return Result<string>.Fail("Failed to activate variant", 400);
+				{
+					await transaction.RollbackAsync();
+					return Result<bool>.Fail("Failed to activate variant", 400);
+				}
+				_productCatalogService.UpdateProductQuantity(product);
+				_unitOfWork.Product.Update(product);
 
 				await _adminOpreationServices.AddAdminOpreationAsync(
 					$"Activate Variant {id}",
@@ -474,34 +573,48 @@ namespace E_Commers.Services.Product
 				);
 
 				await _unitOfWork.CommitAsync();
-
+				await transaction.CommitAsync();
 				// Remove cache for product and subcategory
-				var product = await _unitOfWork.Product.GetByIdAsync(variant.ProductId);
 				RemoveProductCachesAsync();
 
-				return Result<string>.Ok("Variant activated", "Status updated", 200);
+				// Check if product should be activated
+				await CheckAndActivateProductIfAnyVariantActiveAndHasQuantity(variant.ProductId, userId);
+
+				return Result<bool>.Ok(true, "Variant activated", 200);
 			}
 			catch (Exception ex)
 			{
+				await transaction.RollbackAsync();
 				_logger.LogError(ex, $"Error in ActivateVariantAsync for id: {id}");
-				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<string>.Fail("Error activating variant", 500);
+				_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
+				return Result<bool>.Fail("Error activating variant", 500);
 			}
 		}
 
-		public async Task<Result<string>> DeactivateVariantAsync(int id, string userId)
+		public async Task<Result<bool>> DeactivateVariantAsync(int id, string userId)
 		{
 			_logger.LogInformation($"Deactivating variant: {id}");
+			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
 				var variant = await _unitOfWork.Repository<ProductVariant>().GetByIdAsync(id);
 				if (variant == null)
-					return Result<string>.Fail("Variant not found", 404);
+					return Result<bool>.Fail("Variant not found", 404);
+
+				var product = await _unitOfWork.Product.GetProductWithVariants(variant.ProductId);
+				if (product == null)
+					return Result<bool>.Fail("Associated product not found", 404);
 
 				variant.IsActive = false;
 				var result = _unitOfWork.Repository<ProductVariant>().Update(variant);
 				if (!result)
-					return Result<string>.Fail("Failed to deactivate variant", 400);
+				{
+					await transaction.RollbackAsync();
+					return Result<bool>.Fail("Failed to deactivate variant", 400);
+				}
+
+				_productCatalogService.UpdateProductQuantity(product);
+				_unitOfWork.Product.Update(product);
 
 				await _adminOpreationServices.AddAdminOpreationAsync(
 					$"Deactivate Variant {id}",
@@ -511,40 +624,41 @@ namespace E_Commers.Services.Product
 				);
 
 				await _unitOfWork.CommitAsync();
+				await transaction.CommitAsync();
 
-				var product = await _unitOfWork.Product.GetByIdAsync(variant.ProductId);
 				RemoveProductCachesAsync();
 
-				return Result<string>.Ok("Variant deactivated", "Status updated", 200);
+				return Result<bool>.Ok(true, "Variant deactivated", 200);
 			}
 			catch (Exception ex)
 			{
+				await transaction.RollbackAsync();
 				_logger.LogError(ex, $"Error in DeactivateVariantAsync for id: {id}");
 				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<string>.Fail("Error deactivating variant", 500);
+				return Result<bool>.Fail("Error deactivating variant", 500);
 			}
 		}
 
-		public async Task<Result<string>> AddVariantQuantityAsync(int id, int addQuantity, string userId)
+		public async Task<Result<bool>> AddVariantQuantityAsync(int id, int addQuantity, string userId)
 		{
 			_logger.LogInformation($"Adding quantity for variant: {id}");
+			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
 				if (addQuantity <= 0)
-					return Result<string>.Fail("Add quantity must be positive", 400);
+					return Result<bool>.Fail("Add quantity must be positive", 400);
 
 				var variant = await _unitOfWork.Repository<ProductVariant>().GetByIdAsync(id);
 				if (variant == null)
-					return Result<string>.Fail("Variant not found", 404);
+					return Result<bool>.Fail("Variant not found", 404);
 
-				using var transaction = await _unitOfWork.BeginTransactionAsync();
 
 				variant.Quantity += addQuantity;
 				var result = _unitOfWork.Repository<ProductVariant>().Update(variant);
 				if (!result)
 				{
 					await transaction.RollbackAsync();
-					return Result<string>.Fail("Failed to add quantity", 400);
+					return Result<bool>.Fail("Failed to add quantity", 400);
 				}
 
 				await _adminOpreationServices.AddAdminOpreationAsync(
@@ -555,38 +669,42 @@ namespace E_Commers.Services.Product
 				);
 
 				await _unitOfWork.CommitAsync();
-				var product = await _unitOfWork.Product.GetByIdAsync(variant.ProductId);
+				await transaction.CommitAsync();
+				var product = await _unitOfWork.Product.GetProductWithVariants(variant.ProductId);
 				if (product != null)
 				{
 					_productCatalogService.UpdateProductQuantity(product);
+					_unitOfWork.Product.Update(product);
+					await _unitOfWork.CommitAsync();
 				}
 				RemoveProductCachesAsync();
-				return Result<string>.Ok("Quantity added successfully", "Quantity added", 200);
+				return Result<bool>.Ok(true, "Quantity added successfully", 200);
 			}
 			catch (Exception ex)
 			{
+				await transaction.RollbackAsync();
 				_logger.LogError(ex, $"Error in AddVariantQuantityAsync for id: {id}");
 				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<string>.Fail("Error adding quantity", 500);
+				return Result<bool>.Fail("Error adding quantity", 500);
 			}
 		}
 
-		public async Task<Result<string>> RemoveVariantQuantityAsync(int id, int removeQuantity, string userId)
+		public async Task<Result<bool>> RemoveVariantQuantityAsync(int id, int removeQuantity, string userId)
 		{
 			_logger.LogInformation($"Removing quantity for variant: {id}");
+			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
 				if (removeQuantity <= 0)
-					return Result<string>.Fail("Remove quantity must be positive", 400);
+					return Result<bool>.Fail("Remove quantity must be positive", 400);
 
 				var variant = await _unitOfWork.Repository<ProductVariant>().GetByIdAsync(id);
 				if (variant == null)
-					return Result<string>.Fail("Variant not found", 404);
+					return Result<bool>.Fail("Variant not found", 404);
 
 				if (variant.Quantity < removeQuantity)
-					return Result<string>.Fail("Not enough quantity to remove", 400);
+					return Result<bool>.Fail("Not enough quantity to remove", 400);
 
-				using var transaction = await _unitOfWork.BeginTransactionAsync();
 
 				variant.Quantity -= removeQuantity;
 				if (variant.Quantity == 0)
@@ -597,7 +715,7 @@ namespace E_Commers.Services.Product
 				if (!result)
 				{
 					await transaction.RollbackAsync();
-					return Result<string>.Fail("Failed to remove quantity", 400);
+					return Result<bool>.Fail("Failed to remove quantity", 400);
 				}
 
 				await _adminOpreationServices.AddAdminOpreationAsync(
@@ -608,34 +726,38 @@ namespace E_Commers.Services.Product
 				);
 
 				await _unitOfWork.CommitAsync();
-				var product = await _unitOfWork.Product.GetByIdAsync(variant.ProductId);
+				await transaction.CommitAsync();
+				var product = await _unitOfWork.Product.GetProductWithVariants(variant.ProductId);
 				if (product != null)
 				{
 					_productCatalogService.UpdateProductQuantity(product);
+					_unitOfWork.Product.Update(product);
+					await _unitOfWork.CommitAsync();
 				}
 				RemoveProductCachesAsync();
-				return Result<string>.Ok("Quantity removed successfully", "Quantity removed", 200);
+				return Result<bool>.Ok(true, "Quantity removed successfully", 200);
 			}
 			catch (Exception ex)
 			{
+				await transaction.RollbackAsync();
 				_logger.LogError(ex, $"Error in RemoveVariantQuantityAsync for id: {id}");
 				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<string>.Fail("Error removing quantity", 500);
+				return Result<bool>.Fail("Error removing quantity", 500);
 			}
 		}
 
-		public async Task<Result<string>> RestoreVariantAsync(int id, string userId)
+		public async Task<Result<bool>> RestoreVariantAsync(int id, string userId)
 		{
 			_logger.LogInformation($"Restoring variant: {id}");
+			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
 				var variant = await _unitOfWork.Repository<ProductVariant>().GetAll()
 					.Where(v => v.Id == id && v.DeletedAt != null)
 					.FirstOrDefaultAsync();
 				if (variant == null)
-					return Result<string>.Fail("Variant not found or not deleted", 404);
+					return Result<bool>.Fail("Variant not found or not deleted", 404);
 
-				using var transaction = await _unitOfWork.BeginTransactionAsync();
 
 				variant.DeletedAt = null;
 				variant.IsActive = false;
@@ -643,7 +765,7 @@ namespace E_Commers.Services.Product
 				if (!result)
 				{
 					await transaction.RollbackAsync();
-					return Result<string>.Fail("Failed to restore variant", 400);
+					return Result<bool>.Fail("Failed to restore variant", 400);
 				}
 
 				await _adminOpreationServices.AddAdminOpreationAsync(
@@ -654,19 +776,23 @@ namespace E_Commers.Services.Product
 				);
 
 				await _unitOfWork.CommitAsync();
-				var product = await _unitOfWork.Product.GetByIdAsync(variant.ProductId);
+				await transaction.CommitAsync();
+				var product = await _unitOfWork.Product.GetProductWithVariants(variant.ProductId);
 				if (product != null)
 				{
 					_productCatalogService.UpdateProductQuantity(product);
+					_unitOfWork.Product.Update(product);
+					await _unitOfWork.CommitAsync();
 				}
 				RemoveProductCachesAsync();
-				return Result<string>.Ok("Variant restored successfully", "Variant restored", 200);
+				return Result<bool>.Ok(true, "Variant restored successfully", 200);
 			}
 			catch (Exception ex)
 			{
+				await transaction.RollbackAsync();
 				_logger.LogError(ex, $"Error in RestoreVariantAsync for id: {id}");
 				await _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace);
-				return Result<string>.Fail("Error restoring variant", 500);
+				return Result<bool>.Fail("Error restoring variant", 500);
 			}
 		}
 	}

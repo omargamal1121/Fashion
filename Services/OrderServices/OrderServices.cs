@@ -234,7 +234,7 @@ namespace E_Commers.Services.Order
 					{
 						OrderId = createdOrder.Id,
 						ProductId = cartItem.ProductId,
-						ProductVariantId = cartItem.Product?.Variants?.FirstOrDefault()?.Id,
+						
 						Quantity = cartItem.Quantity,
 						UnitPrice = cartItem.UnitPrice,
 						TotalPrice = cartItem.TotalPrice,

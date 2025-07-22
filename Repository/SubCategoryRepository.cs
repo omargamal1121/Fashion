@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 public class SubCategoryRepository : MainRepository<SubCategory>, ISubCategoryRepository
 {
@@ -17,165 +18,82 @@ public class SubCategoryRepository : MainRepository<SubCategory>, ISubCategoryRe
         _logger = logger;
     }
 
-    public async Task<bool> SubCategoryExistsAsync(int id)
-    {
-        _logger.LogInformation($"Executing {nameof(SubCategoryExistsAsync)} Id: {id}");
-        var subCategory = await GetByIdAsync(id);
-        if (subCategory == null)
-        {
-            _logger.LogWarning($"No SubCategory With this id:{id}");
-            return false;
-        }
-        _logger.LogInformation("SubCategory found");
-        return true;
-    }
-
-    public async Task<SubCategory?> GetSubCategoryById(int id, bool isActiveFilter = false)
-    {
-        _logger.LogInformation($"Executing {nameof(GetSubCategoryById)} for id: {id}");
-        var subCategory = await _subCategories
-            .Where(sc => sc.Id == id && (!isActiveFilter || sc.IsActive))
-            .Select(sc => new SubCategory
-            {
-                Id = sc.Id,
-                Name = sc.Name,
-                Description = sc.Description,
-                IsActive = sc.IsActive,
-                CategoryId = sc.CategoryId,
-                CreatedAt = sc.CreatedAt,
-                ModifiedAt = sc.ModifiedAt,
-                DeletedAt = sc.DeletedAt,
-                Images = sc.Images.Where(i => i.DeletedAt == null).Select(i => new Image
-                {
-                    Id = i.Id,
-                    Url = i.Url,
-                    IsMain = i.IsMain,
-                    UploadDate = i.UploadDate, 
-                    FileType= i.FileType,
-
-				}).ToList(),
-                Products = sc.Products.Where(p => p.DeletedAt == null).Select(p => new Product
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Description = p.Description,
-                    Quantity = p.Quantity,
-                    Gender = p.Gender,
-                    SubCategoryId = p.SubCategoryId,
-                    CreatedAt = p.CreatedAt,
-                    ModifiedAt = p.ModifiedAt,
-                    DeletedAt = p.DeletedAt,
-                    Images = p.Images.Where(i => i.DeletedAt == null).Select(i => new Image
-                    {
-                        Id = i.Id,
-                        Url = i.Url,
-                        IsMain = i.IsMain,
-                        FileType = i.FileType
-                    }).ToList(),
-					Discount = p.Discount != null ? new Discount
-                    {
-                        Id = p.Discount.Id,
-                        Name = p.Discount.Name,
-                        Description = p.Discount.Description,
-                        DiscountPercent = p.Discount.DiscountPercent,
-                        StartDate = p.Discount.StartDate,
-                        EndDate = p.Discount.EndDate,
-                        IsActive = p.Discount.IsActive,
-
-                    } : null,
-                    ProductVariants = p.ProductVariants.Where(v => v.DeletedAt == null).Select(v => new ProductVariant
-                    {
-                        Id = v.Id,
-                        Color = v.Color,
-                        Size = v.Size,
-                       
-                        Quantity = v.Quantity,
-                        CreatedAt = v.CreatedAt,
-                        ModifiedAt = v.ModifiedAt,
-                        DeletedAt = v.DeletedAt
-                    }).ToList()
-                }).ToList()
-            })
-            .FirstOrDefaultAsync();
-        if (subCategory == null)
-        {
-            _logger.LogWarning($"SubCategory with id: {id} doesn't exist");
-            return null;
-        }
-        _logger.LogInformation($"SubCategory with id: {id} exists");
-        return subCategory;
-    }
-
-	public async Task<bool> IsExsistByNameAsync(string name)
+	private IQueryable<SubCategory> BasicFilter(IQueryable<SubCategory> query, bool? isActive, bool? DeletedOnly)
 	{
-		return await _subCategories
-			.Where(sc => sc.Name == name)
-			.FirstOrDefaultAsync()==null?false:true;
-	}
-	public async Task<SubCategory?> FindByNameAsync(string name, bool? isDelete = null)
-	{
-		var query = _subCategories.Where(sc => sc.Name == name);
-
-		if (isDelete.HasValue)
+		if (isActive.HasValue)
 		{
-			query = query.Where(sc => isDelete.Value ? sc.DeletedAt != null : sc.DeletedAt == null);
+			if (isActive.Value)
+				query = query.Where(p => p.IsActive);
+			else
+				query = query.Where(p => !p.IsActive);
+		}
+		if (DeletedOnly.HasValue)
+		{
+			if (DeletedOnly.Value)
+				query = query.Where(p => p.DeletedAt != null);
+			else
+				query = query.Where(p => p.DeletedAt == null);
+		}
+		return query;
+	}
+	public async Task<SubCategory?> GetSubCategoryWithImageById(int id, bool? isActive = null, bool? isDeleted = null)
+	{
+		var query = _subCategories.AsQueryable();
+
+		query = query.Where(c => c.Id == id);
+		var Subcategory = await query
+			.Include(sc => sc.Images)
+			.FirstOrDefaultAsync();
+		return Subcategory;
+
+	}
+
+
+
+	public async Task<SubCategory?> GetSubCategoryById(int id, bool? isActive = null,bool ? isDeleted = null)
+    {
+		var query = _subCategories.AsQueryable();
+
+		query = query.Where(c => c.Id == id);
+
+		query = BasicFilter(query, isActive, isDeleted);
+		var Subcategory = await query
+			.Include(sc => sc.Images)
+			.Include(sc =>sc.Products.Where(sc => sc.DeletedAt == null && sc.IsActive)).
+			ThenInclude(p=>p.Discount).Include(sc => sc.Products)
+			.ThenInclude(sc => sc.Images)
+			.FirstOrDefaultAsync();
+
+		if (Subcategory == null)
+		{
+			_logger.LogWarning($"Category with id: {id} doesn't exist");
+			return null;
 		}
 
-		return await query
-			.Select(sc => new SubCategory
-			{
-				Id = sc.Id,
-				Name = sc.Name,
-				Description = sc.Description,
-				IsActive = sc.IsActive,
-				CategoryId = sc.CategoryId,
-				CreatedAt = sc.CreatedAt,
-				ModifiedAt = sc.ModifiedAt,
-				DeletedAt = sc.DeletedAt,
-				Images = sc.Images.Where(i => i.DeletedAt == null).Select(i => new Image
-				{
-					Id = i.Id,
-					Url = i.Url,
-					IsMain = i.IsMain,
-			
-				}).ToList()
-			})
-			.FirstOrDefaultAsync();
+		_logger.LogInformation($"Category with id: {id} exists");
+		return Subcategory;
 	}
-	public IQueryable<SubCategory> FindByNameContains(string partialName)
-    {
-        if (string.IsNullOrWhiteSpace(partialName))
-            return Enumerable.Empty<SubCategory>().AsQueryable();
-        partialName = partialName.Trim().ToLowerInvariant();
-        return _subCategories
-            .Where(sc =>
-                EF.Functions.Like(sc.Name, $"%{partialName}%") &&
-                sc.DeletedAt == null
-            )
-            .Select(sc => new SubCategory
-            {
-                Id = sc.Id,
-                Name = sc.Name,
-                Description = sc.Description,
-                IsActive = sc.IsActive,
-                CategoryId = sc.CategoryId,
-                CreatedAt = sc.CreatedAt,
-                ModifiedAt = sc.ModifiedAt,
-                DeletedAt = sc.DeletedAt,
-                Images = sc.Images.Where(i => i.DeletedAt == null).Select(i => new Image
-                {
-                    Id = i.Id,
-                    Url = i.Url,
-                    IsMain = i.IsMain,
-                    AltText = i.AltText,
-                    Title = i.Title,
-    
-                }).ToList()
-            });
-    }
+
+
+	public bool IsExsistByName(string name)
+	{
+
+		_logger.LogInformation($"Executing {nameof(IsExsistByName)} for name: {name}");
+
+		var exists = _subCategories.Any(c => c.Name == name);
+
+		if (exists)
+			_logger.LogInformation($"Category with name: {name} already exists");
+		else
+			_logger.LogInformation($"Category with name: {name} does not exist");
+
+		return exists;
+
+	}
+	
 
     public async Task<bool> HasProductsAsync(int subCategoryId)
     {
-        return await _subCategories.AnyAsync(sc => sc.Id == subCategoryId && sc.Products.Any(p => p.DeletedAt == null));
+        return await _subCategories.AnyAsync(sc => sc.Id == subCategoryId && sc.Products.Any());
     }
 } 

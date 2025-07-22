@@ -854,7 +854,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -880,7 +880,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -968,7 +968,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -1037,6 +1037,42 @@
   },
   {
     "ContainingType": "E_Commers.Controllers.CategoriesController",
+    "Method": "SearchForAdmin",
+    "RelativePath": "api/Categories/admin-search",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "keyword",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "isActive",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "isDeleted",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "page",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "E_Commers.Controllers.CategoriesController",
     "Method": "GetAllForAdmin",
     "RelativePath": "api/Categories/all/admin",
     "HttpMethod": "GET",
@@ -1089,42 +1125,6 @@
   },
   {
     "ContainingType": "E_Commers.Controllers.CategoriesController",
-    "Method": "Search",
-    "RelativePath": "api/Categories/search",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "keyword",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "isActive",
-        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
-        "IsRequired": false
-      },
-      {
-        "Name": "isDeleted",
-        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
-        "IsRequired": false
-      },
-      {
-        "Name": "page",
-        "Type": "System.Int32",
-        "IsRequired": false
-      },
-      {
-        "Name": "pageSize",
-        "Type": "System.Int32",
-        "IsRequired": false
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "E_Commers.Controllers.CategoriesController",
     "Method": "TestLinks",
     "RelativePath": "api/Categories/test-links",
     "HttpMethod": "GET",
@@ -1142,6 +1142,32 @@
         "StatusCode": 200
       }
     ]
+  },
+  {
+    "ContainingType": "E_Commers.Controllers.CategoriesController",
+    "Method": "SearchForUsers",
+    "RelativePath": "api/Categories/user-search",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "keyword",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "page",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
   },
   {
     "ContainingType": "E_Commers.Controllers.CategoriesController",
@@ -3029,7 +3055,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.ProductDtos.ProductListItemDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.ProductDtos.ProductDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -3060,7 +3086,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.ProductDtos.ProductListItemDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.ProductDtos.ProductDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -3086,7 +3112,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -3345,7 +3371,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.ProductDtos.ProductListItemDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.ProductDtos.ProductDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -3923,7 +3949,7 @@
   },
   {
     "ContainingType": "E_Commers.Controllers.ProductController",
-    "Method": "GetProductsBySubCategory",
+    "Method": "GetProductsBySubCategoryId",
     "RelativePath": "api/Product/subcategory/{subCategoryId}",
     "HttpMethod": "GET",
     "IsController": true,
@@ -3935,19 +3961,19 @@
         "IsRequired": true
       },
       {
-        "Name": "page",
-        "Type": "System.Int32",
+        "Name": "isActive",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
       },
       {
-        "Name": "pageSize",
-        "Type": "System.Int32",
+        "Name": "deletedOnly",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
       }
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Collections.Generic.List\u00601[[E_Commers.DtoModels.ProductDtos.ProductListItemDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Collections.Generic.List\u00601[[E_Commers.DtoModels.ProductDtos.ProductDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -3960,13 +3986,13 @@
   {
     "ContainingType": "E_Commers.Controllers.ProductVariantController",
     "Method": "GetVariantById",
-    "RelativePath": "api/ProductVariant/{variantId}",
+    "RelativePath": "api/ProductVariant/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "variantId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       }
@@ -3986,25 +4012,20 @@
   {
     "ContainingType": "E_Commers.Controllers.ProductVariantController",
     "Method": "ActivateVariant",
-    "RelativePath": "api/ProductVariant/activate/{variantId}",
+    "RelativePath": "api/ProductVariant/activate/{id}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "variantId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
-      },
-      {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": false
       }
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -4031,11 +4052,6 @@
         "Name": "dto",
         "Type": "E_Commers.DtoModels.ProductDtos.CreateProductVariantDto",
         "IsRequired": true
-      },
-      {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": false
       }
     ],
     "ReturnTypes": [
@@ -4053,13 +4069,13 @@
   {
     "ContainingType": "E_Commers.Controllers.ProductVariantController",
     "Method": "AddVariantQuantity",
-    "RelativePath": "api/ProductVariant/add-quantity/{variantId}",
+    "RelativePath": "api/ProductVariant/add-quantity/{id}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "variantId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       },
@@ -4067,16 +4083,11 @@
         "Name": "addQuantity",
         "Type": "System.Int32",
         "IsRequired": false
-      },
-      {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": false
       }
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -4151,25 +4162,20 @@
   {
     "ContainingType": "E_Commers.Controllers.ProductVariantController",
     "Method": "DeactivateVariant",
-    "RelativePath": "api/ProductVariant/deactivate/{variantId}",
+    "RelativePath": "api/ProductVariant/deactivate/{id}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "variantId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
-      },
-      {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": false
       }
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -4182,25 +4188,20 @@
   {
     "ContainingType": "E_Commers.Controllers.ProductVariantController",
     "Method": "DeleteVariant",
-    "RelativePath": "api/ProductVariant/delete/{variantId}",
+    "RelativePath": "api/ProductVariant/delete/{id}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "variantId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
-      },
-      {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": false
       }
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -4213,13 +4214,13 @@
   {
     "ContainingType": "E_Commers.Controllers.ProductVariantController",
     "Method": "RemoveVariantQuantity",
-    "RelativePath": "api/ProductVariant/remove-quantity/{variantId}",
+    "RelativePath": "api/ProductVariant/remove-quantity/{id}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "variantId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       },
@@ -4227,16 +4228,11 @@
         "Name": "removeQuantity",
         "Type": "System.Int32",
         "IsRequired": false
-      },
-      {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": false
       }
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -4249,25 +4245,20 @@
   {
     "ContainingType": "E_Commers.Controllers.ProductVariantController",
     "Method": "RestoreVariant",
-    "RelativePath": "api/ProductVariant/restore/{variantId}",
+    "RelativePath": "api/ProductVariant/restore/{id}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "variantId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
-      },
-      {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": false
       }
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -4362,13 +4353,13 @@
   {
     "ContainingType": "E_Commers.Controllers.ProductVariantController",
     "Method": "UpdateVariant",
-    "RelativePath": "api/ProductVariant/update/{variantId}",
+    "RelativePath": "api/ProductVariant/update/{id}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "variantId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
       },
@@ -4376,11 +4367,6 @@
         "Name": "dto",
         "Type": "E_Commers.DtoModels.ProductDtos.UpdateProductVariantDto",
         "IsRequired": true
-      },
-      {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": false
       }
     ],
     "ReturnTypes": [
@@ -4421,7 +4407,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.CategoryDtos.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.SubCategorydto.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -4457,7 +4443,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.CategoryDtos.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.SubCategorydto.SubCategoryDtoWithData, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -4484,7 +4470,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -4521,16 +4507,11 @@
         "Name": "CategoryId",
         "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
-      },
-      {
-        "Name": "IsActive",
-        "Type": "System.Boolean",
-        "IsRequired": false
       }
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.CategoryDtos.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.SubCategorydto.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -4655,7 +4636,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.CategoryDtos.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.SubCategorydto.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -4681,7 +4662,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.CategoryDtos.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[E_Commers.DtoModels.SubCategorydto.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -4779,7 +4760,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Collections.Generic.List\u00601[[E_Commers.DtoModels.CategoryDtos.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Collections.Generic.List\u00601[[E_Commers.DtoModels.SubCategorydto.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -4815,7 +4796,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Collections.Generic.List\u00601[[E_Commers.DtoModels.CategoryDtos.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "E_Commers.DtoModels.Responses.ApiResponse\u00601[[System.Collections.Generic.List\u00601[[E_Commers.DtoModels.SubCategorydto.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",

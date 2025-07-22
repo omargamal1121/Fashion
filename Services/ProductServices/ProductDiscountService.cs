@@ -12,8 +12,9 @@ using E_Commers.Services.EmailServices;
 using E_Commers.UOW;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
-namespace E_Commers.Services.Product
+namespace E_Commers.Services.ProductServices
 {
 	public interface IProductDiscountService
 	{
@@ -21,7 +22,7 @@ namespace E_Commers.Services.Product
 		Task<Result<ProductDetailDto>> AddDiscountToProductAsync(int productId, int discountId, string userId);
 		Task<Result<ProductDetailDto>> UpdateProductDiscountAsync(int productId, int discountId, string userId);
 		Task<Result<ProductDetailDto>> RemoveDiscountFromProductAsync(int productId, string userId);
-		Task<Result<List<ProductListItemDto>>> GetProductsWithActiveDiscountsAsync();
+		Task<Result<List<ProductDto>>> GetProductsWithActiveDiscountsAsync();
 		Task<Result<bool>> UpdateProductPriceAfteDiscount(int productId);
 	}
 
@@ -59,34 +60,45 @@ namespace E_Commers.Services.Product
 		{
 			try
 			{
-				var discount = await _unitOfWork.Product.GetAll()
+				var productInfo = await _unitOfWork.Product.GetAll()
+					.AsNoTracking()
 					.Where(p => p.Id == productId)
-					.Select(p => p.Discount)
-					.Where(d => d != null && d.DeletedAt == null)
-					.Select(d => new DiscountDto
-					{
-						Id = d.Id,
-						Name = d.Name,
-						Description = d.Description,
-						DiscountPercent = d.DiscountPercent,
-						StartDate = d.StartDate,
-						EndDate = d.EndDate,
-						IsActive = d.IsActive,
-						CreatedAt = d.CreatedAt,
-						ModifiedAt = d.ModifiedAt,
-						DeletedAt = d.DeletedAt,
-					})
+					.Select(p => new { p.Discount })
 					.FirstOrDefaultAsync();
 
-				if (discount == null)
-					return Result<DiscountDto>.Fail("No discount found for this product", 404);
+				if (productInfo == null)
+					return Result<DiscountDto>.Fail("Product not found", 404);
 
-				return Result<DiscountDto>.Ok(discount, "Product discount retrieved successfully", 200);
+				if (productInfo.Discount == null)
+					return Result<DiscountDto>.Fail("No discount found for this product", 404);
+				
+				var discount = productInfo.Discount;
+
+				if (!discount.IsActive || discount.DeletedAt != null || (discount.EndDate != null && discount.EndDate <= DateTime.UtcNow))
+				{
+					return Result<DiscountDto>.Fail("No active discount found for this product", 404);
+				}
+
+				var discountDto = new DiscountDto
+				{
+					Id = discount.Id,
+					Name = discount.Name,
+					Description = discount.Description,
+					DiscountPercent = discount.DiscountPercent,
+					StartDate = discount.StartDate,
+					EndDate = discount.EndDate,
+					IsActive = discount.IsActive,
+					CreatedAt = discount.CreatedAt,
+					ModifiedAt = discount.ModifiedAt,
+					DeletedAt = discount.DeletedAt,
+				};
+
+				return Result<DiscountDto>.Ok(discountDto, "Product discount retrieved successfully", 200);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in GetProductDiscountAsync for productId: {productId}");
-			 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
+				_backgroundJobClient.Enqueue(() => _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<DiscountDto>.Fail("Error retrieving product discount", 500);
 			}
 		}
@@ -95,6 +107,44 @@ namespace E_Commers.Services.Product
 		{
 			_backgroundJobClient.Enqueue(() => _cacheManager.RemoveByTagsAsync(PRODUCT_CACHE_TAGS));
 		}
+
+		private static Expression<Func<E_Commers.Models.Product, ProductDetailDto>> maptoProductDetailDtoexpression = p =>
+		 new ProductDetailDto
+		 {
+			 Id = p.Id,
+			 Name = p.Name,
+			 Description = p.Description,
+			 AvailableQuantity = p.Quantity,
+			 Gender = p.Gender,
+			 SubCategoryId = p.SubCategoryId,
+			 Discount = (p.Discount != null && p.Discount.IsActive && p.Discount.DeletedAt == null && (p.Discount.EndDate == null || p.Discount.EndDate > DateTime.UtcNow)) ? new DiscountDto
+			 {
+				 Id = p.Discount.Id,
+				 DiscountPercent = p.Discount.DiscountPercent,
+				 IsActive = p.Discount.IsActive,
+				 StartDate = p.Discount.StartDate,
+				 EndDate = p.Discount.EndDate,
+				 Name = p.Discount.Name,
+				 Description = p.Discount.Description
+			 } : null,
+			 Images = p.Images.Where(i => i.DeletedAt == null).Select(i => new ImageDto
+			 {
+				 Id = i.Id,
+				 Url = i.Url
+			 }).ToList(),
+			 Variants = p.ProductVariants.Where(v => v.DeletedAt == null && v.Quantity != 0).Select(v => new ProductVariantDto
+			 {
+				 Id = v.Id,
+				 Color = v.Color,
+				 Size = v.Size,
+				 Waist = v.Waist,
+				 Length = v.Length,
+				 Quantity = v.Quantity,
+				 ProductId = v.ProductId
+			 }).ToList()
+		 };
+
+
 
 		public async Task<Result<ProductDetailDto>> AddDiscountToProductAsync(int productId, int discountId, string userId)
 		{
@@ -130,45 +180,10 @@ namespace E_Commers.Services.Product
 				await UpdateProductPriceAfteDiscount(productId);
 				RemoveProductCachesAsync();
 
-				// Retrieve updated product
 				var updatedProduct = await _unitOfWork.Product.GetAll()
 					.Where(p => p.Id == productId)
-					.Select(p => new ProductDetailDto
-					{
-						Id = p.Id,
-						Name = p.Name,
-						Description = p.Description,
-						AvailableQuantity = p.Quantity,
-						Gender = p.Gender,
-						SubCategoryId = p.SubCategoryId,
-						Price = p.Price,
-						PriceAfterDiscount = p.Discount != null && p.Discount.IsActive ? p.Price - (p.Price * (p.Discount.DiscountPercent / 100m)) : p.Price,
-						Discount = p.Discount != null ? new DiscountDto
-						{
-							Id = p.Discount.Id,
-							Name = p.Discount.Name,
-							Description = p.Discount.Description,
-							DiscountPercent = p.Discount.DiscountPercent,
-							StartDate = p.Discount.StartDate,
-							EndDate = p.Discount.EndDate,
-							IsActive = p.Discount.IsActive,
-							CreatedAt = p.Discount.CreatedAt,
-							ModifiedAt = p.Discount.ModifiedAt,
-							DeletedAt = p.Discount.DeletedAt,
-							products = null
-						} : null,
-						Images = p.Images.Where(i => i.DeletedAt == null).Select(i => new ImageDto { Id = i.Id, Url = i.Url }).ToList(),
-						Variants = p.ProductVariants.Where(v => v.DeletedAt == null).Select(v => new ProductVariantDto
-						{
-							Id = v.Id,
-							Color = v.Color,
-							Size = v.Size,
-							Waist = v.Waist,
-							Length = v.Length,
-							Quantity = v.Quantity,
-							ProductId = v.ProductId
-						}).ToList()
-					})
+					.Select(maptoProductDetailDtoexpression)
+					
 					.FirstOrDefaultAsync();
 
 				return Result<ProductDetailDto>.Ok(updatedProduct, "Discount added successfully", 201);
@@ -223,43 +238,7 @@ namespace E_Commers.Services.Product
 				// Retrieve updated product
 				var updatedProduct = await _unitOfWork.Product.GetAll()
 					.Where(p => p.Id == productId)
-					.Select(p => new ProductDetailDto
-					{
-						Id = p.Id,
-						Name = p.Name,
-						Description = p.Description,
-						AvailableQuantity = p.Quantity,
-						Gender = p.Gender,
-						SubCategoryId = p.SubCategoryId,
-						Price = p.Price,
-						PriceAfterDiscount = p.Discount != null && p.Discount.IsActive ? p.Price - (p.Price * (p.Discount.DiscountPercent / 100m)) : p.Price,
-						Discount = p.Discount != null ? new DiscountDto
-						{
-							Id = p.Discount.Id,
-							Name = p.Discount.Name,
-							Description = p.Discount.Description,
-							DiscountPercent = p.Discount.DiscountPercent,
-							StartDate = p.Discount.StartDate,
-							EndDate = p.Discount.EndDate,
-							IsActive = p.Discount.IsActive,
-							CreatedAt = p.Discount.CreatedAt,
-							ModifiedAt = p.Discount.ModifiedAt,
-							DeletedAt = p.Discount.DeletedAt,
-							products = null
-						} : null,
-						Images = p.Images.Where(i => i.DeletedAt == null).Select(i => new ImageDto { Id = i.Id, Url = i.Url }).ToList(),
-						Variants = p.ProductVariants.Where(v => v.DeletedAt == null).Select(v => new ProductVariantDto
-						{
-							Id = v.Id,
-							Color = v.Color,
-							Size = v.Size,
-							Waist = v.Waist,
-							Length = v.Length,
-						
-							Quantity = v.Quantity,
-							ProductId = v.ProductId
-						}).ToList()
-					})
+					.Select(maptoProductDetailDtoexpression)
 					.FirstOrDefaultAsync();
 
 				return Result<ProductDetailDto>.Ok(updatedProduct, "Discount updated successfully", 200);
@@ -311,43 +290,7 @@ namespace E_Commers.Services.Product
 				// Retrieve updated product
 				var updatedProduct = await _unitOfWork.Product.GetAll()
 					.Where(p => p.Id == productId)
-					.Select(p => new ProductDetailDto
-					{
-						Id = p.Id,
-						Name = p.Name,
-						Description = p.Description,
-						AvailableQuantity = p.Quantity,
-						Gender = p.Gender,
-						SubCategoryId = p.SubCategoryId,
-						Price = p.Price,
-						PriceAfterDiscount = p.Discount != null && p.Discount.IsActive ? p.Price - (p.Price * (p.Discount.DiscountPercent / 100m)) : p.Price,
-						Discount = p.Discount != null ? new DiscountDto
-						{
-							Id = p.Discount.Id,
-							Name = p.Discount.Name,
-							Description = p.Discount.Description,
-							DiscountPercent = p.Discount.DiscountPercent,
-							StartDate = p.Discount.StartDate,
-							EndDate = p.Discount.EndDate,
-							IsActive = p.Discount.IsActive,
-							CreatedAt = p.Discount.CreatedAt,
-							ModifiedAt = p.Discount.ModifiedAt,
-							DeletedAt = p.Discount.DeletedAt,
-							products = null
-						} : null,
-						Images = p.Images.Where(i => i.DeletedAt == null).Select(i => new ImageDto { Id = i.Id, Url = i.Url }).ToList(),
-						Variants = p.ProductVariants.Where(v => v.DeletedAt == null).Select(v => new ProductVariantDto
-						{
-							Id = v.Id,
-							Color = v.Color,
-							Size = v.Size,
-							Waist = v.Waist,
-							Length = v.Length,
-						 
-							Quantity = v.Quantity,
-							ProductId = v.ProductId
-						}).ToList()
-					})
+					.Select(maptoProductDetailDtoexpression)
 					.FirstOrDefaultAsync();
 
 				return Result<ProductDetailDto>.Ok(updatedProduct, "Discount removed successfully", 200);
@@ -361,7 +304,7 @@ namespace E_Commers.Services.Product
 		}
 
 
-		public async Task<Result<List<ProductListItemDto>>> GetProductsWithActiveDiscountsAsync()
+		public async Task<Result<List<ProductDto>>> GetProductsWithActiveDiscountsAsync()
 		{
 			try
 			{
@@ -373,7 +316,7 @@ namespace E_Commers.Services.Product
 						&& p.Discount.DeletedAt == null
 						&& p.Discount.StartDate <= now
 						&& p.Discount.EndDate > now)
-					.Select(p => new ProductListItemDto
+					.Select(p => new ProductDto
 					{
 						Id = p.Id,
 						Name = p.Name,
@@ -382,43 +325,36 @@ namespace E_Commers.Services.Product
 						Gender = p.Gender,
 						SubCategoryId = p.SubCategoryId,
 						Price = p.Price,
-						PriceAfterDiscount = p.Discount != null && p.Discount.IsActive ? p.Price - (p.Price * (p.Discount.DiscountPercent / 100m)) : p.Price,
-
-						Discount = new DiscountDto
-						{
-							Id = p.Discount.Id,
-							Name = p.Discount.Name,
-							Description = p.Discount.Description,
-							DiscountPercent = p.Discount.DiscountPercent,
-							StartDate = p.Discount.StartDate,
-							EndDate = p.Discount.EndDate,
-							IsActive = p.Discount.IsActive,
-							CreatedAt = p.Discount.CreatedAt,
-							ModifiedAt = p.Discount.ModifiedAt,
-							DeletedAt = p.Discount.DeletedAt,
-							products = null
-						},
-
-						Images = p.Images
+						FinalPrice = p.Discount != null && p.Discount.IsActive ? p.Price - (p.Price * (p.Discount.DiscountPercent / 100m)) : p.Price,
+						DiscountPrecentage = p.Discount.DiscountPercent,
+						DiscountName = p.Discount.Name,
+						EndAt = p.Discount.EndDate,
+						IsActive = p.IsActive,
+						CreatedAt = p.CreatedAt,
+						ModifiedAt = p.ModifiedAt,
+						DeletedAt = p.DeletedAt,
+						fitType = p.fitType,
+						images = p.Images
 							.Where(i => i.DeletedAt == null)
 							.Select(i => new ImageDto
 							{
 								Id = i.Id,
-								Url = i.Url
+								Url = i.Url,
+								IsMain = i.IsMain
 							}).ToList()
 					})
 					.ToListAsync();
 
 				if (!products.Any())
-					return Result<List<ProductListItemDto>>.Fail("No products with active discounts found", 404);
+					return Result<List<ProductDto>>.Fail("No products with active discounts found", 404);
 
-				return Result<List<ProductListItemDto>>.Ok(products, "Products with active discounts retrieved successfully", 200);
+				return Result<List<ProductDto>>.Ok(products, "Products with active discounts retrieved successfully", 200);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in GetProductsWithActiveDiscountsAsync");
 			 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<List<ProductListItemDto>>.Fail("Error retrieving products with active discounts", 500);
+				return Result<List<ProductDto>>.Fail("Error retrieving products with active discounts", 500);
 			}
 		}
 
@@ -443,7 +379,7 @@ namespace E_Commers.Services.Product
 					product.Discount.IsActive && 
 					product.Discount.DeletedAt == null &&
 					product.Discount.StartDate <= DateTime.UtcNow &&
-					product.Discount.EndDate >= DateTime.UtcNow)
+					product.Discount.EndDate > DateTime.UtcNow)
 				{
 					var discountAmount = originalPrice * (product.Discount.DiscountPercent / 100m);
 					discountedPrice = originalPrice - discountAmount;

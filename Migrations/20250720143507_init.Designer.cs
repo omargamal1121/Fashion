@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace E_Commers.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250717141410_intial")]
-    partial class intial
+    [Migration("20250720143507_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -728,11 +728,18 @@ namespace E_Commers.Migrations
                     b.Property<int?>("DiscountId")
                         .HasColumnType("int");
 
+                    b.Property<decimal?>("FinalPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("Gender")
                         .HasColumnType("int");
 
                     b.Property<int?>("ImageId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("datetime(6)");
@@ -752,7 +759,7 @@ namespace E_Commers.Migrations
                     b.Property<int>("SubCategoryId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("fitType")
+                    b.Property<int>("fitType")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -834,8 +841,8 @@ namespace E_Commers.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("FitType")
-                        .HasColumnType("int");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int?>("Length")
                         .HasColumnType("int");
@@ -849,8 +856,8 @@ namespace E_Commers.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<string>("Size")
-                        .HasColumnType("longtext");
+                    b.Property<int?>("Size")
+                        .HasColumnType("int");
 
                     b.Property<int?>("Waist")
                         .HasColumnType("int");
@@ -1432,12 +1439,12 @@ namespace E_Commers.Migrations
                     b.HasOne("E_Commers.Models.Category", "Category")
                         .WithMany("Images")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("E_Commers.Models.Collection", "Collection")
                         .WithMany("Images")
                         .HasForeignKey("CollectionId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("E_Commers.Models.Product", "Product")
                         .WithMany("Images")
@@ -1447,7 +1454,7 @@ namespace E_Commers.Migrations
                     b.HasOne("E_Commers.Models.SubCategory", "SubCategory")
                         .WithMany("Images")
                         .HasForeignKey("SubCategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Category");
 
@@ -1674,13 +1681,13 @@ namespace E_Commers.Migrations
                     b.HasOne("E_Commers.Models.Customer", "Customer")
                         .WithMany("Reviews")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("E_Commers.Models.Product", "Product")
                         .WithMany("Reviews")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Customer");
@@ -1719,13 +1726,13 @@ namespace E_Commers.Migrations
                     b.HasOne("E_Commers.Models.Customer", "Customer")
                         .WithMany("WishlistItems")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("E_Commers.Models.Product", "Product")
                         .WithMany("WishlistItems")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Customer");
@@ -1789,7 +1796,7 @@ namespace E_Commers.Migrations
                     b.HasOne("E_Commers.Models.Image", "Image")
                         .WithMany("Customers")
                         .HasForeignKey("ImageId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Image");
                 });
