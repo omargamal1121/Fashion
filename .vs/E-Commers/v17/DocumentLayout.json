@@ -3,20 +3,24 @@
   "WorkspaceRootPath": "D:\\project_fashion\\E-Commerce-API-main\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\services\\productservices\\productsservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|solutionrelative:services\\productservices\\productsservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\services\\productservices\\productcatalogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|solutionrelative:services\\productservices\\productcatalogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\services\\productservices\\productimageservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|solutionrelative:services\\productservices\\productimageservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\services\\productservices\\productvariantservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|solutionrelative:services\\productservices\\productvariantservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\services\\productservices\\productsservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|solutionrelative:services\\productservices\\productsservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|solutionrelative:controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\dtomodels\\accountdtos\\registerdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|solutionrelative:dtomodels\\accountdtos\\registerdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\repository\\mainrepostory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -29,10 +33,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\models\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|solutionrelative:models\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|solutionrelative:controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -51,58 +51,67 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "ProductsServices.cs",
-              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductsServices.cs",
-              "RelativeDocumentMoniker": "Services\\ProductServices\\ProductsServices.cs",
-              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductsServices.cs",
-              "RelativeToolTip": "Services\\ProductServices\\ProductsServices.cs",
-              "ViewState": "AgIAABUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-21T15:52:55.201Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ProductImageService.cs",
-              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductImageService.cs",
-              "RelativeDocumentMoniker": "Services\\ProductServices\\ProductImageService.cs",
-              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductImageService.cs",
-              "RelativeToolTip": "Services\\ProductServices\\ProductImageService.cs",
-              "ViewState": "AgIAAA0AAAAAAAAAAAAiwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-21T15:52:36.114Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
               "Title": "ProductCatalogService.cs",
               "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductCatalogService.cs",
               "RelativeDocumentMoniker": "Services\\ProductServices\\ProductCatalogService.cs",
               "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductCatalogService.cs",
               "RelativeToolTip": "Services\\ProductServices\\ProductCatalogService.cs",
-              "ViewState": "AgIAABIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAL8BAAAAAAAAAAAmwLUAAABQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-21T15:52:16.336Z",
+              "WhenOpened": "2025-07-22T13:55:16.38Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ProductsServices.cs",
+              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductsServices.cs",
+              "RelativeDocumentMoniker": "Services\\ProductServices\\ProductsServices.cs",
+              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductsServices.cs",
+              "RelativeToolTip": "Services\\ProductServices\\ProductsServices.cs",
+              "ViewState": "AgIAAKcAAAAAAAAAAAAowBUAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-22T13:11:02.777Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "MainRepostory.cs",
-              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Repository\\MainRepostory.cs",
-              "RelativeDocumentMoniker": "Repository\\MainRepostory.cs",
-              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\Repository\\MainRepostory.cs",
-              "RelativeToolTip": "Repository\\MainRepostory.cs",
-              "ViewState": "AgIAAEkAAAAAAAAAAAAcwFUAAAAlAAAAAAAAAA==",
+              "Title": "RegisterDto.cs",
+              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\DtoModels\\AccountDtos\\RegisterDto.cs",
+              "RelativeDocumentMoniker": "DtoModels\\AccountDtos\\RegisterDto.cs",
+              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\DtoModels\\AccountDtos\\RegisterDto.cs",
+              "RelativeToolTip": "DtoModels\\AccountDtos\\RegisterDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAACvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-21T15:32:44.23Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-22T11:46:47.725Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 3,
+              "Title": "ProductController.cs",
+              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Controllers\\ProductController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ProductController.cs",
+              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\Controllers\\ProductController.cs",
+              "RelativeToolTip": "Controllers\\ProductController.cs",
+              "ViewState": "AgIAAH8BAAAAAAAAAAA0wIwBAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-21T15:20:27.08Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ProductVariantService.cs",
+              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductVariantService.cs",
+              "RelativeDocumentMoniker": "Services\\ProductServices\\ProductVariantService.cs",
+              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductVariantService.cs",
+              "RelativeToolTip": "Services\\ProductServices\\ProductVariantService.cs",
+              "ViewState": "AgIAAAoDAAAAAAAAAAAswBMDAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-21T15:08:32.617Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
               "Title": "Product.cs",
               "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Models\\Product.cs",
               "RelativeDocumentMoniker": "Models\\Product.cs",
@@ -110,38 +119,23 @@
               "RelativeToolTip": "Models\\Product.cs",
               "ViewState": "AgIAADcAAAAAAAAAAAA2wEoAAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-21T15:20:59.647Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "ProductController.cs",
-              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Controllers\\ProductController.cs",
-              "RelativeDocumentMoniker": "Controllers\\ProductController.cs",
-              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\Controllers\\ProductController.cs",
-              "RelativeToolTip": "Controllers\\ProductController.cs",
-              "ViewState": "AgIAAEYAAAAAAAAAAAAQwFEAAABZAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-21T15:20:27.08Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ProductVariantService.cs",
-              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductVariantService.cs",
-              "RelativeDocumentMoniker": "Services\\ProductServices\\ProductVariantService.cs",
-              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductVariantService.cs",
-              "RelativeToolTip": "Services\\ProductServices\\ProductVariantService.cs",
-              "ViewState": "AgIAADIBAAAAAAAAAAAtwEoBAAAEAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-21T15:08:32.617Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-21T15:20:59.647Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
+              "Title": "MainRepostory.cs",
+              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Repository\\MainRepostory.cs",
+              "RelativeDocumentMoniker": "Repository\\MainRepostory.cs",
+              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\Repository\\MainRepostory.cs",
+              "RelativeToolTip": "Repository\\MainRepostory.cs",
+              "ViewState": "AgIAAEkAAAAAAAAAAAAcwFUAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-21T15:32:44.23Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "ProductVariantController.cs",
               "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Controllers\\ProductVariantController.cs",
               "RelativeDocumentMoniker": "Controllers\\ProductVariantController.cs",
@@ -149,8 +143,7 @@
               "RelativeToolTip": "Controllers\\ProductVariantController.cs",
               "ViewState": "AgIAAEgAAAAAAAAAAAAIwFIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-21T15:07:19.475Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-21T15:07:19.475Z"
             }
           ]
         },

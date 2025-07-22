@@ -138,6 +138,15 @@ namespace E_Commers.Controllers
 		[HttpPatch("{id}/restore")]
 		public async Task<ActionResult<ApiResponse<ProductDto>>> RestoreProductAsync(int id)
 		{
+			if (!ModelState.IsValid)
+			{
+				var errors = string.Join(", ", ModelState.Values
+					.SelectMany(v => v.Errors)
+					.Select(e => e.ErrorMessage)
+					.ToList());
+				_logger.LogError($"Validation Errors: {errors}");
+				return BadRequest(ApiResponse<ProductDto>.CreateErrorResponse("", new ErrorResponse("Invalid data", errors)));
+			}
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var result = await _productsServices.RestoreProductAsync(id, userId);
 			return HandleResult(result, nameof(RestoreProductAsync), id);
@@ -160,6 +169,17 @@ namespace E_Commers.Controllers
 		[HttpPost("advanced-search")]
 		public async Task<ActionResult<ApiResponse<List<ProductListItemDto>>>> AdvancedSearch([FromBody] AdvancedSearchDto searchDto, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
+
+			if(!ModelState.IsValid)
+			{
+				var errors = string.Join(", ", ModelState.Values
+					.SelectMany(v => v.Errors)
+					.Select(e => e.ErrorMessage)
+					.ToList());
+				_logger.LogError($"Validation Errors: {errors}");
+				return BadRequest(ApiResponse<List<ProductListItemDto>>.CreateErrorResponse("Invalid search criteria", new ErrorResponse("Invalid data", errors)));
+			}
+
 			var response = await _productsServices.AdvancedSearchAsync(searchDto, page, pageSize);
 			return HandleResult(response, nameof(AdvancedSearch));
 		}
@@ -174,6 +194,15 @@ namespace E_Commers.Controllers
 		[HttpPost("{id}/images")]
 		public async Task<ActionResult<ApiResponse<List<ImageDto>>>> AddProductImages(int id, [FromForm] List<IFormFile> images)
 		{
+			if (!ModelState.IsValid || images == null || !images.Any())
+			{
+				var errors = string.Join(", ", ModelState.Values
+					.SelectMany(v => v.Errors)
+					.Select(e => e.ErrorMessage)
+					.ToList());
+				_logger.LogError($"Validation Errors: {errors}");
+				return BadRequest(ApiResponse<List<ImageDto>>.CreateErrorResponse("Invalid image data", new ErrorResponse("Invalid data", errors ?? "No images provided")));
+			}
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var response = await _productsServices.AddProductImagesAsync(id, images, userId);
 			return HandleResult(response, nameof(AddProductImages), id);
@@ -188,8 +217,18 @@ namespace E_Commers.Controllers
 		}
 
 		[HttpPost("{id}/main-image")]
-		public async Task<ActionResult<ApiResponse<bool>>> UploadAndSetMainImage(int id, [FromForm] CreateImageDto mainImage)
+		public async Task<ActionResult<ApiResponse<ImageDto>>> UploadAndSetMainImage(int id, [FromForm] CreateImageDto mainImage)
 		{
+			if (!ModelState.IsValid || mainImage?.Files == null || !mainImage.Files.Any())
+			{
+				var errors = string.Join(", ", ModelState.Values
+					.SelectMany(v => v.Errors)
+					.Select(e => e.ErrorMessage)
+					.ToList());
+				_logger.LogError($"Validation Errors: {errors}");
+				return BadRequest(ApiResponse<bool>.CreateErrorResponse("Invalid image data", new ErrorResponse("Invalid data", errors ?? "No main image provided")));
+			}
+
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var response = await _productsServices.UploadAndSetMainImageAsync(id, mainImage.Files.First(), userId);
 			return HandleResult(response, nameof(UploadAndSetMainImage), id);
@@ -216,6 +255,15 @@ namespace E_Commers.Controllers
 		[HttpPost("{id}/discount")]
 		public async Task<ActionResult<ApiResponse<ProductDetailDto>>> AddDiscountToProduct(int id, [FromBody] int discountId)
 		{
+			if (!ModelState.IsValid || discountId <= 0)
+			{
+				var errors = string.Join(", ", ModelState.Values
+					.SelectMany(v => v.Errors)
+					.Select(e => e.ErrorMessage)
+					.ToList());
+				_logger.LogError($"Validation Errors: {errors}");
+				return BadRequest(ApiResponse<ProductDetailDto>.CreateErrorResponse("Invalid discount data", new ErrorResponse("Invalid data", errors ?? "Invalid discount ID")));
+			}
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var response = await _productsServices.AddDiscountToProductAsync(id, discountId, userId);
 			return HandleResult(response, nameof(AddDiscountToProduct), id);
@@ -224,6 +272,15 @@ namespace E_Commers.Controllers
 		[HttpPut("{id}/discount")]
 		public async Task<ActionResult<ApiResponse<ProductDetailDto>>> UpdateProductDiscount(int id, [FromBody] int discountId)
 		{
+			if (!ModelState.IsValid || discountId <= 0)
+			{
+				var errors = string.Join(", ", ModelState.Values
+					.SelectMany(v => v.Errors)
+					.Select(e => e.ErrorMessage)
+					.ToList());
+				_logger.LogError($"Validation Errors: {errors}");
+				return BadRequest(ApiResponse<ProductDetailDto>.CreateErrorResponse("Invalid discount data", new ErrorResponse("Invalid data", errors ?? "Invalid discount ID")));
+			}
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var response = await _productsServices.UpdateProductDiscountAsync(id, discountId, userId);
 			return HandleResult(response, nameof(UpdateProductDiscount), id);
@@ -331,6 +388,23 @@ namespace E_Commers.Controllers
 			var response = await _productsServices.GetNewArrivalsAsync(page, pageSize, isActive: true, deletedOnly: false);
 			return HandleResult(response, nameof(GetNewArrivalsPublic));
 		}
+		[HttpPatch("{id}/activate")]
+		public async Task<ActionResult<ApiResponse<bool>>> ActiveProduct(int id)
+		{
+			string userId = HttpContext.Items["UserId"]?.ToString();
+			var response = await _productsServices.ActivateProductAsync(id, userId);
+			return HandleResult(response, nameof(ActiveProduct), id);
+		}
+
+		[HttpPatch("{id}/deactivate")]
+		public async Task<ActionResult<ApiResponse<bool>>> DeActiveProduct(int id)
+		{
+			string userId = HttpContext.Items["UserId"]?.ToString();
+			var response = await _productsServices.DeactivateProductAsync(id, userId);
+			return HandleResult(response, nameof(DeActiveProduct), id);
+		}
+
+
 
 		[HttpPost("admin/advanced-search")]
 		[Authorize(Roles = "Admin")]
@@ -341,6 +415,17 @@ namespace E_Commers.Controllers
 			[FromQuery] bool? isActive = null,
 			[FromQuery] bool? includeDeleted = null)
 		{
+
+
+			if (!ModelState.IsValid)
+			{
+				var errors = string.Join(", ", ModelState.Values
+					.SelectMany(v => v.Errors)
+					.Select(e => e.ErrorMessage)
+					.ToList());
+				_logger.LogError($"Validation Errors: {errors}");
+				return BadRequest(ApiResponse<List<ProductListItemDto>>.CreateErrorResponse("Invalid search criteria", new ErrorResponse("Invalid data", errors)));
+			}
 			var response = await _productsServices.AdvancedSearchAsync(searchDto, page, pageSize, isActive, includeDeleted);
 			return HandleResult(response, nameof(AdvancedSearchAdmin));
 		}
@@ -352,6 +437,15 @@ namespace E_Commers.Controllers
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10)
 		{
+			if (!ModelState.IsValid)
+			{
+				var errors = string.Join(", ", ModelState.Values
+					.SelectMany(v => v.Errors)
+					.Select(e => e.ErrorMessage)
+					.ToList());
+				_logger.LogError($"Validation Errors: {errors}");
+				return BadRequest(ApiResponse<List<ProductListItemDto>>.CreateErrorResponse("Invalid search criteria", new ErrorResponse("Invalid data", errors)));
+			}
 			var response = await _productsServices.AdvancedSearchAsync(searchDto, page, pageSize, isActive: true, deletedOnly: false);
 			return HandleResult(response, nameof(AdvancedSearchPublic));
 		}

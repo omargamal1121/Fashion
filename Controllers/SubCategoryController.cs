@@ -198,23 +198,23 @@ namespace E_Commers.Controllers
 		[Authorize(Roles = "Admin")]
 		[ActionName(nameof(Activate))]
 
-		public async Task<IActionResult> Activate(int id)
+		public async Task<ActionResult<ApiResponse<bool>>> Activate(int id)
 		{
 			_logger.LogInformation($"Executing {nameof(Activate)} for id: {id}");
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var result = await _subCategoryServices.ActivateSubCategoryAsync(id, userId);
-			return StatusCode(result.StatusCode, result);
+			return HandleResult(result, nameof(Activate));
 		}
 
 		[HttpPatch("{id}/deactivate")]
 		[Authorize(Roles = "Admin")]
 		[ActionName(nameof(Deactivate))]
-		public async Task<IActionResult> Deactivate(int id)
+		public async Task<ActionResult<ApiResponse<bool>>> Deactivate(int id)
 		{
 			_logger.LogInformation($"Executing {nameof(Deactivate)} for id: {id}");
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var result = await _subCategoryServices.DeactivateSubCategoryAsync(id, userId);
-			return StatusCode(result.StatusCode, result);
+			return HandleResult(result, nameof(Deactivate));
 		}
 
 		// Only keep SearchForUser and SearchForAdmin endpoints for searching subcategories

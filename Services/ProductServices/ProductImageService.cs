@@ -6,6 +6,7 @@ using E_Commers.ErrorHnadling;
 using E_Commers.Interfaces;
 using E_Commers.Models;
 using E_Commers.Services.AdminOpreationServices;
+using E_Commers.Services.Cache;
 using E_Commers.Services.EmailServices;
 using E_Commers.UOW;
 using Hangfire;
@@ -19,7 +20,7 @@ namespace E_Commers.Services.ProductServices
 		Task<Result<List<ImageDto>>> GetProductImagesAsync(int productId);
 		Task<Result<List<ImageDto>>> AddProductImagesAsync(int productId, List<IFormFile> images, string userId);
 		Task<Result<bool>> RemoveProductImageAsync(int productId, int imageId, string userId);
-		Task<Result<bool>> UploadAndSetMainImageAsync(int productId, Microsoft.AspNetCore.Http.IFormFile mainImage, string userId);
+		Task<Result<ImageDto>> UploadAndSetMainImageAsync(int productId, Microsoft.AspNetCore.Http.IFormFile mainImage, string userId);
 		
 	}
 
@@ -32,9 +33,16 @@ namespace E_Commers.Services.ProductServices
 		private readonly IErrorNotificationService _errorNotificationService;
 		private readonly IImagesServices _imagesServices;
 		private readonly ISubCategoryServices _subCategoryServices;
+		private readonly ICacheManager _cacheManager;
 		private readonly IProductCatalogService _productCatalogService;
+		private const string CACHE_TAG_PRODUCT_SEARCH = "product_search";
+
+		public const string CACHE_TAG_CATEGORY_WITH_DATA = "categorywithdata";
+		private static readonly string[] PRODUCT_CACHE_TAGS = new[] { CACHE_TAG_PRODUCT_SEARCH, CACHE_TAG_CATEGORY_WITH_DATA, PRODUCT_WITH_VARIANT_TAG };
+		private const string PRODUCT_WITH_VARIANT_TAG = "productwithvariantdata";
 
 		public ProductImageService(
+			ICacheManager cacheManager,
 			IBackgroundJobClient backgroundJobClient,
 			IUnitOfWork unitOfWork,
 			ILogger<ProductImageService> logger,
@@ -44,6 +52,7 @@ namespace E_Commers.Services.ProductServices
 			ISubCategoryServices subCategoryServices,
 			IProductCatalogService productCatalogService)
 		{
+			_cacheManager = cacheManager;
 			_backgroundJobClient = backgroundJobClient;
 			_unitOfWork = unitOfWork;
 			_logger = logger;
@@ -52,6 +61,11 @@ namespace E_Commers.Services.ProductServices
 			_imagesServices = imagesServices;
 			_subCategoryServices = subCategoryServices;
 			_productCatalogService = productCatalogService;
+		}
+		private void RemoveProductCaches()
+		{
+
+			BackgroundJob.Enqueue(() => _cacheManager.RemoveByTagsAsync(PRODUCT_CACHE_TAGS));
 		}
 
 		public async Task<Result<List<ImageDto>>> GetProductImagesAsync(int productId)
@@ -123,6 +137,9 @@ namespace E_Commers.Services.ProductServices
 
 				await _unitOfWork.CommitAsync();
 				await transaction.CommitAsync();
+				RemoveProductCaches();
+
+
 
 				_logger.LogInformation($"Successfully added {addedImages.Count} images to product {productId}");
 
@@ -204,6 +221,8 @@ namespace E_Commers.Services.ProductServices
 					await _subCategoryServices.DeactivateSubCategoryIfAllProductsAreInactiveAsync(product.SubCategoryId, userId);
 				}
 
+				RemoveProductCaches();
+
 				_logger.LogInformation($"Image {imageId} removed from product {productId}");
 
 				return Result<bool>.Ok(true, "Image removed", 200, warnings: warnings);
@@ -218,13 +237,13 @@ namespace E_Commers.Services.ProductServices
 		}
 
 
-		public async Task<Result<bool>> UploadAndSetMainImageAsync(int productId, IFormFile mainImage, string userId)
+		public async Task<Result<ImageDto>> UploadAndSetMainImageAsync(int productId, IFormFile mainImage, string userId)
 		{
 			_logger.LogInformation($"Setting new main image for product: {productId}");
 			
 			var product = await _unitOfWork.Product.GetByIdAsync(productId);
 			if (product == null)
-				return Result<bool>.Fail("Product not found", 404);
+				return Result<ImageDto>.Fail("Product not found", 404);
 			
 			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
@@ -247,7 +266,7 @@ namespace E_Commers.Services.ProductServices
 					var errorMsg = !string.IsNullOrWhiteSpace(saveResult.Message)
 						? saveResult.Message
 						: "Image saving failed. No image returned.";
-					return Result<bool>.Fail(errorMsg, 400);
+					return Result<ImageDto>.Fail(errorMsg, 400);
 				}
 
 				saveResult.Data.ProductId = productId;
@@ -264,14 +283,21 @@ namespace E_Commers.Services.ProductServices
 				await _unitOfWork.CommitAsync();
 				await transaction.CommitAsync();
 				_logger.LogInformation($"Main image set successfully for product {productId}");
-				return Result<bool>.Ok(true, "Main image updated", 200);
+				var imageDto = new ImageDto
+				{
+					Id = saveResult.Data.Id,
+					Url = saveResult.Data.Url,
+					IsMain = saveResult.Data.IsMain
+				};
+				RemoveProductCaches();
+				return Result<ImageDto>.Ok(imageDto, "Main image updated", 200);
 			}
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync();
 				_logger.LogError(ex, $"Error in AddMainImageAsync for productId: {productId}");
 				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<bool>.Fail("Error setting main image", 500);
+				return Result<ImageDto>.Fail("Error setting main image", 500);
 			}
 		}
 

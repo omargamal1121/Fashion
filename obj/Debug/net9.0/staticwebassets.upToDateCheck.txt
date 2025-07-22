@@ -150,3 +150,12 @@ wwwroot\CategoryPhotos\6b4b674e-1cf0-463b-b625-817c9740f63f.png
 wwwroot\SubCategoryPhotos\90bbd417-6a66-409e-9bf0-1aef3767928d.png
 wwwroot\SubCategoryPhotos\9cdd831a-8320-4742-83f5-de233a643ca5.png
 wwwroot\ProductPhotos\b7b0fbe9-1816-4ebf-b576-13ba7a412846.png
+wwwroot\CategoryPhotos\ff2f4fbd-92d9-44ad-8649-a704bfd5e204.png
+wwwroot\CategoryPhotos\78d3de38-b410-43fc-8f0b-3f21f36db159.png
+wwwroot\CategoryPhotos\fd57c9f7-078f-42a1-9549-f94edaabce9d.png
+wwwroot\SubCategoryPhotos\8d62c751-2b4a-4312-9cd6-eab128b56cfe.png
+wwwroot\ProductPhotos\0095e4a1-8928-4fb0-ba31-0e127a82f7bb.png
+wwwroot\ProductPhotos\5fce00e4-a17a-4f11-89a0-4fbc746b6472.png
+wwwroot\ProductPhotos\4a613bd9-cf90-4de0-96b0-fbb8b3981696.png
+wwwroot\ProductPhotos\4ea64cfb-e543-4333-b719-4886d44052c3.png
+wwwroot\ProductPhotos\30dc750f-b095-4848-9be4-2131d8ecaf24.png

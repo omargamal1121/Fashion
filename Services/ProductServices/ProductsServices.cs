@@ -36,13 +36,16 @@ namespace E_Commers.Services.ProductServices
 		Task<Result<List<ImageDto>>> GetProductImagesAsync(int productId);
 		Task<Result<List<ImageDto>>> AddProductImagesAsync(int productId, List<IFormFile> images, string userId);
 		Task<Result<bool>> RemoveProductImageAsync(int productId, int imageId, string userId);
-		Task<Result<bool>> UploadAndSetMainImageAsync(int productId, IFormFile mainImage, string userId);
+		Task<Result<ImageDto>> UploadAndSetMainImageAsync(int productId, IFormFile mainImage, string userId);
 		// Variant operations (delegated to ProductVariantService)
 		Task<Result<List<ProductVariantDto>>> GetProductVariantsAsync(int productId);
 		Task<Result<ProductVariantDto>> AddVariantAsync(int productId, CreateProductVariantDto dto, string userId);
 		Task<Result<ProductVariantDto>> UpdateVariantAsync(int variantId, UpdateProductVariantDto dto, string userId);
 		Task<Result<bool>> DeleteVariantAsync(int variantId, string userId);
 		Task<Result<bool>> UpdateVariantQuantityAsync(int variantId, int newQuantity, string userId);
+		Task<Result<bool>> ActivateProductAsync(int productId, string userId);
+		Task<Result<bool>> DeactivateProductAsync(int productId, string userId);
+
 		// Discount operations (delegated to ProductDiscountService)
 		Task<Result<DiscountDto>> GetProductDiscountAsync(int productId);
 		Task<Result<ProductDetailDto>> AddDiscountToProductAsync(int productId, int discountId, string userId);
@@ -126,7 +129,7 @@ namespace E_Commers.Services.ProductServices
 		{
 			return await _productImageService.RemoveProductImageAsync(productId, imageId, userId);
 		}
-		public async Task<Result<bool>> UploadAndSetMainImageAsync(int productId, IFormFile mainImage, string userId)
+		public async Task<Result<ImageDto>> UploadAndSetMainImageAsync(int productId, IFormFile mainImage, string userId)
 		{
 			return await _productImageService.UploadAndSetMainImageAsync(productId, mainImage, userId);
 		}
@@ -168,6 +171,16 @@ namespace E_Commers.Services.ProductServices
 		public async Task<Result<ProductDetailDto>> RemoveDiscountFromProductAsync(int productId, string userId)
 		{
 			return await _productDiscountService.RemoveDiscountFromProductAsync(productId, userId);
+		}
+
+		public async Task<Result<bool>> ActivateProductAsync(int productId, string userId)
+		{
+			return	await _productCatalogService.ActivateProductAsync(productId, userId);
+		}
+
+		public async Task<Result<bool>> DeactivateProductAsync(int productId, string userId)
+		{
+			return await _productCatalogService.DeactivateProductAsync(productId, userId);
 		}
 	}
 }

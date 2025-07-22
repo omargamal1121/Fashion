@@ -6,12 +6,12 @@ namespace E_Commers.DtoModels.AccountDtos
 	public class RegisterDto
 	{
 		[Required(ErrorMessage = "Name is required.")]
-		[RegularExpression(@"^[a-zA-Z0-9][a-zA-Z0-9\s\-,]*[a-zA-Z0-9]$", ErrorMessage = "Name must start and end with an alphanumeric character and can contain spaces, hyphens, and commas in between.")]
+		[RegularExpression(@"^[a-zA-Z](?:[a-zA-Z\s\-,]*[a-zA-Z])?$", ErrorMessage = "Name must start and end with a letter and may contain spaces, hyphens, and commas in between.")]
 		[Display(Name = "Full Name")]
 		public string Name { get; set; } = string.Empty;
 
 		[Required(ErrorMessage = "Name is required.")]
-		[RegularExpression(@"^[a-zA-Z0-9]+$", ErrorMessage = "Name must contain only letters and spaces.")]
+		[RegularExpression(@"^(?![_\.])[a-zA-Z0-9._]+(?<![_\.])$", ErrorMessage = "User name must contain only letters, numbers, dots, and underscores, and must not start or end with a dot or underscore.")]
 		[Display(Name = "User Name")]
 		public string UserName { get; set; } = string.Empty;
 

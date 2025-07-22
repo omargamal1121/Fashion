@@ -47,6 +47,7 @@ namespace E_Commers.DtoModels.ProductDtos
 		public int? Length { get; set; }
 		public int Quantity { get; set; }
 		public int ProductId { get; set; }
+		public bool IsActive { get; set; }
 
 	}
 
@@ -122,6 +123,9 @@ namespace E_Commers.DtoModels.ProductDtos
 		public int AvailableQuantity { get; set; }
 		public decimal Price { get; set; }
 		public Gender Gender { get; set; }
+		public bool IsActive { get; set; }
+		public  FitType fitType { get; set; }
+
 		public List<ImageDto>? Images { get; set; }
 		public List<ProductVariantDto>? Variants { get; set; }
 		public decimal? PriceAfterDiscount { get; set; }

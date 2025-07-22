@@ -71,7 +71,7 @@ namespace E_Commers.Services.ProductServices
 
 				if (productInfo.Discount == null)
 					return Result<DiscountDto>.Fail("No discount found for this product", 404);
-				
+
 				var discount = productInfo.Discount;
 
 				if (!discount.IsActive || discount.DeletedAt != null || (discount.EndDate != null && discount.EndDate <= DateTime.UtcNow))

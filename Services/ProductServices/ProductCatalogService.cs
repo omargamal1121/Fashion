@@ -70,6 +70,33 @@ namespace E_Commers.Services.ProductServices
 		private string GetProductsBySubCategoryCacheKey(int subCategoryId, bool? isActive, bool? deletedOnly) => $"products_subcategory:{subCategoryId}:isActive={isActive}:deletedOnly={deletedOnly}";
 
 
+		private static Expression<Func<E_Commers.Models.Product, ProductDto>> maptoProductDtoexpression = p =>
+		 new ProductDto
+		 {
+			 Id = p.Id,
+			 Name = p.Name,
+			 IsActive = p.IsActive,
+			 AvailableQuantity = p.Quantity,
+			 Price = p.Price,
+			 Description = p.Description,
+			 SubCategoryId = p.SubCategoryId,
+			 CreatedAt = p.CreatedAt,
+			 DiscountPrecentage = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate == null || p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.DiscountPercent : null,
+			 FinalPrice = p.FinalPrice,
+			 DiscountName = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate == null || p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.Name : null,
+			 EndAt = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate == null || p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.EndDate : null,
+			 fitType = p.fitType,
+			 Gender = p.Gender,
+			 
+			 ModifiedAt = p.ModifiedAt,
+			 DeletedAt = p.DeletedAt,
+			 images = p.Images.Select(img => new ImageDto
+			 {
+				 Id = img.Id,
+				 IsMain = img.IsMain,
+				 Url = img.Url
+			 })
+		 };
 		private static Expression<Func< E_Commers.Models.Product, ProductDetailDto>> maptoProductDetailDtoexpression = p =>
 		 new ProductDetailDto
 		 {
@@ -78,6 +105,14 @@ namespace E_Commers.Services.ProductServices
 			 Description = p.Description,
 			 AvailableQuantity = p.Quantity,
 			 Gender = p.Gender,
+			 CreatedAt = p.CreatedAt,
+			 DeletedAt= p.DeletedAt,
+			 ModifiedAt = p.ModifiedAt,
+			 IsActive = p.IsActive,
+			 Price = p.Price,
+			 PriceAfterDiscount = p.FinalPrice,
+			 fitType = p.fitType,
+
 			 SubCategoryId = p.SubCategoryId,
 			 Discount = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate == null || p.Discount.EndDate > DateTime.UtcNow)) ? new DiscountDto
 			 {
@@ -97,6 +132,10 @@ namespace E_Commers.Services.ProductServices
 			 Variants = p.ProductVariants.Where(v => v.DeletedAt == null && v.Quantity != 0).Select(v => new ProductVariantDto
 			 {
 				 Id = v.Id,
+				 IsActive = v.IsActive,
+				 CreatedAt = v.CreatedAt,
+				 ModifiedAt = v.ModifiedAt,
+				 DeletedAt= v.DeletedAt,
 				 Color = v.Color,
 				 Size = v.Size,
 				 Waist = v.Waist,
@@ -111,6 +150,7 @@ namespace E_Commers.Services.ProductServices
 
 		public async Task<Result<ProductDetailDto>> GetProductByIdAsync(int id, bool? isActive, bool? deletedOnly)
 		{
+			_logger.LogInformation($"Retrieving product by id: {id}, isActive: {isActive}, deletedOnly: {deletedOnly}");
 			var cacheKey = GetProductByIdCacheKey(id, isActive, deletedOnly);
 			var cached = await _cacheManager.GetAsync<ProductDetailDto>(cacheKey);
 			if (cached != null)
@@ -139,6 +179,8 @@ namespace E_Commers.Services.ProductServices
 				if (product == null)
 					return Result<ProductDetailDto>.Fail("Product not found", 404);
 
+				_logger.LogInformation($"Product found: {product.Name} (ID: {product.Id})");
+
 				BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, product, null, new[] { PRODUCT_WITH_VARIANT_TAG }));
 				return Result<ProductDetailDto>.Ok(product, "Product retrieved successfully", 200);
 			}
@@ -150,7 +192,7 @@ namespace E_Commers.Services.ProductServices
 			}
 		}
 
-		private  void RemoveProductCachesAsync()
+		private  void RemoveProductCaches()
 		{
 			
 			BackgroundJob.Enqueue(() => _cacheManager.RemoveByTagsAsync(PRODUCT_CACHE_TAGS));
@@ -239,7 +281,7 @@ namespace E_Commers.Services.ProductServices
 				);
 				await _unitOfWork.CommitAsync();
 				await transaction.CommitAsync();
-				 RemoveProductCachesAsync();
+				 RemoveProductCaches();
 				var productdto = Maptoproductdto(product);
 				return Result<ProductDto>.Ok(productdto, "Product created successfully", 201);
 			}
@@ -313,7 +355,7 @@ namespace E_Commers.Services.ProductServices
 					userId,
 					id
 				);
-				 RemoveProductCachesAsync();
+				 RemoveProductCaches();
 				
 				var productDetailDto =Maptoproductdto(product);
 				return Result<ProductDto>.Ok(productDetailDto, "Product updated successfully", 200);
@@ -347,7 +389,7 @@ namespace E_Commers.Services.ProductServices
 					id
 				);
 				 await _unitOfWork.CommitAsync();
-				RemoveProductCachesAsync();
+				RemoveProductCaches();
 				await _subCategoryServices.DeactivateSubCategoryIfAllProductsAreInactiveAsync(product.SubCategoryId, userId);
 				return Result<bool>.Ok(true, "Product deleted", 200);
 			}
@@ -380,7 +422,7 @@ namespace E_Commers.Services.ProductServices
 					userId,
 					id
 				);
-				 RemoveProductCachesAsync();
+				 RemoveProductCaches();
 				var productdto = Maptoproductdto(product);
 				return Result<ProductDto>.Ok(productdto, "Product restored successfully", 200);
 			}
@@ -423,31 +465,7 @@ namespace E_Commers.Services.ProductServices
 					return Result<List<ProductDto>>.Fail("No Products Found", 404);
 
 				var products = await productsQuery
-					.Select(p => new ProductDto
-					{
-						Id = p.Id,
-						Name = p.Name,
-						IsActive = p.IsActive,
-						AvailableQuantity = p.Quantity,
-						Price = p.Price,
-						Description = p.Description,
-						SubCategoryId = p.SubCategoryId,
-						CreatedAt = p.CreatedAt,
-						DiscountPrecentage = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate == null || p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.DiscountPercent : null,
-						FinalPrice = p.FinalPrice,
-						DiscountName = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate == null || p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.Name : null,
-						EndAt = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate == null || p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.EndDate : null,
-						fitType = p.fitType,
-						Gender = p.Gender,
-						ModifiedAt = p.ModifiedAt,
-						DeletedAt = p.DeletedAt,
-						images = p.Images.Select(img => new ImageDto
-						{
-							Id = img.Id,
-							IsMain = img.IsMain,
-							Url = img.Url
-						})
-					})
+					.Select(maptoProductDtoexpression)
 					.ToListAsync();
 
 				BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, products, null, new string[] { CACHE_TAG_PRODUCT_SEARCH }));
@@ -463,11 +481,14 @@ namespace E_Commers.Services.ProductServices
 
 		public async Task<Result<bool>> ActivateProductAsync(int productId, string userId)
 		{
-			var product = await _unitOfWork.Product.GetByIdAsync(productId);
+			var product = await _unitOfWork.Product.GetProductWithVariants(productId);
 			if (product == null)
 				return Result<bool>.Fail("Product not found", 404);
 			if (product.IsActive)
 				return Result<bool>.Ok(true, "Product already active", 200);
+
+			if(!product.ProductVariants.Any(v=>v.Quantity>0&&v.IsActive))
+				return Result<bool>.Fail("Product has no available active variants", 400);
 
 			product.IsActive = true;
 			var result = _unitOfWork.Product.Update(product);
@@ -482,7 +503,7 @@ namespace E_Commers.Services.ProductServices
 			);
 
 			await _unitOfWork.CommitAsync();
-			RemoveProductCachesAsync();
+			RemoveProductCaches();
 			return Result<bool>.Ok(true, "Product activated successfully", 200);
 		}
 
@@ -507,9 +528,9 @@ namespace E_Commers.Services.ProductServices
 			);
 
 			await _unitOfWork.CommitAsync();
-			RemoveProductCachesAsync();
+			RemoveProductCaches();
 
-			// Check if subcategory has any other active products
+			
 			var activeProducts = await _unitOfWork.Product.GetAll()
 				.Where(p => p.SubCategoryId == product.SubCategoryId && p.IsActive && p.DeletedAt == null)
 				.AnyAsync();
@@ -521,7 +542,6 @@ namespace E_Commers.Services.ProductServices
 			return Result<bool>.Ok(true, "Product deactivated successfully", 200);
 		}
 
-		// Updates the product's quantity based on the sum of all non-deleted variant quantities
 		public void UpdateProductQuantity(Models.Product product)
 		{
 			if (product.ProductVariants != null)
