@@ -1,7 +1,7 @@
-using E_Commers.Models;
+using E_Commerce.Models;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
-namespace E_Commers.Services.EmailServices
+namespace E_Commerce.Services.EmailServices
 {
 	public class ErrorNotificationService: IErrorNotificationService
 	{

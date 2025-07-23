@@ -1,6 +1,6 @@
-﻿using E_Commers.Context;
+﻿using E_Commerce.Context;
 
-namespace E_Commers.BackgroundJops
+namespace E_Commerce.BackgroundJops
 {
 	public class CategoryCleanupService
 	{

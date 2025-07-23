@@ -1,7 +1,7 @@
-﻿using E_Commers.Enums;
+﻿using E_Commerce.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace E_Commers.Models
+namespace E_Commerce.Models
 {
 	public class AdminOperationsLog :BaseEntity
 	{

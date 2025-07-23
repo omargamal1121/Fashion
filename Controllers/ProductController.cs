@@ -1,23 +1,23 @@
-﻿using E_Commers.DtoModels;
-using E_Commers.DtoModels.CategoryDtos;
-using E_Commers.DtoModels.DiscoutDtos;
-using E_Commers.DtoModels.ProductDtos;
-using E_Commers.Enums;
-using E_Commers.Services;
-using E_Commers.Models;
-using E_Commers.UOW;
+﻿using E_Commerce.DtoModels;
+using E_Commerce.DtoModels.CategoryDtos;
+using E_Commerce.DtoModels.DiscoutDtos;
+using E_Commerce.DtoModels.ProductDtos;
+using E_Commerce.Enums;
+using E_Commerce.Services;
+using E_Commerce.Models;
+using E_Commerce.UOW;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
-using E_Commers.Services.Product;
-using E_Commers.Interfaces;
-using E_Commers.ErrorHnadling;
-using E_Commers.DtoModels.Responses;
-using E_Commers.Services.ProductServices;
-using E_Commers.DtoModels.ImagesDtos;
+using E_Commerce.Services.Product;
+using E_Commerce.Interfaces;
+using E_Commerce.ErrorHnadling;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.Services.ProductServices;
+using E_Commerce.DtoModels.ImagesDtos;
 
-namespace E_Commers.Controllers
+namespace E_Commerce.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
@@ -153,21 +153,21 @@ namespace E_Commers.Controllers
 		}
 
 		[HttpGet("bestsellers")]
-		public async Task<ActionResult<ApiResponse<List<ProductListItemDto>>>> GetBestSellers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetBestSellers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
 			var response = await _productsServices.GetBestSellersAsync(page, pageSize);
 			return HandleResult(response, nameof(GetBestSellers));
 		}
 
 		[HttpGet("newarrivals")]
-		public async Task<ActionResult<ApiResponse<List<ProductListItemDto>>>> GetNewArrivals([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetNewArrivals([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
 			var response = await _productsServices.GetNewArrivalsAsync(page, pageSize);
 			return HandleResult(response, nameof(GetNewArrivals));
 		}
 
 		[HttpPost("advanced-search")]
-		public async Task<ActionResult<ApiResponse<List<ProductListItemDto>>>> AdvancedSearch([FromBody] AdvancedSearchDto searchDto, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> AdvancedSearch([FromBody] AdvancedSearchDto searchDto, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
 
 			if(!ModelState.IsValid)
@@ -177,7 +177,7 @@ namespace E_Commers.Controllers
 					.Select(e => e.ErrorMessage)
 					.ToList());
 				_logger.LogError($"Validation Errors: {errors}");
-				return BadRequest(ApiResponse<List<ProductListItemDto>>.CreateErrorResponse("Invalid search criteria", new ErrorResponse("Invalid data", errors)));
+				return BadRequest(ApiResponse<List<ProductDto>>.CreateErrorResponse("Invalid search criteria", new ErrorResponse("Invalid data", errors)));
 			}
 
 			var response = await _productsServices.AdvancedSearchAsync(searchDto, page, pageSize);
@@ -296,7 +296,7 @@ namespace E_Commers.Controllers
 
 		[HttpGet("admin/list")]
 		[Authorize(Roles = "Admin")]
-		public async Task<ActionResult<ApiResponse<List<ProductListItemDto>>>> GetProductsForAdmin(
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetProductsForAdmin(
 			[FromQuery] bool? isActive = null,
 			[FromQuery] bool? includeDeleted = null,
 			[FromQuery] int page = 1,
@@ -309,7 +309,7 @@ namespace E_Commers.Controllers
 
 		[HttpGet("public/list")]
 		[AllowAnonymous]
-		public async Task<ActionResult<ApiResponse<List<ProductListItemDto>>>> GetProductsForPublic(
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetProductsForPublic(
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10)
 		{
@@ -320,7 +320,7 @@ namespace E_Commers.Controllers
 
 		[HttpGet("admin/subcategory/{subCategoryId}")]
 		[Authorize(Roles = "Admin")]
-		public async Task<ActionResult<ApiResponse<List<ProductListItemDto>>>> GetProductsBySubCategoryAdmin(
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetProductsBySubCategoryAdmin(
 			int subCategoryId,
 			[FromQuery] bool? isActive = null,
 			[FromQuery] bool? includeDeleted = null,
@@ -335,7 +335,7 @@ namespace E_Commers.Controllers
 
 		[HttpGet("public/subcategory/{subCategoryId}")]
 		[AllowAnonymous]
-		public async Task<ActionResult<ApiResponse<List<ProductListItemDto>>>> GetProductsBySubCategoryPublic(
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetProductsBySubCategoryPublic(
 			int subCategoryId,
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10)
@@ -347,7 +347,7 @@ namespace E_Commers.Controllers
 
 		[HttpGet("admin/bestsellers")]
 		[Authorize(Roles = "Admin")]
-		public async Task<ActionResult<ApiResponse<List<ProductListItemDto>>>> GetBestSellersAdmin(
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetBestSellersAdmin(
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10,
 			[FromQuery] bool? isActive = null,
@@ -359,7 +359,7 @@ namespace E_Commers.Controllers
 
 		[HttpGet("public/bestsellers")]
 		[AllowAnonymous]
-		public async Task<ActionResult<ApiResponse<List<ProductListItemDto>>>> GetBestSellersPublic(
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetBestSellersPublic(
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10)
 		{
@@ -369,7 +369,7 @@ namespace E_Commers.Controllers
 
 		[HttpGet("admin/newarrivals")]
 		[Authorize(Roles = "Admin")]
-		public async Task<ActionResult<ApiResponse<List<ProductListItemDto>>>> GetNewArrivalsAdmin(
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetNewArrivalsAdmin(
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10,
 			[FromQuery] bool? isActive = null,
@@ -381,7 +381,7 @@ namespace E_Commers.Controllers
 
 		[HttpGet("public/newarrivals")]
 		[AllowAnonymous]
-		public async Task<ActionResult<ApiResponse<List<ProductListItemDto>>>> GetNewArrivalsPublic(
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetNewArrivalsPublic(
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10)
 		{
@@ -408,7 +408,7 @@ namespace E_Commers.Controllers
 
 		[HttpPost("admin/advanced-search")]
 		[Authorize(Roles = "Admin")]
-		public async Task<ActionResult<ApiResponse<List<ProductListItemDto>>>> AdvancedSearchAdmin(
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> AdvancedSearchAdmin(
 			[FromBody] AdvancedSearchDto searchDto,
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10,
@@ -424,7 +424,7 @@ namespace E_Commers.Controllers
 					.Select(e => e.ErrorMessage)
 					.ToList());
 				_logger.LogError($"Validation Errors: {errors}");
-				return BadRequest(ApiResponse<List<ProductListItemDto>>.CreateErrorResponse("Invalid search criteria", new ErrorResponse("Invalid data", errors)));
+				return BadRequest(ApiResponse<List<ProductDto>>.CreateErrorResponse("Invalid search criteria", new ErrorResponse("Invalid data", errors)));
 			}
 			var response = await _productsServices.AdvancedSearchAsync(searchDto, page, pageSize, isActive, includeDeleted);
 			return HandleResult(response, nameof(AdvancedSearchAdmin));
@@ -432,7 +432,7 @@ namespace E_Commers.Controllers
 
 		[HttpPost("public/advanced-search")]
 		[AllowAnonymous]
-		public async Task<ActionResult<ApiResponse<List<ProductListItemDto>>>> AdvancedSearchPublic(
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> AdvancedSearchPublic(
 			[FromBody] AdvancedSearchDto searchDto,
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10)
@@ -444,7 +444,7 @@ namespace E_Commers.Controllers
 					.Select(e => e.ErrorMessage)
 					.ToList());
 				_logger.LogError($"Validation Errors: {errors}");
-				return BadRequest(ApiResponse<List<ProductListItemDto>>.CreateErrorResponse("Invalid search criteria", new ErrorResponse("Invalid data", errors)));
+				return BadRequest(ApiResponse<List<ProductDto>>.CreateErrorResponse("Invalid search criteria", new ErrorResponse("Invalid data", errors)));
 			}
 			var response = await _productsServices.AdvancedSearchAsync(searchDto, page, pageSize, isActive: true, deletedOnly: false);
 			return HandleResult(response, nameof(AdvancedSearchPublic));

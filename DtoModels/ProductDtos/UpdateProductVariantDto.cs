@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using E_Commers.Enums;
+using E_Commerce.Enums;
 
-namespace E_Commers.DtoModels.ProductDtos
+namespace E_Commerce.DtoModels.ProductDtos
 {
 	public class UpdateProductVariantDto
 	{

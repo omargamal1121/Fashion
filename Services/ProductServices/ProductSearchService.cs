@@ -1,27 +1,28 @@
-using E_Commers.DtoModels.CategoryDtos;
-using E_Commers.DtoModels.CollectionDtos;
-using E_Commers.DtoModels.DiscoutDtos;
-using E_Commers.DtoModels.ImagesDtos;
-using E_Commers.DtoModels.ProductDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.Enums;
-using E_Commers.ErrorHnadling;
-using E_Commers.Interfaces;
-using E_Commers.Models;
-using E_Commers.Services.EmailServices;
-using E_Commers.UOW;
+using E_Commerce.DtoModels.CategoryDtos;
+using E_Commerce.DtoModels.CollectionDtos;
+using E_Commerce.DtoModels.DiscoutDtos;
+using E_Commerce.DtoModels.ImagesDtos;
+using E_Commerce.DtoModels.ProductDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.Enums;
+using E_Commerce.ErrorHnadling;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
+using E_Commerce.Services.EmailServices;
+using E_Commerce.UOW;
 using Microsoft.EntityFrameworkCore;
-using E_Commers.Services.Cache;
+using E_Commerce.Services.Cache;
 using Hangfire;
+using System.Linq.Expressions;
 
-namespace E_Commers.Services.ProductServices
+namespace E_Commerce.Services.ProductServices
 {
 	public interface IProductSearchService
 	{
 	
-		Task<Result<List<ProductListItemDto>>> GetNewArrivalsAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
-		Task<Result<List<ProductListItemDto>>> GetBestSellersAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
-		Task<Result<List<ProductListItemDto>>> AdvancedSearchAsync(AdvancedSearchDto searchCriteria, int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
+		Task<Result<List<ProductDto>>> GetNewArrivalsAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
+		Task<Result<List<ProductDto>>> GetBestSellersAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
+		Task<Result<List<ProductDto>>> AdvancedSearchAsync(AdvancedSearchDto searchCriteria, int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
 	}
 
 	public class ProductSearchService : IProductSearchService
@@ -58,7 +59,7 @@ namespace E_Commers.Services.ProductServices
 		
 
 		
-		private IQueryable<E_Commers.Models.Product> BasicFilter(IQueryable<E_Commers.Models. Product> query,bool? isActive,bool? DeletedOnly)
+		private IQueryable<E_Commerce.Models.Product> BasicFilter(IQueryable<E_Commerce.Models. Product> query,bool? isActive,bool? DeletedOnly)
 		{
 			if (isActive.HasValue)
 			{
@@ -77,14 +78,38 @@ namespace E_Commers.Services.ProductServices
 			return query;
 		}
 
-	
 
-	
-	
-		public async Task<Result<List<ProductListItemDto>>> GetNewArrivalsAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
+
+
+		private Expression<Func<E_Commerce.Models.Product, ProductDto>> maptoproductdto = p =>
+		new ProductDto
+		{
+			Id = p.Id,
+			Name = p.Name,
+			Description = p.Description,
+			AvailableQuantity = p.Quantity,
+			Gender = p.Gender,
+			SubCategoryId = p.SubCategoryId,
+			Price = p.Price,
+			CreatedAt = p.CreatedAt,
+			ModifiedAt = p.ModifiedAt,
+			DeletedAt = p.DeletedAt,
+			FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && ( p.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(p.Price - (p.Discount.DiscountPercent * p.Price)) : p.Price,
+
+			fitType = p.fitType,
+			images = p.Images.Where(i => i.DeletedAt == null).Select(i => new ImageDto { Id = i.Id, Url = i.Url }).ToList(),
+			EndAt = (p.Discount != null && p.Discount.IsActive && p.Discount.EndDate > DateTime.UtcNow) && p.Discount.IsActive ? p.Discount.EndDate : null,
+			DiscountName = (p.Discount != null && p.Discount.IsActive && p.Discount.EndDate > DateTime.UtcNow) ? p.Discount.Name : null,
+			DiscountPrecentage = (p.Discount != null && p.Discount.IsActive && p.Discount.EndDate > DateTime.UtcNow) ? p.Discount.DiscountPercent : 0,
+			IsActive = p.IsActive,
+		};
+
+
+
+		public async Task<Result<List<ProductDto>>> GetNewArrivalsAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
 		{
 			string cacheKey = $"newarrivals_{page}_{pageSize}_{isActive}_{deletedOnly}";
-			var cached = await _cacheManager.GetAsync<Result<List<ProductListItemDto>>>(cacheKey);
+			var cached = await _cacheManager.GetAsync<Result<List<ProductDto>>>(cacheKey);
 			if (cached != null)
 				return cached;
 			try
@@ -97,39 +122,14 @@ namespace E_Commers.Services.ProductServices
 					.OrderByDescending(p => p.CreatedAt)
 					.Skip((page - 1) * pageSize)
 					.Take(pageSize)
-					.Select(p => new ProductListItemDto
-					{
-						Id = p.Id,
-						Name = p.Name,
-						Description = p.Description,
-						AvailableQuantity = p.Quantity,
-						Gender = p.Gender,
-						SubCategoryId = p.SubCategoryId,
-						Price = p.Price,
-						PriceAfterDiscount = p.Discount != null && p.Discount.IsActive ? p.Price - (p.Price * (p.Discount.DiscountPercent / 100m)) : p.Price,
-						Discount = p.Discount != null ? new DiscountDto
-						{
-							Id = p.Discount.Id,
-							Name = p.Discount.Name,
-							Description = p.Discount.Description,
-							DiscountPercent = p.Discount.DiscountPercent,
-							StartDate = p.Discount.StartDate,
-							EndDate = p.Discount.EndDate,
-							IsActive = p.Discount.IsActive,
-							CreatedAt = p.Discount.CreatedAt,
-							ModifiedAt = p.Discount.ModifiedAt,
-							DeletedAt = p.Discount.DeletedAt,
-							products = null
-						} : null,
-						Images = p.Images.Where(i => i.DeletedAt == null).Select(i => new ImageDto { Id = i.Id, Url = i.Url }).ToList()
-					})
+					.Select(maptoproductdto)
 					.ToListAsync();
 
-				Result<List<ProductListItemDto>> result;
+				Result<List<ProductDto>> result;
 				if (!products.Any())
-					result = Result<List<ProductListItemDto>>.Fail("No new arrivals found", 404);
+					result = Result<List<ProductDto>>.Fail("No new arrivals found", 404);
 				else
-					result = Result<List<ProductListItemDto>>.Ok(products, $"Found {products.Count} new arrivals", 200);
+					result = Result<List<ProductDto>>.Ok(products, $"Found {products.Count} new arrivals", 200);
 				BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, result, TimeSpan.FromMinutes(2), new[] { CACHE_TAG_PRODUCT_SEARCH }));
 				return result;
 			}
@@ -137,10 +137,10 @@ namespace E_Commers.Services.ProductServices
 			{
 				_logger.LogError(ex, "Error in GetNewArrivalsAsync");
 				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<List<ProductListItemDto>>.Fail("Error retrieving new arrivals", 500);
+				return Result<List<ProductDto>>.Fail("Error retrieving new arrivals", 500);
 			}
 		}
-		private ProductListItemDto convertToProductListItemDto(E_Commers.Models.Product p)
+		private ProductListItemDto convertToProductListItemDto(E_Commerce.Models.Product p)
 		{
 			return new ProductListItemDto
 			{
@@ -170,10 +170,10 @@ namespace E_Commers.Services.ProductServices
 			};
 		}
 
-		public async Task<Result<List<ProductListItemDto>>> GetBestSellersAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
+		public async Task<Result<List<ProductDto>>> GetBestSellersAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
 		{
 			string cacheKey = $"bestsellers_{page}_{pageSize}_{isActive}_{deletedOnly}";
-			var cached = await _cacheManager.GetAsync<Result<List<ProductListItemDto>>>(cacheKey);
+			var cached = await _cacheManager.GetAsync<Result<List<ProductDto>>>(cacheKey);
 			if (cached != null)
 				return cached;
 			try
@@ -182,46 +182,53 @@ namespace E_Commers.Services.ProductServices
 				query = BasicFilter(query, isActive, deletedOnly);
 
 				var bestSellers = await query
-					.Select(p => new {
-						Product = p,
-						TotalSold = p.OrderItems.Where(oi => oi.Order.Status == E_Commers.Enums.OrderStatus.Delivered).Sum(oi => (int?)oi.Quantity) ?? 0
-					})
-					.OrderByDescending(x => x.TotalSold)
-					.Skip((page - 1) * pageSize)
-					.Take(pageSize)
-					.Select(x => new ProductListItemDto
-					{
-						Id = x.Product.Id,
-						Name = x.Product.Name,
-						Description = x.Product.Description,
-						AvailableQuantity = x.Product.Quantity,
-						Gender = x.Product.Gender,
-						SubCategoryId = x.Product.SubCategoryId,
-						Price = x.Product.Price,
-						PriceAfterDiscount = x.Product.Discount != null && x.Product.Discount.IsActive ? x.Product.Price - (x.Product.Price * (x.Product.Discount.DiscountPercent / 100m)) : x.Product.Price,
-						Discount = x.Product.Discount != null ? new DiscountDto
-						{
-							Id = x.Product.Discount.Id,
-							Name = x.Product.Discount.Name,
-							Description = x.Product.Discount.Description,
-							DiscountPercent = x.Product.Discount.DiscountPercent,
-							StartDate = x.Product.Discount.StartDate,
-							EndDate = x.Product.Discount.EndDate,
-							IsActive = x.Product.Discount.IsActive,
-							CreatedAt = x.Product.Discount.CreatedAt,
-							ModifiedAt = x.Product.Discount.ModifiedAt,
-							DeletedAt = x.Product.Discount.DeletedAt,
-							products = null
-						} : null,
-						Images = x.Product.Images.Where(i => i.DeletedAt == null).Select(i => new ImageDto { Id = i.Id, Url = i.Url }).ToList()
-					})
-					.ToListAsync();
+	.Select(p => new {
+		Product = p,
+		TotalSold = p.OrderItems
+			.Where(oi => oi.Order.Status == E_Commerce.Enums.OrderStatus.Delivered)
+			.Sum(oi => (int?)oi.Quantity) ?? 0
+	})
+	.OrderByDescending(x => x.TotalSold)
+	.Skip((page - 1) * pageSize)
+	.Take(pageSize)
+	.Select(x => new ProductDto
+	{
+		Id = x.Product.Id,
+		Name = x.Product.Name,
+		Description = x.Product.Description,
+		AvailableQuantity = x.Product.Quantity,
+		Gender = x.Product.Gender,
+		SubCategoryId = x.Product.SubCategoryId,
+		Price = x.Product.Price,
+		CreatedAt = x.Product.CreatedAt,
+		ModifiedAt = x.Product.ModifiedAt,
+		DeletedAt = x.Product.DeletedAt,
+		FinalPrice = (x.Product.Discount != null && x.Product.Discount.IsActive && (x.Product.Discount.DeletedAt == null) && (x.Product.Discount.EndDate == null || x.Product.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(x.Product.Price - (x.Product.Discount.DiscountPercent * x.Product.Price)) : x.Product .Price,
 
-				Result<List<ProductListItemDto>> result;
+		fitType = x.Product.fitType,
+		images = x.Product.Images
+			.Where(i => i.DeletedAt == null)
+			.Select(i => new ImageDto { Id = i.Id, Url = i.Url })
+			.ToList(),
+		EndAt = (x.Product.Discount != null && x.Product.Discount.IsActive && x.Product.Discount.EndDate > DateTime.UtcNow)
+			? x.Product.Discount.EndDate
+			: null,
+		DiscountName = (x.Product.Discount != null && x.Product.Discount.IsActive && x.Product.Discount.EndDate > DateTime.UtcNow)
+			? x.Product.Discount.Name
+			: null,
+		DiscountPrecentage = (x.Product.Discount != null && x.Product.Discount.IsActive && x.Product.Discount.EndDate > DateTime.UtcNow)
+			? x.Product.Discount.DiscountPercent
+			: 0,
+		IsActive = x.Product.IsActive
+	})
+	.ToListAsync();
+
+
+				Result<List<ProductDto>> result;
 				if (!bestSellers.Any())
-					result = Result<List<ProductListItemDto>>.Fail("No best sellers found", 404);
+					result = Result<List<ProductDto>>.Fail("No best sellers found", 404);
 				else
-					result = Result<List<ProductListItemDto>>.Ok(bestSellers, $"Found {bestSellers.Count} best sellers", 200);
+					result = Result<List<ProductDto>>.Ok(bestSellers, $"Found {bestSellers.Count} best sellers", 200);
 				BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, result, TimeSpan.FromMinutes(2), new[] { CACHE_TAG_PRODUCT_SEARCH }));
 				return result;
 			}
@@ -229,14 +236,14 @@ namespace E_Commers.Services.ProductServices
 			{
 				_logger.LogError(ex, "Error in GetBestSellersAsync");
 				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<List<ProductListItemDto>>.Fail("Error retrieving best sellers", 500);
+				return Result<List<ProductDto>>.Fail("Error retrieving best sellers", 500);
 			}
 		}
 
-		public async Task<Result<List<ProductListItemDto>>> AdvancedSearchAsync(AdvancedSearchDto searchCriteria, int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
+		public async Task<Result<List<ProductDto>>> AdvancedSearchAsync(AdvancedSearchDto searchCriteria, int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
 		{
 			string cacheKey = $"advsearch_{searchCriteria?.SearchTerm}_{searchCriteria?.Subcategoryid}_{searchCriteria?.Gender}_{searchCriteria?.FitType}_{searchCriteria?.MinPrice}_{searchCriteria?.MaxPrice}_{searchCriteria?.InStock}_{searchCriteria?.OnSale}_{searchCriteria?.SortBy}_{searchCriteria?.SortDescending}_{page}_{pageSize}_{isActive}_{deletedOnly}";
-			var cached = await _cacheManager.GetAsync<Result<List<ProductListItemDto>>>(cacheKey);
+			var cached = await _cacheManager.GetAsync<Result<List<ProductDto>>>(cacheKey);
 			if (cached != null)
 				return cached;
 			try
@@ -265,33 +272,7 @@ namespace E_Commers.Services.ProductServices
 					query = query.Where(p => p.fitType == (FitType)searchCriteria.FitType.Value);
 				}
 
-				if (searchCriteria.MinPrice.HasValue || searchCriteria.MaxPrice.HasValue)
-				{
-					if (searchCriteria.MinPrice.HasValue && searchCriteria.MaxPrice.HasValue)
-					{
-						query = query.Where(p =>
-							(p.Price >= searchCriteria.MinPrice.Value && p.Price <= searchCriteria.MaxPrice.Value)
-							||
-							(p.FinalPrice.HasValue && p.FinalPrice.Value >= searchCriteria.MinPrice.Value && p.FinalPrice.Value <= searchCriteria.MaxPrice.Value)
-						);
-					}
-					else if (searchCriteria.MinPrice.HasValue)
-					{
-						query = query.Where(p =>
-							p.Price >= searchCriteria.MinPrice.Value
-							||
-							(p.FinalPrice.HasValue && p.FinalPrice.Value >= searchCriteria.MinPrice.Value)
-						);
-					}
-					else if (searchCriteria.MaxPrice.HasValue)
-					{
-						query = query.Where(p =>
-							p.Price <= searchCriteria.MaxPrice.Value
-							||
-							(p.FinalPrice.HasValue && p.FinalPrice.Value <= searchCriteria.MaxPrice.Value)
-						);
-					}
-				}
+				
 
 				if (searchCriteria.InStock.HasValue)
 				{
@@ -334,35 +315,41 @@ namespace E_Commers.Services.ProductServices
 				var products = await query
 					.Skip((page - 1) * pageSize)
 					.Take(pageSize)
-					.Select(p => new ProductListItemDto
-					{
-						Id = p.Id,
-						Name = p.Name,
-						Description = p.Description,
-						AvailableQuantity = p.Quantity,
-						Gender = p.Gender,
-						SubCategoryId = p.SubCategoryId,
-						Price = p.Price,
-						PriceAfterDiscount = p.Discount != null && p.Discount.IsActive ? p.Price - (p.Price * (p.Discount.DiscountPercent / 100m)) : p.Price,
-						Discount = p.Discount != null ? new DiscountDto 
-						{ 
-							Id = p.Discount.Id, 
-							DiscountPercent = p.Discount.DiscountPercent, 
-							IsActive = p.Discount.IsActive,
-							StartDate = p.Discount.StartDate,
-							EndDate = p.Discount.EndDate,
-							Name = p.Discount.Name,
-							Description = p.Discount.Description
-						} : null,
-						Images = p.Images.Where(i => i.DeletedAt == null).Select(i => new ImageDto { Id = i.Id, Url = i.Url }).ToList()
-					})
+					.Select(maptoproductdto)
 					.ToListAsync();
+				if (searchCriteria.MinPrice.HasValue || searchCriteria.MaxPrice.HasValue)
+				{
+					if (searchCriteria.MinPrice.HasValue && searchCriteria.MaxPrice.HasValue)
+					{
+						products = products.Where(p =>
+							(p.Price >= searchCriteria.MinPrice.Value && p.Price <= searchCriteria.MaxPrice.Value)
+							||
+							(p.FinalPrice.HasValue && p.FinalPrice.Value >= searchCriteria.MinPrice.Value && p.FinalPrice.Value <= searchCriteria.MaxPrice.Value)
+						).ToList();
+					}
+					else if (searchCriteria.MinPrice.HasValue)
+					{
+						products = products.Where(p =>
+							p.Price >= searchCriteria.MinPrice.Value
+							||
+							(p.FinalPrice.HasValue && p.FinalPrice.Value >= searchCriteria.MinPrice.Value)
+						).ToList();
+					}
+					else if (searchCriteria.MaxPrice.HasValue)
+					{
+						products = products.Where(p =>
+							p.Price <= searchCriteria.MaxPrice.Value
+							||
+							(p.FinalPrice.HasValue && p.FinalPrice.Value <= searchCriteria.MaxPrice.Value)
+						).ToList();
+					}
+				}
 
-				Result<List<ProductListItemDto>> result;
+				Result<List<ProductDto>> result;
 				if (!products.Any())
-					result = Result<List<ProductListItemDto>>.Fail("No products found matching the search criteria", 404);
+					result = Result<List<ProductDto>>.Fail("No products found matching the search criteria", 404);
 				else
-					result = Result<List<ProductListItemDto>>.Ok(products, $"Found {products.Count} products matching search criteria", 200);
+					result = Result<List<ProductDto>>.Ok(products, $"Found {products.Count} products matching search criteria", 200);
 				BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, result, TimeSpan.FromMinutes(2), new[] { CACHE_TAG_PRODUCT_SEARCH }));
 				return result;
 			}
@@ -370,7 +357,7 @@ namespace E_Commers.Services.ProductServices
 			{
 				_logger.LogError(ex, "Error in AdvancedSearchAsync");
 				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<List<ProductListItemDto>>.Fail("Error performing advanced search", 500);
+				return Result<List<ProductDto>>.Fail("Error performing advanced search", 500);
 			}
 		}
 	}

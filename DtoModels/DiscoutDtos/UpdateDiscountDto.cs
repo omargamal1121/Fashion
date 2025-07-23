@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace E_Commers.DtoModels.DiscoutDtos
+namespace E_Commerce.DtoModels.DiscoutDtos
 {
 	public class UpdateDiscountDto
 	{
@@ -10,7 +10,6 @@ namespace E_Commers.DtoModels.DiscoutDtos
 		[Range(1, 100, ErrorMessage = "Discount percentage must be between 1 and 100")]
 		public decimal? DiscountPercent { get; set; }
 
-		public bool? IsActive { get; set; }
 
 		public DateTime? StartDate { get; set; }
 

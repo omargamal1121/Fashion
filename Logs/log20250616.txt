@@ -577,8 +577,8 @@ SELECT ROW_COUNT();
 2025-06-16 20:40:20.593 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 156.6801ms
 2025-06-16 20:40:29.539 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/Account/register - application/json 312
 2025-06-16 20:40:30.962 +03:00 [INF] Executing UserAuthenticationMiddleware
-2025-06-16 20:40:30.996 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.AccountController.RegisterAsync (E-Commerce)'
-2025-06-16 20:40:31.039 +03:00 [INF] Route matched with {action = "RegisterAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.AccountDtos.RegisterResponse]]] RegisterAsync(E_Commers.DtoModels.AccountDtos.RegisterDto) on controller E_Commers.Controllers.AccountController (E-Commerce).
+2025-06-16 20:40:30.996 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.AccountController.RegisterAsync (E-Commerce)'
+2025-06-16 20:40:31.039 +03:00 [INF] Route matched with {action = "RegisterAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.AccountDtos.RegisterResponse]]] RegisterAsync(E_Commerce.DtoModels.AccountDtos.RegisterDto) on controller E_Commerce.Controllers.AccountController (E-Commerce).
 2025-06-16 20:40:31.389 +03:00 [INF] In RegisterAsync Method 
 2025-06-16 20:40:31.398 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
 SELECT `a`.`Id`, `a`.`AccessFailedCount`, `a`.`ConcurrencyStamp`, `a`.`Discriminator`, `a`.`Email`, `a`.`EmailConfirmed`, `a`.`LockoutEnabled`, `a`.`LockoutEnd`, `a`.`NormalizedEmail`, `a`.`NormalizedUserName`, `a`.`PasswordHash`, `a`.`PhoneNumber`, `a`.`PhoneNumberConfirmed`, `a`.`SecurityStamp`, `a`.`TwoFactorEnabled`, `a`.`UserName`, `a`.`Age`, `a`.`CreateAt`, `a`.`DeletedAt`, `a`.`ImageId`, `a`.`LastVisit`, `a`.`Name`, `a`.`ProfilePicture`
@@ -621,14 +621,14 @@ UPDATE `AspNetUsers` SET `AccessFailedCount` = @p2, `Age` = @p3, `ConcurrencySta
 WHERE `Id` = @p23 AND `ConcurrencyStamp` = @p24;
 SELECT ROW_COUNT();
 2025-06-16 20:40:35.313 +03:00 [INF] User registered successfully.
-2025-06-16 20:40:35.364 +03:00 [INF] Executing CreatedAtActionResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.AccountDtos.RegisterResponse, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-06-16 20:40:35.394 +03:00 [INF] Executed action E_Commers.Controllers.AccountController.RegisterAsync (E-Commerce) in 4348.6903ms
-2025-06-16 20:40:35.396 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.AccountController.RegisterAsync (E-Commerce)'
+2025-06-16 20:40:35.364 +03:00 [INF] Executing CreatedAtActionResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.AccountDtos.RegisterResponse, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-06-16 20:40:35.394 +03:00 [INF] Executed action E_Commerce.Controllers.AccountController.RegisterAsync (E-Commerce) in 4348.6903ms
+2025-06-16 20:40:35.396 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.AccountController.RegisterAsync (E-Commerce)'
 2025-06-16 20:40:35.401 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/Account/register - 201 852 application/json; charset=utf-8 5862.4506ms
 2025-06-16 20:42:03.645 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/Account/Login - application/json 165
 2025-06-16 20:42:03.689 +03:00 [INF] Executing UserAuthenticationMiddleware
-2025-06-16 20:42:03.691 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.AccountController.LoginAsync (E-Commerce)'
-2025-06-16 20:42:03.700 +03:00 [INF] Route matched with {action = "LoginAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.TokenDtos.TokensDto]]] LoginAsync(E_Commers.DtoModels.AccountDtos.LoginDTo) on controller E_Commers.Controllers.AccountController (E-Commerce).
+2025-06-16 20:42:03.691 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce)'
+2025-06-16 20:42:03.700 +03:00 [INF] Route matched with {action = "LoginAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.TokenDtos.TokensDto]]] LoginAsync(E_Commerce.DtoModels.AccountDtos.LoginDTo) on controller E_Commerce.Controllers.AccountController (E-Commerce).
 2025-06-16 20:42:03.788 +03:00 [INF] In LoginAsync Method 
 2025-06-16 20:42:03.797 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
 SELECT `a`.`Id`, `a`.`AccessFailedCount`, `a`.`ConcurrencyStamp`, `a`.`Discriminator`, `a`.`Email`, `a`.`EmailConfirmed`, `a`.`LockoutEnabled`, `a`.`LockoutEnd`, `a`.`NormalizedEmail`, `a`.`NormalizedUserName`, `a`.`PasswordHash`, `a`.`PhoneNumber`, `a`.`PhoneNumberConfirmed`, `a`.`SecurityStamp`, `a`.`TwoFactorEnabled`, `a`.`UserName`, `a`.`Age`, `a`.`CreateAt`, `a`.`DeletedAt`, `a`.`ImageId`, `a`.`LastVisit`, `a`.`Name`, `a`.`ProfilePicture`
@@ -636,14 +636,14 @@ FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`NormalizedEmail` = @__normalizedEmail_0)
 LIMIT 2
 2025-06-16 20:42:03.931 +03:00 [WRN] Login failed: Incorrect password.
-2025-06-16 20:42:03.940 +03:00 [INF] Executing UnauthorizedObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.TokenDtos.TokensDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-06-16 20:42:03.951 +03:00 [INF] Executed action E_Commers.Controllers.AccountController.LoginAsync (E-Commerce) in 249.4053ms
-2025-06-16 20:42:03.952 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.AccountController.LoginAsync (E-Commerce)'
+2025-06-16 20:42:03.940 +03:00 [INF] Executing UnauthorizedObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.TokenDtos.TokensDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-06-16 20:42:03.951 +03:00 [INF] Executed action E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce) in 249.4053ms
+2025-06-16 20:42:03.952 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce)'
 2025-06-16 20:42:03.960 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/Account/Login - 401 683 application/json; charset=utf-8 314.2601ms
 2025-06-16 20:42:19.339 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/Account/Login - application/json 75
 2025-06-16 20:42:19.344 +03:00 [INF] Executing UserAuthenticationMiddleware
-2025-06-16 20:42:19.345 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.AccountController.LoginAsync (E-Commerce)'
-2025-06-16 20:42:19.346 +03:00 [INF] Route matched with {action = "LoginAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.TokenDtos.TokensDto]]] LoginAsync(E_Commers.DtoModels.AccountDtos.LoginDTo) on controller E_Commers.Controllers.AccountController (E-Commerce).
+2025-06-16 20:42:19.345 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce)'
+2025-06-16 20:42:19.346 +03:00 [INF] Route matched with {action = "LoginAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.TokenDtos.TokensDto]]] LoginAsync(E_Commerce.DtoModels.AccountDtos.LoginDTo) on controller E_Commerce.Controllers.AccountController (E-Commerce).
 2025-06-16 20:42:19.370 +03:00 [INF] In LoginAsync Method 
 2025-06-16 20:42:19.374 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
 SELECT `a`.`Id`, `a`.`AccessFailedCount`, `a`.`ConcurrencyStamp`, `a`.`Discriminator`, `a`.`Email`, `a`.`EmailConfirmed`, `a`.`LockoutEnabled`, `a`.`LockoutEnd`, `a`.`NormalizedEmail`, `a`.`NormalizedUserName`, `a`.`PasswordHash`, `a`.`PhoneNumber`, `a`.`PhoneNumberConfirmed`, `a`.`SecurityStamp`, `a`.`TwoFactorEnabled`, `a`.`UserName`, `a`.`Age`, `a`.`CreateAt`, `a`.`DeletedAt`, `a`.`ImageId`, `a`.`LastVisit`, `a`.`Name`, `a`.`ProfilePicture`
@@ -660,9 +660,9 @@ WHERE `a`.`UserId` = @__userId_0
 2025-06-16 20:42:19.685 +03:00 [INF] 🔑 Generating Refresh Token for User ID: 6a644472-75bd-413c-99b5-5e881b69b102
 2025-06-16 20:42:19.696 +03:00 [INF] RefreshToken Generated
 2025-06-16 20:42:19.696 +03:00 [INF] User logged in successfully.
-2025-06-16 20:42:19.698 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.TokenDtos.TokensDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-06-16 20:42:19.701 +03:00 [INF] Executed action E_Commers.Controllers.AccountController.LoginAsync (E-Commerce) in 353.3422ms
-2025-06-16 20:42:19.703 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.AccountController.LoginAsync (E-Commerce)'
+2025-06-16 20:42:19.698 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.TokenDtos.TokensDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-06-16 20:42:19.701 +03:00 [INF] Executed action E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce) in 353.3422ms
+2025-06-16 20:42:19.703 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce)'
 2025-06-16 20:42:19.704 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/Account/Login - 200 1786 application/json; charset=utf-8 365.3266ms
 2025-06-16 20:42:53.418 +03:00 [INF] Request starting HTTP/1.1 PATCH https://localhost:7288/api/Account/Upload-Photo - null 0
 2025-06-16 20:42:53.519 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -671,12 +671,12 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-06-16 20:42:53.559 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.AccountController.UploadPhotoAsync (E-Commerce)'
-2025-06-16 20:42:53.567 +03:00 [INF] Route matched with {action = "UploadPhotoAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.AccountDtos.UploadPhotoResponseDto]]] UploadPhotoAsync(E_Commers.DtoModels.AccountDtos.UploadPhotoDto) on controller E_Commers.Controllers.AccountController (E-Commerce).
+2025-06-16 20:42:53.559 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.AccountController.UploadPhotoAsync (E-Commerce)'
+2025-06-16 20:42:53.567 +03:00 [INF] Route matched with {action = "UploadPhotoAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.AccountDtos.UploadPhotoResponseDto]]] UploadPhotoAsync(E_Commerce.DtoModels.AccountDtos.UploadPhotoDto) on controller E_Commerce.Controllers.AccountController (E-Commerce).
 2025-06-16 20:42:53.583 +03:00 [WRN] ModelState errors: The image field is required.
-2025-06-16 20:42:53.584 +03:00 [INF] Executing BadRequestObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-06-16 20:42:53.587 +03:00 [INF] Executed action E_Commers.Controllers.AccountController.UploadPhotoAsync (E-Commerce) in 18.9898ms
-2025-06-16 20:42:53.591 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.AccountController.UploadPhotoAsync (E-Commerce)'
+2025-06-16 20:42:53.584 +03:00 [INF] Executing BadRequestObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-06-16 20:42:53.587 +03:00 [INF] Executed action E_Commerce.Controllers.AccountController.UploadPhotoAsync (E-Commerce) in 18.9898ms
+2025-06-16 20:42:53.591 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.AccountController.UploadPhotoAsync (E-Commerce)'
 2025-06-16 20:42:53.592 +03:00 [INF] Request finished HTTP/1.1 PATCH https://localhost:7288/api/Account/Upload-Photo - 400 117 application/json; charset=utf-8 174.993ms
 2025-06-16 20:43:13.939 +03:00 [INF] Request starting HTTP/1.1 PATCH https://localhost:7288/api/Account/Upload-Photo - multipart/form-data; boundary=--------------------------587185134363434708824453 76631
 2025-06-16 20:43:13.952 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -685,16 +685,16 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-06-16 20:43:13.969 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.AccountController.UploadPhotoAsync (E-Commerce)'
-2025-06-16 20:43:13.971 +03:00 [INF] Route matched with {action = "UploadPhotoAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.AccountDtos.UploadPhotoResponseDto]]] UploadPhotoAsync(E_Commers.DtoModels.AccountDtos.UploadPhotoDto) on controller E_Commers.Controllers.AccountController (E-Commerce).
+2025-06-16 20:43:13.969 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.AccountController.UploadPhotoAsync (E-Commerce)'
+2025-06-16 20:43:13.971 +03:00 [INF] Route matched with {action = "UploadPhotoAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.AccountDtos.UploadPhotoResponseDto]]] UploadPhotoAsync(E_Commerce.DtoModels.AccountDtos.UploadPhotoDto) on controller E_Commerce.Controllers.AccountController (E-Commerce).
 2025-06-16 20:43:14.018 +03:00 [INF] Executing UploadPhotoAsync
 2025-06-16 20:43:14.026 +03:00 [INF] Executing UploadPhotoAsync for user ID: 6a644472-75bd-413c-99b5-5e881b69b102
 2025-06-16 20:43:14.033 +03:00 [INF] 📥 Saving image to CustomerPhotos
 2025-06-16 20:43:14.036 +03:00 [WRN] Invalid MIME type: multipart/form-data
 2025-06-16 20:43:14.037 +03:00 [ERR] Failed to save image for user ID: 6a644472-75bd-413c-99b5-5e881b69b102
-2025-06-16 20:43:14.042 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.AccountDtos.UploadPhotoResponseDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-06-16 20:43:14.050 +03:00 [INF] Executed action E_Commers.Controllers.AccountController.UploadPhotoAsync (E-Commerce) in 71.2566ms
-2025-06-16 20:43:14.055 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.AccountController.UploadPhotoAsync (E-Commerce)'
+2025-06-16 20:43:14.042 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.AccountDtos.UploadPhotoResponseDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-06-16 20:43:14.050 +03:00 [INF] Executed action E_Commerce.Controllers.AccountController.UploadPhotoAsync (E-Commerce) in 71.2566ms
+2025-06-16 20:43:14.055 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.AccountController.UploadPhotoAsync (E-Commerce)'
 2025-06-16 20:43:14.253 +03:00 [INF] Request finished HTTP/1.1 PATCH https://localhost:7288/api/Account/Upload-Photo - 500 673 application/json; charset=utf-8 314.5852ms
 2025-06-16 20:44:31.099 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/index.html - null null
 2025-06-16 20:44:31.688 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/index.html - 200 null text/html;charset=utf-8 589.1581ms
@@ -716,8 +716,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-06-16 20:44:36.998 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.AccountController.UploadPhotoAsync (E-Commerce)'
-2025-06-16 20:44:37.003 +03:00 [INF] Route matched with {action = "UploadPhotoAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.AccountDtos.UploadPhotoResponseDto]]] UploadPhotoAsync(E_Commers.DtoModels.AccountDtos.UploadPhotoDto) on controller E_Commers.Controllers.AccountController (E-Commerce).
+2025-06-16 20:44:36.998 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.AccountController.UploadPhotoAsync (E-Commerce)'
+2025-06-16 20:44:37.003 +03:00 [INF] Route matched with {action = "UploadPhotoAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.AccountDtos.UploadPhotoResponseDto]]] UploadPhotoAsync(E_Commerce.DtoModels.AccountDtos.UploadPhotoDto) on controller E_Commerce.Controllers.AccountController (E-Commerce).
 2025-06-16 20:44:37.009 +03:00 [INF] Executing UploadPhotoAsync
 2025-06-16 20:44:37.010 +03:00 [INF] Executing UploadPhotoAsync for user ID: 6a644472-75bd-413c-99b5-5e881b69b102
 2025-06-16 20:44:37.015 +03:00 [INF] 📥 Saving image to CustomerPhotos
@@ -759,9 +759,9 @@ SELECT ROW_COUNT();
 2025-06-16 20:44:37.309 +03:00 [INF] Executing CreateAsync for entity UserOperationsLog
 2025-06-16 20:44:37.311 +03:00 [INF] UserOperationsLog added successfully (pending save)
 2025-06-16 20:44:37.317 +03:00 [INF] Successfully uploaded photo for user ID: 6a644472-75bd-413c-99b5-5e881b69b102
-2025-06-16 20:44:37.319 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.AccountDtos.UploadPhotoResponseDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-06-16 20:44:37.324 +03:00 [INF] Executed action E_Commers.Controllers.AccountController.UploadPhotoAsync (E-Commerce) in 319.1538ms
-2025-06-16 20:44:37.334 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.AccountController.UploadPhotoAsync (E-Commerce)'
+2025-06-16 20:44:37.319 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.AccountDtos.UploadPhotoResponseDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-06-16 20:44:37.324 +03:00 [INF] Executed action E_Commerce.Controllers.AccountController.UploadPhotoAsync (E-Commerce) in 319.1538ms
+2025-06-16 20:44:37.334 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.AccountController.UploadPhotoAsync (E-Commerce)'
 2025-06-16 20:44:37.336 +03:00 [INF] Request finished HTTP/1.1 PATCH https://localhost:7288/api/Account/Upload-Photo - 200 773 application/json; charset=utf-8 367.163ms
 2025-06-16 20:48:13.112 +03:00 [INF] Request starting HTTP/2 DELETE https://localhost:7288/api/Account/delete-account - null null
 2025-06-16 20:48:13.125 +03:00 [INF] CORS policy execution successful.
@@ -777,8 +777,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-06-16 20:49:05.527 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.AccountController.DeleteAsync (E-Commerce)'
-2025-06-16 20:49:05.535 +03:00 [INF] Route matched with {action = "DeleteAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.String]]] DeleteAsync() on controller E_Commers.Controllers.AccountController (E-Commerce).
+2025-06-16 20:49:05.527 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.AccountController.DeleteAsync (E-Commerce)'
+2025-06-16 20:49:05.535 +03:00 [INF] Route matched with {action = "DeleteAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.String]]] DeleteAsync() on controller E_Commerce.Controllers.AccountController (E-Commerce).
 2025-06-16 20:49:05.543 +03:00 [INF] In DeleteAsync Method
 2025-06-16 20:49:05.546 +03:00 [INF] Execute :DeleteAsync in services
 2025-06-16 20:49:05.558 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__p_0='?' (Size = 255)], CommandType='"Text"', CommandTimeout='30']
@@ -805,14 +805,14 @@ SELECT `Id`
 FROM `userOperationsLogs`
 WHERE ROW_COUNT() = 1 AND `Id` = LAST_INSERT_ID();
 2025-06-16 20:49:05.591 +03:00 [INF] Soft deleted is done
-2025-06-16 20:49:05.593 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-06-16 20:49:05.594 +03:00 [INF] Executed action E_Commers.Controllers.AccountController.DeleteAsync (E-Commerce) in 56.8114ms
-2025-06-16 20:49:05.596 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.AccountController.DeleteAsync (E-Commerce)'
+2025-06-16 20:49:05.593 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-06-16 20:49:05.594 +03:00 [INF] Executed action E_Commerce.Controllers.AccountController.DeleteAsync (E-Commerce) in 56.8114ms
+2025-06-16 20:49:05.596 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.AccountController.DeleteAsync (E-Commerce)'
 2025-06-16 20:49:05.597 +03:00 [INF] Request finished HTTP/1.1 DELETE https://localhost:7288/api/Account/delete-account - 200 620 application/json; charset=utf-8 135.6032ms
 2025-06-16 21:01:33.605 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/Account/register - application/json 312
 2025-06-16 21:01:33.645 +03:00 [INF] Executing UserAuthenticationMiddleware
-2025-06-16 21:01:33.646 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.AccountController.RegisterAsync (E-Commerce)'
-2025-06-16 21:01:33.654 +03:00 [INF] Route matched with {action = "RegisterAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.AccountDtos.RegisterResponse]]] RegisterAsync(E_Commers.DtoModels.AccountDtos.RegisterDto) on controller E_Commers.Controllers.AccountController (E-Commerce).
+2025-06-16 21:01:33.646 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.AccountController.RegisterAsync (E-Commerce)'
+2025-06-16 21:01:33.654 +03:00 [INF] Route matched with {action = "RegisterAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.AccountDtos.RegisterResponse]]] RegisterAsync(E_Commerce.DtoModels.AccountDtos.RegisterDto) on controller E_Commerce.Controllers.AccountController (E-Commerce).
 2025-06-16 21:01:33.681 +03:00 [INF] In RegisterAsync Method 
 2025-06-16 21:01:33.691 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
 SELECT `a`.`Id`, `a`.`AccessFailedCount`, `a`.`ConcurrencyStamp`, `a`.`Discriminator`, `a`.`Email`, `a`.`EmailConfirmed`, `a`.`LockoutEnabled`, `a`.`LockoutEnd`, `a`.`NormalizedEmail`, `a`.`NormalizedUserName`, `a`.`PasswordHash`, `a`.`PhoneNumber`, `a`.`PhoneNumberConfirmed`, `a`.`SecurityStamp`, `a`.`TwoFactorEnabled`, `a`.`UserName`, `a`.`Age`, `a`.`CreateAt`, `a`.`DeletedAt`, `a`.`ImageId`, `a`.`LastVisit`, `a`.`Name`, `a`.`ProfilePicture`
@@ -820,14 +820,14 @@ FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`NormalizedEmail` = @__normalizedEmail_0)
 LIMIT 2
 2025-06-16 21:01:33.697 +03:00 [WRN] Registration attempt with existing email.
-2025-06-16 21:01:33.704 +03:00 [INF] Executing ConflictObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.AccountDtos.RegisterResponse, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-06-16 21:01:33.708 +03:00 [INF] Executed action E_Commers.Controllers.AccountController.RegisterAsync (E-Commerce) in 43.6003ms
-2025-06-16 21:01:33.718 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.AccountController.RegisterAsync (E-Commerce)'
+2025-06-16 21:01:33.704 +03:00 [INF] Executing ConflictObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.AccountDtos.RegisterResponse, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-06-16 21:01:33.708 +03:00 [INF] Executed action E_Commerce.Controllers.AccountController.RegisterAsync (E-Commerce) in 43.6003ms
+2025-06-16 21:01:33.718 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.AccountController.RegisterAsync (E-Commerce)'
 2025-06-16 21:01:33.719 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/Account/register - 409 684 application/json; charset=utf-8 118.2493ms
 2025-06-16 21:01:45.421 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/Account/register - application/json 313
 2025-06-16 21:01:45.424 +03:00 [INF] Executing UserAuthenticationMiddleware
-2025-06-16 21:01:45.425 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.AccountController.RegisterAsync (E-Commerce)'
-2025-06-16 21:01:45.426 +03:00 [INF] Route matched with {action = "RegisterAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.AccountDtos.RegisterResponse]]] RegisterAsync(E_Commers.DtoModels.AccountDtos.RegisterDto) on controller E_Commers.Controllers.AccountController (E-Commerce).
+2025-06-16 21:01:45.425 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.AccountController.RegisterAsync (E-Commerce)'
+2025-06-16 21:01:45.426 +03:00 [INF] Route matched with {action = "RegisterAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.AccountDtos.RegisterResponse]]] RegisterAsync(E_Commerce.DtoModels.AccountDtos.RegisterDto) on controller E_Commerce.Controllers.AccountController (E-Commerce).
 2025-06-16 21:01:45.429 +03:00 [INF] In RegisterAsync Method 
 2025-06-16 21:01:45.438 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
 SELECT `a`.`Id`, `a`.`AccessFailedCount`, `a`.`ConcurrencyStamp`, `a`.`Discriminator`, `a`.`Email`, `a`.`EmailConfirmed`, `a`.`LockoutEnabled`, `a`.`LockoutEnd`, `a`.`NormalizedEmail`, `a`.`NormalizedUserName`, `a`.`PasswordHash`, `a`.`PhoneNumber`, `a`.`PhoneNumberConfirmed`, `a`.`SecurityStamp`, `a`.`TwoFactorEnabled`, `a`.`UserName`, `a`.`Age`, `a`.`CreateAt`, `a`.`DeletedAt`, `a`.`ImageId`, `a`.`LastVisit`, `a`.`Name`, `a`.`ProfilePicture`
@@ -840,14 +840,14 @@ FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`NormalizedUserName` = @__normalizedUserName_0)
 LIMIT 1
 2025-06-16 21:01:45.550 +03:00 [ERR] Failed to register user: Username 'CNFKQzweczHtNwqZPBFx203Waohw7S8HCA4b58H51uvhYgBGnSIPhfw4cqWM760YoP4Lnd8X7Pqsv2O4Tlsdn5cnI1Sc5xosM419Z3fn' is already taken.
-2025-06-16 21:01:45.552 +03:00 [INF] Executing BadRequestObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.AccountDtos.RegisterResponse, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-06-16 21:01:45.553 +03:00 [INF] Executed action E_Commers.Controllers.AccountController.RegisterAsync (E-Commerce) in 126.2598ms
-2025-06-16 21:01:45.555 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.AccountController.RegisterAsync (E-Commerce)'
+2025-06-16 21:01:45.552 +03:00 [INF] Executing BadRequestObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.AccountDtos.RegisterResponse, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-06-16 21:01:45.553 +03:00 [INF] Executed action E_Commerce.Controllers.AccountController.RegisterAsync (E-Commerce) in 126.2598ms
+2025-06-16 21:01:45.555 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.AccountController.RegisterAsync (E-Commerce)'
 2025-06-16 21:01:45.557 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/Account/register - 400 806 application/json; charset=utf-8 135.7799ms
 2025-06-16 21:02:07.014 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/Account/register - application/json 220
 2025-06-16 21:02:07.037 +03:00 [INF] Executing UserAuthenticationMiddleware
-2025-06-16 21:02:07.038 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.AccountController.RegisterAsync (E-Commerce)'
-2025-06-16 21:02:07.039 +03:00 [INF] Route matched with {action = "RegisterAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.AccountDtos.RegisterResponse]]] RegisterAsync(E_Commers.DtoModels.AccountDtos.RegisterDto) on controller E_Commers.Controllers.AccountController (E-Commerce).
+2025-06-16 21:02:07.038 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.AccountController.RegisterAsync (E-Commerce)'
+2025-06-16 21:02:07.039 +03:00 [INF] Route matched with {action = "RegisterAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.AccountDtos.RegisterResponse]]] RegisterAsync(E_Commerce.DtoModels.AccountDtos.RegisterDto) on controller E_Commerce.Controllers.AccountController (E-Commerce).
 2025-06-16 21:02:07.043 +03:00 [INF] In RegisterAsync Method 
 2025-06-16 21:02:07.067 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
 SELECT `a`.`Id`, `a`.`AccessFailedCount`, `a`.`ConcurrencyStamp`, `a`.`Discriminator`, `a`.`Email`, `a`.`EmailConfirmed`, `a`.`LockoutEnabled`, `a`.`LockoutEnd`, `a`.`NormalizedEmail`, `a`.`NormalizedUserName`, `a`.`PasswordHash`, `a`.`PhoneNumber`, `a`.`PhoneNumberConfirmed`, `a`.`SecurityStamp`, `a`.`TwoFactorEnabled`, `a`.`UserName`, `a`.`Age`, `a`.`CreateAt`, `a`.`DeletedAt`, `a`.`ImageId`, `a`.`LastVisit`, `a`.`Name`, `a`.`ProfilePicture`
@@ -890,7 +890,7 @@ UPDATE `AspNetUsers` SET `AccessFailedCount` = @p2, `Age` = @p3, `ConcurrencySta
 WHERE `Id` = @p23 AND `ConcurrencyStamp` = @p24;
 SELECT ROW_COUNT();
 2025-06-16 21:02:07.203 +03:00 [INF] User registered successfully.
-2025-06-16 21:02:07.205 +03:00 [INF] Executing CreatedAtActionResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.AccountDtos.RegisterResponse, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-06-16 21:02:07.211 +03:00 [INF] Executed action E_Commers.Controllers.AccountController.RegisterAsync (E-Commerce) in 170.7568ms
-2025-06-16 21:02:07.213 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.AccountController.RegisterAsync (E-Commerce)'
+2025-06-16 21:02:07.205 +03:00 [INF] Executing CreatedAtActionResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.AccountDtos.RegisterResponse, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-06-16 21:02:07.211 +03:00 [INF] Executed action E_Commerce.Controllers.AccountController.RegisterAsync (E-Commerce) in 170.7568ms
+2025-06-16 21:02:07.213 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.AccountController.RegisterAsync (E-Commerce)'
 2025-06-16 21:02:07.215 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/Account/register - 201 760 application/json; charset=utf-8 211.8226ms

@@ -1,16 +1,17 @@
-using E_Commers.DtoModels.DiscoutDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.Enums;
-using E_Commers.ErrorHnadling;
-using E_Commers.Interfaces;
-using E_Commers.Models;
-using E_Commers.Services.AdminOpreationServices;
-using E_Commers.Services.EmailServices;
-using E_Commers.UOW;
+using E_Commerce.DtoModels.DiscoutDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.Enums;
+using E_Commerce.ErrorHnadling;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
+using E_Commerce.Services.AdminOpreationServices;
+using E_Commerce.Services.Cache;
+using E_Commerce.Services.EmailServices;
+using E_Commerce.UOW;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
-namespace E_Commers.Services.Discount
+namespace E_Commerce.Services.Discount
 {
 	public class DiscountService : IDiscountService
 	{
@@ -19,6 +20,12 @@ namespace E_Commers.Services.Discount
 		private readonly ILogger<DiscountService> _logger;
 		private readonly IAdminOpreationServices _adminOpreationServices;
 		private readonly IErrorNotificationService _errorNotificationService;
+		private readonly ICacheManager _cacheManager;
+		private const string CACHE_TAG_PRODUCT_SEARCH = "product_search";
+
+		public const string CACHE_TAG_CATEGORY_WITH_DATA = "categorywithdata";
+		private static readonly string[] PRODUCT_CACHE_TAGS = new[] { CACHE_TAG_PRODUCT_SEARCH, CACHE_TAG_CATEGORY_WITH_DATA, PRODUCT_WITH_VARIANT_TAG };
+		private const string PRODUCT_WITH_VARIANT_TAG = "productwithvariantdata";
 
 		public DiscountService( 
 			IBackgroundJobClient backgroundJobClient,	
@@ -33,12 +40,59 @@ namespace E_Commers.Services.Discount
 			_adminOpreationServices = adminOpreationServices;
 			_errorNotificationService = errorNotificationService;
 		}
+		private void SchedulingToCheckDiscounts(int id,DateTime start,DateTime end)
+		{
+			
+			_backgroundJobClient.Schedule(() => CheckOnDiscount(id), start);
+			_backgroundJobClient.Schedule(() => CheckOnDiscount(id), end);
 
+		}
+		private void RemoveProductCaches()
+		{
+
+			BackgroundJob.Enqueue(() => _cacheManager.RemoveByTagsAsync(PRODUCT_CACHE_TAGS));
+		}
+		public async Task CheckOnDiscount(int id)
+		{
+			var discount = await _unitOfWork.Repository<E_Commerce.Models.Discount>().GetByIdAsync(id);
+			if( discount == null)
+			{
+				_logger.LogWarning($"Discount with ID {id} not found for check.");
+				return;
+			}
+			bool shouldDeactivate = discount.IsActive &&
+						((discount.EndDate != null && discount.EndDate < DateTime.UtcNow) || discount.DeletedAt != null);
+
+			bool shouldActivate = !discount.IsActive &&
+								  discount.StartDate != null &&
+								  discount.StartDate <= DateTime.UtcNow;
+
+			if (shouldDeactivate)
+			{
+				_logger.LogInformation($"Discount with ID {id} has expired. Deactivating it.");
+				discount.IsActive = false;
+
+			}
+			else if (shouldActivate)
+			{
+				_logger.LogInformation($"Discount with ID {id} is now valid. Activating it.");
+				discount.IsActive = true;
+			}
+
+			if (shouldDeactivate || shouldActivate)
+			{
+				_unitOfWork.Repository<E_Commerce.Models.Discount>().Update(discount);
+				RemoveProductCaches();
+				await _unitOfWork.CommitAsync();
+			}
+
+
+		}
 		public async Task<Result<List<DiscountDto>>> GetAllAsync()
 		{
 			try
 			{
-				var discounts = await _unitOfWork.Repository<Models.Discount>().GetAll()
+				var discounts = await _unitOfWork.Repository<Models.Discount>().GetAll().AsNoTracking()
 					.Where(d => d.DeletedAt == null)
 					.Select(d => new DiscountDto
 					{
@@ -48,6 +102,7 @@ namespace E_Commers.Services.Discount
 						DiscountPercent = d.DiscountPercent,
 						StartDate = d.StartDate,
 						EndDate = d.EndDate,
+						DeletedAt= d.DeletedAt,
 						IsActive = d.IsActive,
 						CreatedAt = d.CreatedAt,
 						ModifiedAt = d.ModifiedAt
@@ -67,15 +122,18 @@ namespace E_Commers.Services.Discount
 			}
 		}
 
-		public async Task<Result<DiscountDto>> GetDiscountByIdAsync(int id, bool? isActive = null, bool includeDeleted = false)
+		public async Task<Result<DiscountDto>> GetDiscountByIdAsync(int id, bool? isActive = null, bool? isDeleted = false)
 		{
 			try
 			{
-				var query = _unitOfWork.Repository<Models.Discount>().GetAll().Where(d => d.Id == id);
+				var query = _unitOfWork.Repository<Models.Discount>().GetAll().AsNoTracking().Where(d => d.Id == id);
 
-				if (!includeDeleted)
-					query = query.Where(d => d.DeletedAt == null);
-
+				if (isDeleted.HasValue){
+					if(isDeleted.Value)
+						query = query.Where(d => d.DeletedAt != null);
+					else
+						query = query.Where(d => d.DeletedAt == null);
+				}
 				if (isActive.HasValue)
 					query = query.Where(d => d.IsActive == isActive.Value);
 
@@ -107,18 +165,61 @@ namespace E_Commers.Services.Discount
 				return Result<DiscountDto>.Fail("Error retrieving discount", 500);
 			}
 		}
+		public async  Task<Result<List< DiscountDto>>> GetDiscountByNameAsync(string name, bool? isActive = null, bool? isDeleted = null)
+		{
+			try
+			{
+				var query = _unitOfWork.Repository<Models.Discount>().GetAll().AsNoTracking()
+					.Where(d => d.Name.Contains( name)||d.Description.Contains(name));
+				if (isDeleted.HasValue)
+				{
+					if (isDeleted.Value)
+						query = query.Where(d => d.DeletedAt != null);
+					else
+						query = query.Where(d => d.DeletedAt == null);
+				}
+				if (isActive.HasValue)
+					query = query.Where(d => d.IsActive == isActive.Value);
+				var discount = await query
+					.Select(d => new DiscountDto
+					{
+						Id = d.Id,
+						Name = d.Name,
+						Description = d.Description,
+						DiscountPercent = d.DiscountPercent,
+						StartDate = d.StartDate,
+						EndDate = d.EndDate,
+						IsActive = d.IsActive,
+						CreatedAt = d.CreatedAt,
+						ModifiedAt = d.ModifiedAt,
+						DeletedAt = d.DeletedAt
+					}).ToListAsync();
+
+				if (discount == null)
+					return Result<List<DiscountDto>>.Fail("Discount not found", 404);
+				return Result<List<DiscountDto>>.Ok(discount, "Discount retrieved successfully", 200);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, $"Error in GetDiscountByNameAsync for name: {name}");
+					_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
+				return Result<List<DiscountDto>>.Fail("Error retrieving discount", 500);
+			}
+		}
 
 		public async Task<Result<DiscountDto>> CreateDiscountAsync(CreateDiscountDto dto, string userId)
 		{
 			_logger.LogInformation($"Creating new discount: {dto.Name}");
 			try
 			{
-				// Validate dates
+				
 				if (dto.StartDate >= dto.EndDate)
 					return Result<DiscountDto>.Fail("Start date must be before end date", 400);
 
-				// Check for duplicate name
-				var existingDiscount = await _unitOfWork.Repository<Models.Discount>().GetAll()
+				if(dto.EndDate < DateTime.UtcNow)
+					return Result<DiscountDto>.Fail("End date cannot be in the past", 400);
+
+				var existingDiscount = await _unitOfWork.Repository<Models.Discount>().GetAll().AsNoTracking()
 					.FirstOrDefaultAsync(d => d.Name == dto.Name && d.DeletedAt == null);
 
 				if (existingDiscount != null)
@@ -133,7 +234,6 @@ namespace E_Commers.Services.Discount
 					DiscountPercent = dto.DiscountPercent,
 					StartDate = dto.StartDate,
 					EndDate = dto.EndDate,
-					IsActive = dto.IsActive ?? true
 				};
 
 				var result = await _unitOfWork.Repository<Models.Discount>().CreateAsync(discount);
@@ -152,6 +252,9 @@ namespace E_Commers.Services.Discount
 				);
 
 				await _unitOfWork.CommitAsync();
+				await transaction.CommitAsync();
+
+				SchedulingToCheckDiscounts(discount.Id, discount.StartDate, discount.EndDate);
 
 				var discountDto = new DiscountDto
 				{
@@ -186,19 +289,39 @@ namespace E_Commers.Services.Discount
 
 				using var transaction = await _unitOfWork.BeginTransactionAsync();
 
-				// Update fields
-				if (!string.IsNullOrEmpty(dto.Name))
+				// Track changes
+				var changes = new List<string>();
+
+				if (!string.IsNullOrEmpty(dto.Name) && dto.Name != discount.Name)
+				{
+					changes.Add($"Name changed from '{discount.Name}' to '{dto.Name}'");
 					discount.Name = dto.Name;
-				if (!string.IsNullOrEmpty(dto.Description))
+				}
+				if (!string.IsNullOrEmpty(dto.Description) && dto.Description != discount.Description)
+				{
+					changes.Add($"Description changed from '{discount.Description}' to '{dto.Description}'");
 					discount.Description = dto.Description;
-				if (dto.DiscountPercent.HasValue)
+				}
+				if (dto.DiscountPercent.HasValue && dto.DiscountPercent.Value != discount.DiscountPercent)
+				{
+					changes.Add($"DiscountPercent changed from {discount.DiscountPercent}% to {dto.DiscountPercent.Value}%");
 					discount.DiscountPercent = dto.DiscountPercent.Value;
-				if (dto.StartDate.HasValue)
+				}
+				if (dto.StartDate.HasValue && dto.StartDate.Value != discount.StartDate)
+				{
+					changes.Add($"StartDate changed from {discount.StartDate} to {dto.StartDate.Value}");
 					discount.StartDate = dto.StartDate.Value;
-				if (dto.EndDate.HasValue)
+				}
+				if (dto.EndDate.HasValue && dto.EndDate.Value != discount.EndDate&& discount.EndDate < DateTime.UtcNow)
+				{
+					changes.Add($"EndDate changed from {discount.EndDate} to {dto.EndDate.Value}");
 					discount.EndDate = dto.EndDate.Value;
-				if (dto.IsActive.HasValue)
-					discount.IsActive = dto.IsActive.Value;
+				}
+				
+				if (!changes.Any())
+				{
+					return Result<DiscountDto>.Fail("No changes were provided to update.", 400);
+				}
 
 				// Validate dates
 				if (discount.StartDate >= discount.EndDate)
@@ -211,15 +334,18 @@ namespace E_Commers.Services.Discount
 					return Result<DiscountDto>.Fail("Failed to update discount", 400);
 				}
 
-				// Log admin operation
+				// Log admin operation with detailed changes
+				string changeSummary = string.Join(" | ", changes);
 				await _adminOpreationServices.AddAdminOpreationAsync(
-					$"Update Discount {id}",
+					$"Updated Discount {id}: {changeSummary}",
 					Opreations.UpdateOpreation,
 					userId,
 					id
 				);
 
 				await _unitOfWork.CommitAsync();
+				await transaction.CommitAsync();
+				SchedulingToCheckDiscounts(discount.Id, discount.StartDate, discount.EndDate);
 
 				var discountDto = new DiscountDto
 				{
@@ -231,6 +357,7 @@ namespace E_Commers.Services.Discount
 					EndDate = discount.EndDate,
 					IsActive = discount.IsActive,
 					CreatedAt = discount.CreatedAt,
+					DeletedAt = discount.DeletedAt,
 					ModifiedAt = discount.ModifiedAt
 				};
 
@@ -239,27 +366,29 @@ namespace E_Commers.Services.Discount
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in UpdateDiscountAsync for id: {id}");
-				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
+				_backgroundJobClient.Enqueue(() => _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<DiscountDto>.Fail("Error updating discount", 500);
 			}
 		}
 
-		public async Task<Result<string>> DeleteDiscountAsync(int id, string userId)
+
+		public async Task<Result<bool>> DeleteDiscountAsync(int id, string userId)
 		{
 			_logger.LogInformation($"Deleting discount: {id}");
 			try
 			{
 				var discount = await _unitOfWork.Repository<Models.Discount>().GetByIdAsync(id);
 				if (discount == null)
-					return Result<string>.Fail("Discount not found", 404);
+					return Result<bool>.Fail("Discount not found", 404);
 
 				using var transaction = await _unitOfWork.BeginTransactionAsync();
 
 				var result = await _unitOfWork.Repository<Models.Discount>().SoftDeleteAsync(id);
+				discount.IsActive= false;
 				if (!result)
 				{
 					await transaction.RollbackAsync();
-					return Result<string>.Fail("Failed to delete discount", 400);
+					return Result<bool>.Fail("Failed to delete discount", 400);
 				}
 
 				// Log admin operation
@@ -271,13 +400,15 @@ namespace E_Commers.Services.Discount
 				);
 
 				await _unitOfWork.CommitAsync();
-				return Result<string>.Ok("Discount deleted successfully", "Discount deleted", 200);
+				await transaction.CommitAsync();
+				RemoveProductCaches();
+				return Result<bool>.Ok(true, "Discount deleted", 200);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in DeleteDiscountAsync for id: {id}");
 				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<string>.Fail("Error deleting discount", 500);
+				return Result<bool>.Fail("Error deleting discount", 500);
 			}
 		}
 
@@ -309,6 +440,8 @@ namespace E_Commers.Services.Discount
 				);
 
 				await _unitOfWork.CommitAsync();
+				await transaction.CommitAsync();
+				RemoveProductCaches();
 
 				var discountDto = new DiscountDto
 				{
@@ -333,14 +466,19 @@ namespace E_Commers.Services.Discount
 			}
 		}
 
-		public async Task<Result<List<DiscountDto>>> FilterAsync(string? search, bool? isActive, bool includeDeleted, int page, int pageSize, string role)
+		public async Task<Result<List<DiscountDto>>> FilterAsync(string? search, bool? isActive, bool? IsDeleted, int page, int pageSize, string role)
 		{
 			try
 			{
-				var query = _unitOfWork.Repository<Models.Discount>().GetAll();
+				var query = _unitOfWork.Repository<Models.Discount>().GetAll().AsNoTracking();
 
-				if (!includeDeleted)
-					query = query.Where(d => d.DeletedAt == null);
+				if(IsDeleted.HasValue)
+				{
+					if (IsDeleted.Value)
+						query = query.Where(d => d.DeletedAt != null);
+					else
+						query = query.Where(d => d.DeletedAt == null);
+				}
 
 				if (!string.IsNullOrWhiteSpace(search))
 					query = query.Where(d => d.Name.Contains(search) || d.Description.Contains(search));
@@ -386,7 +524,7 @@ namespace E_Commers.Services.Discount
 			try
 			{
 				var now = DateTime.UtcNow;
-				var discounts = await _unitOfWork.Repository<Models.Discount>().GetAll()
+				var discounts = await _unitOfWork.Repository<Models.Discount>().GetAll().AsNoTracking()
 					.Where(d => d.DeletedAt == null && 
 						d.IsActive && 
 						d.StartDate <= now && 
@@ -422,8 +560,10 @@ namespace E_Commers.Services.Discount
 			try
 			{
 				var now = DateTime.UtcNow;
-				var discounts = await _unitOfWork.Repository<Models.Discount>().GetAll()
+
+				var expiredDiscounts = await _unitOfWork.Repository<Models.Discount>().GetAll().AsNoTracking()
 					.Where(d => d.DeletedAt == null && d.EndDate < now)
+					.OrderByDescending(d => d.EndDate)
 					.Select(d => new DiscountDto
 					{
 						Id = d.Id,
@@ -437,26 +577,29 @@ namespace E_Commers.Services.Discount
 					})
 					.ToListAsync();
 
-				if (!discounts.Any())
-					return Result<List<DiscountDto>>.Fail("No expired discounts found", 404);
+				if (expiredDiscounts.Count == 0)
+					return Result<List<DiscountDto>>.Ok(new List<DiscountDto>(), "No expired discounts found", 200);
 
-				return Result<List<DiscountDto>>.Ok(discounts, "Expired discounts retrieved successfully", 200);
+				return Result<List<DiscountDto>>.Ok(expiredDiscounts, "Expired discounts retrieved successfully", 200);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in GetExpiredDiscountsAsync");
-				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
+				_backgroundJobClient.Enqueue(() => _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<DiscountDto>>.Fail("Error retrieving expired discounts", 500);
 			}
 		}
+
 
 		public async Task<Result<List<DiscountDto>>> GetUpcomingDiscountsAsync()
 		{
 			try
 			{
 				var now = DateTime.UtcNow;
-				var discounts = await _unitOfWork.Repository<Models.Discount>().GetAll()
+
+				var upcomingDiscounts = await _unitOfWork.Repository<Models.Discount>().GetAll().AsNoTracking()
 					.Where(d => d.DeletedAt == null && d.StartDate > now)
+					.OrderBy(d => d.StartDate)
 					.Select(d => new DiscountDto
 					{
 						Id = d.Id,
@@ -470,24 +613,25 @@ namespace E_Commers.Services.Discount
 					})
 					.ToListAsync();
 
-				if (!discounts.Any())
-					return Result<List<DiscountDto>>.Fail("No upcoming discounts found", 404);
+				if (upcomingDiscounts.Count == 0)
+					return Result<List<DiscountDto>>.Ok(new List<DiscountDto>(), "No upcoming discounts found", 200); // 200 + empty list
 
-				return Result<List<DiscountDto>>.Ok(discounts, "Upcoming discounts retrieved successfully", 200);
+				return Result<List<DiscountDto>>.Ok(upcomingDiscounts, "Upcoming discounts retrieved successfully", 200);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in GetUpcomingDiscountsAsync");
-				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
+				_backgroundJobClient.Enqueue(() => _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<DiscountDto>>.Fail("Error retrieving upcoming discounts", 500);
 			}
 		}
+
 
 		public async Task<Result<List<DiscountDto>>> GetDiscountsByCategoryAsync(int categoryId)
 		{
 			try
 			{
-				var discounts = await _unitOfWork.Repository<Models.Discount>().GetAll()
+				var discounts = await _unitOfWork.Repository<Models.Discount>().GetAll().AsNoTracking()
 					.Where(d => d.DeletedAt == null && d.CategoryId == categoryId)
 					.Select(d => new DiscountDto
 					{
@@ -514,18 +658,26 @@ namespace E_Commers.Services.Discount
 				return Result<List<DiscountDto>>.Fail("Error retrieving category discounts", 500);
 			}
 		}
-
-		public async Task<Result<string>> ActivateDiscountAsync(int id, string userId)
+		public async Task<Result<bool>> ActivateDiscountAsync(int id, string userId)
 		{
 			_logger.LogInformation($"Activating discount: {id}");
 			try
 			{
 				var discount = await _unitOfWork.Repository<Models.Discount>().GetByIdAsync(id);
 				if (discount == null)
-					return Result<string>.Fail("Discount not found", 404);
+					return Result<bool>.Fail("Discount not found", 404);
 
 				if (discount.IsActive)
-					return Result<string>.Fail("Discount is already active", 400);
+					return Result<bool>.Fail("Discount is already active", 400);
+
+				var now = DateTime.UtcNow;
+
+				// Optional: prevent activating expired discounts
+				if (discount.EndDate < now)
+					return Result<bool>.Fail("Cannot activate a discount that has already expired", 400);
+
+				if(discount.StartDate>now)
+					return Result<bool>.Fail($"Cannot activate a discount that Start Time {discount.StartDate}", 400);
 
 				using var transaction = await _unitOfWork.BeginTransactionAsync();
 
@@ -534,66 +686,72 @@ namespace E_Commers.Services.Discount
 				if (!result)
 				{
 					await transaction.RollbackAsync();
-					return Result<string>.Fail("Failed to activate discount", 400);
+					return Result<bool>.Fail("Failed to activate discount", 400);
 				}
 
-				// Log admin operation
 				await _adminOpreationServices.AddAdminOpreationAsync(
-					$"Activate Discount {id}",
-					Opreations.UpdateOpreation,
+					 $"Activated discount '{discount.Name}' (ID: {discount.Id})",
+					 Opreations.UpdateOpreation,
 					userId,
-					id
+					discount.Id
 				);
 
 				await _unitOfWork.CommitAsync();
-				return Result<string>.Ok("Discount activated successfully", "Discount activated", 200);
+				await transaction.CommitAsync();
+				RemoveProductCaches();
+				return Result<bool>.Ok(true, "Discount activated successfully", 200);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in ActivateDiscountAsync for id: {id}");
-				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<string>.Fail("Error activating discount", 500);
+				_backgroundJobClient.Enqueue(() => _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
+				return Result<bool>.Fail("Error activating discount", 500);
 			}
 		}
 
-		public async Task<Result<string>> DeactivateDiscountAsync(int id, string userId)
+		public async Task<Result<bool>> DeactivateDiscountAsync(int id, string userId)
 		{
 			_logger.LogInformation($"Deactivating discount: {id}");
+
 			try
 			{
 				var discount = await _unitOfWork.Repository<Models.Discount>().GetByIdAsync(id);
 				if (discount == null)
-					return Result<string>.Fail("Discount not found", 404);
+					return Result<bool>.Fail("Discount not found", 404);
 
 				if (!discount.IsActive)
-					return Result<string>.Fail("Discount is already inactive", 400);
+					return Result<bool>.Fail("Discount is already inactive", 400);
 
 				using var transaction = await _unitOfWork.BeginTransactionAsync();
 
 				discount.IsActive = false;
 				var result = _unitOfWork.Repository<Models.Discount>().Update(discount);
+
 				if (!result)
 				{
 					await transaction.RollbackAsync();
-					return Result<string>.Fail("Failed to deactivate discount", 400);
+					return Result<bool>.Fail("Failed to deactivate discount", 400);
 				}
 
-				// Log admin operation
 				await _adminOpreationServices.AddAdminOpreationAsync(
-					$"Deactivate Discount {id}",
-					Opreations.UpdateOpreation,
-					userId,
-					id
+					description: $"Deactivated discount '{discount.Name}' (ID: {discount.Id})",
+					opreation: Opreations.UpdateOpreation,
+					 userid: userId,
+					itemid: discount.Id
 				);
 
 				await _unitOfWork.CommitAsync();
-				return Result<string>.Ok("Discount deactivated successfully", "Discount deactivated", 200);
+				await transaction.CommitAsync();
+				RemoveProductCaches();
+
+				return Result<bool>.Ok(true, "Discount deactivated successfully", 200);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in DeactivateDiscountAsync for id: {id}");
-				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<string>.Fail("Error deactivating discount", 500);
+				_backgroundJobClient.Enqueue(() => _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
+
+				return Result<bool>.Fail("Error deactivating discount", 500);
 			}
 		}
 
@@ -602,23 +760,30 @@ namespace E_Commers.Services.Discount
 			try
 			{
 				var now = DateTime.UtcNow;
-				var discount = await _unitOfWork.Repository<Models.Discount>().GetAll()
+
+				var discount = await _unitOfWork.Repository<Models.Discount>()
+					.GetAll().AsNoTracking()
 					.Where(d => d.Id == id && d.DeletedAt == null)
 					.FirstOrDefaultAsync();
 
 				if (discount == null)
 					return Result<bool>.Ok(false, "Discount not found", 200);
 
-				var isValid = discount.IsActive && 
-					discount.StartDate <= now && 
-					discount.EndDate >= now;
+				if (!discount.IsActive)
+					return Result<bool>.Ok(false, "Discount is not active", 200);
 
-				return Result<bool>.Ok(isValid, "Discount validation completed", 200);
+				if (discount.StartDate > now)
+					return Result<bool>.Ok(false, "Discount has not started yet", 200);
+
+				if (discount.EndDate < now)
+					return Result<bool>.Ok(false, "Discount has expired", 200);
+
+				return Result<bool>.Ok(true, "Discount is valid", 200);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in IsDiscountValidAsync for id: {id}");
-				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
+				_backgroundJobClient.Enqueue(() => _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<bool>.Fail("Error validating discount", 500);
 			}
 		}

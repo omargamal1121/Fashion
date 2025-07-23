@@ -1,6 +1,6 @@
-using E_Commers.Models;
+using E_Commerce.Models;
 
-namespace E_Commers.Interfaces
+namespace E_Commerce.Interfaces
 {
     public interface ICartRepository : IRepository<Cart>
     {

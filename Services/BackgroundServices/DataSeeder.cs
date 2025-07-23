@@ -1,4 +1,4 @@
-﻿using E_Commers.Models;
+﻿using E_Commerce.Models;
 using Microsoft.AspNetCore.Identity;
 
 public static class DataSeeder

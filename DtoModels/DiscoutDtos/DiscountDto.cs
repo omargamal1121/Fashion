@@ -1,9 +1,9 @@
-﻿using E_Commers.DtoModels.ProductDtos;
-using E_Commers.DtoModels.Shared;
-using E_Commers.Models;
+﻿using E_Commerce.DtoModels.ProductDtos;
+using E_Commerce.DtoModels.Shared;
+using E_Commerce.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace E_Commers.DtoModels.DiscoutDtos
+namespace E_Commerce.DtoModels.DiscoutDtos
 {
 	public class DiscountDto:BaseDto
 	{

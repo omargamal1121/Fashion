@@ -1,10 +1,10 @@
-﻿using E_Commers.Models;
+﻿using E_Commerce.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Emit;
 
-namespace E_Commers.Context
+namespace E_Commerce.Context
 {
 	public class AppDbContext : IdentityDbContext
 	{

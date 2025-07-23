@@ -1,6 +1,6 @@
-using E_Commers.DtoModels.Responses;
+using E_Commerce.DtoModels.Responses;
 
-namespace E_Commers.Services.AccountServices.AccountManagement
+namespace E_Commerce.Services.AccountServices.AccountManagement
 {
     public interface IAccountManagementService
     {

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace E_Commers.Models
+namespace E_Commerce.Models
 {
     public class ReturnRequest
     {

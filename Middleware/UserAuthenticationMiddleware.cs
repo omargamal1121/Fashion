@@ -1,7 +1,7 @@
 using System.Security.Claims;
-using E_Commers.DtoModels.Responses;
+using E_Commerce.DtoModels.Responses;
 
-namespace E_Commers.Middleware
+namespace E_Commerce.Middleware
 {
     public class UserAuthenticationMiddleware
     {

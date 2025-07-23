@@ -1,7 +1,7 @@
-using E_Commers.DtoModels.Responses;
-using E_Commers.DtoModels.TokenDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.DtoModels.TokenDtos;
 
-namespace E_Commers.Services.AccountServices.Authentication
+namespace E_Commerce.Services.AccountServices.Authentication
 {
     public interface IAuthenticationService
     {

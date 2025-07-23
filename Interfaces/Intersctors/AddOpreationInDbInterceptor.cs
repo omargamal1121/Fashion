@@ -1,12 +1,12 @@
-﻿using E_Commers.Enums;
-using E_Commers.Models;
+﻿using E_Commerce.Enums;
+using E_Commerce.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Security.Claims;
 using System.Threading;
 
-namespace E_Commers.Interfaces.Intersctors
+namespace E_Commerce.Interfaces.Intersctors
 {
 	public class AddOperationInDbInterceptor : SaveChangesInterceptor
 	{

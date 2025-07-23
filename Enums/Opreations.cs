@@ -1,4 +1,4 @@
-﻿namespace E_Commers.Enums
+﻿namespace E_Commerce.Enums
 {
 	
 	public enum Opreations

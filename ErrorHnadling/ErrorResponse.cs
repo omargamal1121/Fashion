@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace E_Commers.ErrorHnadling
+namespace E_Commerce.ErrorHnadling
 {
 	public class ErrorResponse
 	{

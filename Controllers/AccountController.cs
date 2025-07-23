@@ -1,23 +1,23 @@
-﻿using E_Commers.DtoModels;
-using E_Commers.DtoModels.AccountDtos;
+﻿using E_Commerce.DtoModels;
+using E_Commerce.DtoModels.AccountDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
-using E_Commers.Interfaces;
-using E_Commers.Services.AccountServices;
-using E_Commers.DtoModels.Responses;
-using E_Commers.DtoModels.TokenDtos;
-using E_Commers.ErrorHnadling;
+using E_Commerce.Interfaces;
+using E_Commerce.Services.AccountServices;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.DtoModels.TokenDtos;
+using E_Commerce.ErrorHnadling;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using System.ComponentModel.DataAnnotations;
-using E_Commers.Services.EmailServices;
+using E_Commerce.Services.EmailServices;
 using Microsoft.AspNetCore.RateLimiting;
-using E_Commers.Services.AccountServices.Shared;
-using E_Commers.Services;
+using E_Commerce.Services.AccountServices.Shared;
+using E_Commerce.Services;
 using Hangfire;
 
-namespace E_Commers.Controllers
+namespace E_Commerce.Controllers
 {
 	/// <summary>
 	/// Controller for handling user account operations

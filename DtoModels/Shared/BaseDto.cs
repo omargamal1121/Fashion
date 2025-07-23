@@ -1,9 +1,9 @@
-﻿using E_Commers.Models;
+﻿using E_Commerce.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace E_Commers.DtoModels.Shared
+namespace E_Commerce.DtoModels.Shared
 {
 	public class BaseDto
 	{

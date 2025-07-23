@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using E_Commers.Enums;
-using E_Commers.Models;
+using E_Commerce.Enums;
+using E_Commerce.Models;
 using Microsoft.AspNetCore.Http;
 
-namespace E_Commers.DtoModels.ProductDtos
+namespace E_Commerce.DtoModels.ProductDtos
 {
 	public class UpdateProductDto
 	{

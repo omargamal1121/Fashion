@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualBasic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using E_Commers.Enums;
+using E_Commerce.Enums;
 
-namespace E_Commers.Models
+namespace E_Commerce.Models
 {
 	public class Product : BaseEntity
 	{
@@ -49,7 +49,7 @@ namespace E_Commers.Models
 		public ICollection<Review> Reviews { get; set; } = new List<Review>();
 		public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
 		public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
-		public decimal? FinalPrice { get; set; }
+		
 	
 
 

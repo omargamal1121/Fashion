@@ -1,24 +1,24 @@
 using AutoMapper;
-using E_Commers.DtoModels.CategoryDtos;
+using E_Commerce.DtoModels.CategoryDtos;
 
-using E_Commers.DtoModels.ImagesDtos;
-using E_Commers.DtoModels.ProductDtos;
-using E_Commers.DtoModels.SubCategorydto;
-using E_Commers.Enums;
+using E_Commerce.DtoModels.ImagesDtos;
+using E_Commerce.DtoModels.ProductDtos;
+using E_Commerce.DtoModels.SubCategorydto;
+using E_Commerce.Enums;
 
-using E_Commers.Interfaces;
-using E_Commers.Models;
-using E_Commers.Services.AdminOpreationServices;
-using E_Commers.Services.Cache;
-using E_Commers.Services.EmailServices;
-using E_Commers.UOW;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
+using E_Commerce.Services.AdminOpreationServices;
+using E_Commerce.Services.Cache;
+using E_Commerce.Services.EmailServices;
+using E_Commerce.UOW;
 using Hangfire;
 
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 
-namespace E_Commers.Services.SubCategoryServices
+namespace E_Commerce.Services.SubCategoryServices
 {
     public class SubCategoryServices : ISubCategoryServices
     {
@@ -148,10 +148,11 @@ namespace E_Commers.Services.SubCategoryServices
                     SubCategoryId = p.SubCategoryId,
                     CreatedAt = p.CreatedAt,
                     DiscountPrecentage= p.Discount.DiscountPercent,
-                    FinalPrice= p.FinalPrice,
-                    DiscountName = p.Discount.Name,
-                    EndAt = p.Discount.EndDate,
-                    fitType = p.fitType,
+					FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (   p.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(p.Price - (p.Discount.DiscountPercent * p.Price)) : p.Price,
+
+					DiscountName = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (  p.Discount.EndDate > DateTime.UtcNow)) ?p.Discount.Name : null,
+					EndAt = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (   p.Discount.EndDate > DateTime.UtcNow)) ?p.Discount.EndDate : null,
+					fitType = p.fitType,
                     Gender=p.Gender,
    
 					ModifiedAt = p.ModifiedAt,
@@ -482,9 +483,10 @@ namespace E_Commers.Services.SubCategoryServices
 				CreatedAt = p.CreatedAt,
 				DeletedAt = p.DeletedAt,
 				Description = p.Description,
-				FinalPrice = p.FinalPrice,
-				DiscountName = p.Discount.Name,
-				DiscountPrecentage = p.Discount.DiscountPercent,
+				FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && ( p.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(p.Price - (p.Discount.DiscountPercent * p.Price)) : p.Price,
+
+				DiscountName = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && ( p.Discount.EndDate > DateTime.UtcNow)) ?p.Discount.Name : null,
+				DiscountPrecentage = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.DiscountPercent:null,
 				EndAt = p.Discount.EndDate,
 				Id = p.Id,
 				Name = p.Name,

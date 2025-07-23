@@ -103,8 +103,8 @@ LIMIT 2
 2025-06-11 05:21:24.816 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/favicon-32x32.png - 200 628 image/png 33.6373ms
 2025-06-11 05:26:09.987 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/Account/Login - application/json 77
 2025-06-11 05:26:10.041 +03:00 [INF] Executing UserAuthenticationMiddleware
-2025-06-11 05:26:10.056 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.AccountController.LoginAsync (E-Commerce)'
-2025-06-11 05:26:10.091 +03:00 [INF] Route matched with {action = "LoginAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.TokenDtos.TokensDto]]] LoginAsync(E_Commers.DtoModels.AccountDtos.LoginDTo) on controller E_Commers.Controllers.AccountController (E-Commerce).
+2025-06-11 05:26:10.056 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce)'
+2025-06-11 05:26:10.091 +03:00 [INF] Route matched with {action = "LoginAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.TokenDtos.TokensDto]]] LoginAsync(E_Commerce.DtoModels.AccountDtos.LoginDTo) on controller E_Commerce.Controllers.AccountController (E-Commerce).
 2025-06-11 05:26:10.433 +03:00 [INF] In LoginAsync Method 
 2025-06-11 05:26:10.458 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
 SELECT `a`.`Id`, `a`.`AccessFailedCount`, `a`.`ConcurrencyStamp`, `a`.`Discriminator`, `a`.`Email`, `a`.`EmailConfirmed`, `a`.`LockoutEnabled`, `a`.`LockoutEnd`, `a`.`NormalizedEmail`, `a`.`NormalizedUserName`, `a`.`PasswordHash`, `a`.`PhoneNumber`, `a`.`PhoneNumberConfirmed`, `a`.`SecurityStamp`, `a`.`TwoFactorEnabled`, `a`.`UserName`, `a`.`Age`, `a`.`CreateAt`, `a`.`DeletedAt`, `a`.`ImageUrl`, `a`.`LastVisit`, `a`.`Name`, `a`.`ProfilePicture`
@@ -121,9 +121,9 @@ WHERE `a`.`UserId` = @__userId_0
 2025-06-11 05:26:10.763 +03:00 [INF] 🔑 Generating Refresh Token for User ID: 123d445b-9783-46a5-aa55-7dd3db78dacb
 2025-06-11 05:26:10.773 +03:00 [INF] RefreshToken Generated
 2025-06-11 05:26:10.774 +03:00 [INF] User logged in successfully.
-2025-06-11 05:26:10.814 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.TokenDtos.TokensDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-06-11 05:26:10.872 +03:00 [INF] Executed action E_Commers.Controllers.AccountController.LoginAsync (E-Commerce) in 759.7063ms
-2025-06-11 05:26:10.960 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.AccountController.LoginAsync (E-Commerce)'
+2025-06-11 05:26:10.814 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.TokenDtos.TokensDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-06-11 05:26:10.872 +03:00 [INF] Executed action E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce) in 759.7063ms
+2025-06-11 05:26:10.960 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce)'
 2025-06-11 05:26:10.969 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/Account/Login - 200 1654 application/json; charset=utf-8 982.1992ms
 2025-06-11 05:29:34.571 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:7288/api/Product - null null
 2025-06-11 05:29:34.668 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -132,8 +132,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-06-11 05:29:34.826 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.ProductController.GetAllProducts (E-Commerce)'
-2025-06-11 05:29:34.837 +03:00 [INF] Route matched with {action = "GetAllProducts", controller = "Product"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commers.DtoModels.ProductDtos.ProductDto]]]] GetAllProducts() on controller E_Commers.Controllers.ProductController (E-Commerce).
+2025-06-11 05:29:34.826 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.ProductController.GetAllProducts (E-Commerce)'
+2025-06-11 05:29:34.837 +03:00 [INF] Route matched with {action = "GetAllProducts", controller = "Product"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commerce.DtoModels.ProductDtos.ProductDto]]]] GetAllProducts() on controller E_Commerce.Controllers.ProductController (E-Commerce).
 2025-06-11 05:29:34.849 +03:00 [INF] Executing GetAllProducts
 2025-06-11 05:29:34.857 +03:00 [INF] Execute GetAll for entity Product
 2025-06-11 05:29:34.867 +03:00 [INF] Data retrieved from Database
@@ -141,7 +141,7 @@ LIMIT 1
 SELECT `p`.`Id`, `p`.`CategoryId`, `p`.`CreatedAt`, `p`.`DeletedAt`, `p`.`Description`, `p`.`DiscountId`, `p`.`ImagesUrl`, `p`.`ModifiedAt`, `p`.`Name`, `p`.`Price`, `p`.`Quantity`
 FROM `Products` AS `p`
 WHERE `p`.`DeletedAt` IS NULL
-2025-06-11 05:29:34.992 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commers.DtoModels.ProductDtos.ProductDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-06-11 05:29:35.026 +03:00 [INF] Executed action E_Commers.Controllers.ProductController.GetAllProducts (E-Commerce) in 184.3682ms
-2025-06-11 05:29:35.032 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.ProductController.GetAllProducts (E-Commerce)'
+2025-06-11 05:29:34.992 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commerce.DtoModels.ProductDtos.ProductDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-06-11 05:29:35.026 +03:00 [INF] Executed action E_Commerce.Controllers.ProductController.GetAllProducts (E-Commerce) in 184.3682ms
+2025-06-11 05:29:35.032 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.ProductController.GetAllProducts (E-Commerce)'
 2025-06-11 05:29:35.035 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:7288/api/Product - 200 580 application/json; charset=utf-8 463.3832ms

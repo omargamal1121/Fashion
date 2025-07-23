@@ -1,9 +1,9 @@
-﻿using E_Commers.Enums;
-using E_Commers.Models;
-using E_Commers.Services.Category;
-using E_Commers.UOW;
+﻿using E_Commerce.Enums;
+using E_Commerce.Models;
+using E_Commerce.Services.Category;
+using E_Commerce.UOW;
 
-namespace E_Commers.Services.AdminOpreationServices
+namespace E_Commerce.Services.AdminOpreationServices
 {
 	public class AdminOpreationServices : IAdminOpreationServices
 	{

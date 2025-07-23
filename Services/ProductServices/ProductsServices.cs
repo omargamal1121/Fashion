@@ -1,23 +1,23 @@
 ﻿using AutoMapper;
-using E_Commers.DtoModels.CategoryDtos;
-using E_Commers.DtoModels.DiscoutDtos;
-using E_Commers.DtoModels.ImagesDtos;
-using E_Commers.DtoModels.ProductDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.Enums;
-using E_Commers.ErrorHnadling;
-using E_Commers.Interfaces;
-using E_Commers.Models;
-using E_Commers.Services.AdminOpreationServices;
-using E_Commers.Services.EmailServices;
-using E_Commers.UOW;
+using E_Commerce.DtoModels.CategoryDtos;
+using E_Commerce.DtoModels.DiscoutDtos;
+using E_Commerce.DtoModels.ImagesDtos;
+using E_Commerce.DtoModels.ProductDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.Enums;
+using E_Commerce.ErrorHnadling;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
+using E_Commerce.Services.AdminOpreationServices;
+using E_Commerce.Services.EmailServices;
+using E_Commerce.UOW;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using E_Commers.Services.ProductServices; // For IProductSearchService and AdvancedSearchDto
+using E_Commerce.Services.ProductServices; // For IProductSearchService and AdvancedSearchDto
 
-namespace E_Commers.Services.ProductServices
+namespace E_Commerce.Services.ProductServices
 {
 	public interface IProductsServices
 	{
@@ -29,9 +29,9 @@ namespace E_Commers.Services.ProductServices
 		Task<Result<ProductDto>> RestoreProductAsync(int id, string userId);
 		Task<Result<List<ProductDto>>> GetProductsBySubCategoryId(int subCategoryId, bool? isActive, bool? deletedOnly);
 		// Search operations (delegated to ProductSearchService)
-		Task<Result<List<ProductListItemDto>>> GetNewArrivalsAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
-		Task<Result<List<ProductListItemDto>>> GetBestSellersAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
-		Task<Result<List<ProductListItemDto>>> AdvancedSearchAsync(AdvancedSearchDto searchCriteria, int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
+		Task<Result<List<ProductDto>>> GetNewArrivalsAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
+		Task<Result<List<ProductDto>>> GetBestSellersAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
+		Task<Result<List<ProductDto>>> AdvancedSearchAsync(AdvancedSearchDto searchCriteria, int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
 		// Image operations (delegated to ProductImageService)
 		Task<Result<List<ImageDto>>> GetProductImagesAsync(int productId);
 		Task<Result<List<ImageDto>>> AddProductImagesAsync(int productId, List<IFormFile> images, string userId);
@@ -104,15 +104,15 @@ namespace E_Commers.Services.ProductServices
 			return await _productCatalogService.GetProductsBySubCategoryId(subCategoryId, isActive, deletedOnly);
 		}
 		// Search Operations
-		public async Task<Result<List<ProductListItemDto>>> GetNewArrivalsAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
+		public async Task<Result<List<ProductDto>>> GetNewArrivalsAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
 		{
 			return await _productSearchService.GetNewArrivalsAsync(page, pageSize, isActive, deletedOnly);
 		}
-		public async Task<Result<List<ProductListItemDto>>> GetBestSellersAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
+		public async Task<Result<List<ProductDto>>> GetBestSellersAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
 		{
 			return await _productSearchService.GetBestSellersAsync(page, pageSize, isActive, deletedOnly);
 		}
-		public async Task<Result<List<ProductListItemDto>>> AdvancedSearchAsync(AdvancedSearchDto searchCriteria, int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
+		public async Task<Result<List<ProductDto>>> AdvancedSearchAsync(AdvancedSearchDto searchCriteria, int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
 		{
 			return await _productSearchService.AdvancedSearchAsync(searchCriteria, page, pageSize, isActive, deletedOnly);
 		}

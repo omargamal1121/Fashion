@@ -1,12 +1,12 @@
-﻿using E_Commers.Interfaces;
-using E_Commers.Models;
-using E_Commers.Services.EmailServices;
+﻿using E_Commerce.Interfaces;
+using E_Commerce.Models;
+using E_Commerce.Services.EmailServices;
 using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using StackExchange.Redis;
 using System.Security.Cryptography;
 
-namespace E_Commers.Services
+namespace E_Commerce.Services
 {
 	public class RefreshTokenService : IRefreshTokenService
 	{

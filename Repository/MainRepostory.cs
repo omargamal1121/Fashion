@@ -1,9 +1,9 @@
 ﻿using Dapper;
-using E_Commers.Context;
+using E_Commerce.Context;
 
-using E_Commers.Interfaces;
-using E_Commers.Models;
-using E_Commers.Services;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
+using E_Commerce.Services;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using StackExchange.Redis;

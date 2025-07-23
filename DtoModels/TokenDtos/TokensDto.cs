@@ -1,4 +1,4 @@
-﻿namespace E_Commers.DtoModels.TokenDtos
+﻿namespace E_Commerce.DtoModels.TokenDtos
 {
 	public class TokensDto
 	{

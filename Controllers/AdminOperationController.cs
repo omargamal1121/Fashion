@@ -1,11 +1,11 @@
-﻿using E_Commers.DtoModels;
-using E_Commers.Models;
-using E_Commers.UOW;
+﻿using E_Commerce.DtoModels;
+using E_Commerce.Models;
+using E_Commerce.UOW;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
-namespace E_Commers.Controllers
+namespace E_Commerce.Controllers
 {
 		[Route("api/[Controller]")]
 		[ApiController]

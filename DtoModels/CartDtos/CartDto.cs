@@ -1,9 +1,9 @@
-using E_Commers.DtoModels.ImagesDtos;
-using E_Commers.DtoModels.ProductDtos;
-using E_Commers.DtoModels.Shared;
-using E_Commers.Models;
+using E_Commerce.DtoModels.ImagesDtos;
+using E_Commerce.DtoModels.ProductDtos;
+using E_Commerce.DtoModels.Shared;
+using E_Commerce.Models;
 
-namespace E_Commers.DtoModels.CartDtos
+namespace E_Commerce.DtoModels.CartDtos
 {
     public class CartDto : BaseDto
     {

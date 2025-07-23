@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace E_Commers.DtoModels.InventoryDtos
+namespace E_Commerce.DtoModels.InventoryDtos
 {
     public class UpdateInventoryQuantityDto
     {

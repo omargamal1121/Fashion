@@ -1,4 +1,4 @@
-namespace E_Commers.Services.Cache
+namespace E_Commerce.Services.Cache
 {
 	public interface ICacheManager
     {

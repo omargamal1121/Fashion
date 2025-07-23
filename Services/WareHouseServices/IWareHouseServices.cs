@@ -1,8 +1,8 @@
-﻿using E_Commers.DtoModels.InventoryDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.DtoModels.WareHouseDtos;
+﻿using E_Commerce.DtoModels.InventoryDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.DtoModels.WareHouseDtos;
 
-namespace E_Commers.Services.WareHouseServices
+namespace E_Commerce.Services.WareHouseServices
 {
 	public interface IWareHouseServices
 	{

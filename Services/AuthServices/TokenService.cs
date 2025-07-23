@@ -1,5 +1,5 @@
-﻿using E_Commers.Interfaces;
-using E_Commers.Models;
+﻿using E_Commerce.Interfaces;
+using E_Commerce.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
@@ -9,7 +9,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace E_Commers.Services
+namespace E_Commerce.Services
 {
 	public class TokenService:ITokenService
 	{

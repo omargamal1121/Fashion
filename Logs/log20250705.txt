@@ -343,8 +343,8 @@ System.IndexOutOfRangeException: Index was outside the bounds of the array.
 2025-07-05 19:00:42.656 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 300.0773ms
 2025-07-05 19:00:47.762 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/Account/Login - application/json 75
 2025-07-05 19:00:50.464 +03:00 [INF] Executing UserAuthenticationMiddleware
-2025-07-05 19:00:50.531 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.AccountController.LoginAsync (E-Commerce)'
-2025-07-05 19:00:50.570 +03:00 [INF] Route matched with {action = "LoginAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.TokenDtos.TokensDto]]] LoginAsync(E_Commers.DtoModels.AccountDtos.LoginDTo) on controller E_Commers.Controllers.AccountController (E-Commerce).
+2025-07-05 19:00:50.531 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce)'
+2025-07-05 19:00:50.570 +03:00 [INF] Route matched with {action = "LoginAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.TokenDtos.TokensDto]]] LoginAsync(E_Commerce.DtoModels.AccountDtos.LoginDTo) on controller E_Commerce.Controllers.AccountController (E-Commerce).
 2025-07-05 19:00:50.888 +03:00 [INF] In LoginAsync Method 
 2025-07-05 19:00:50.901 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
 SELECT `a`.`Id`, `a`.`AccessFailedCount`, `a`.`ConcurrencyStamp`, `a`.`Discriminator`, `a`.`Email`, `a`.`EmailConfirmed`, `a`.`LockoutEnabled`, `a`.`LockoutEnd`, `a`.`NormalizedEmail`, `a`.`NormalizedUserName`, `a`.`PasswordHash`, `a`.`PhoneNumber`, `a`.`PhoneNumberConfirmed`, `a`.`SecurityStamp`, `a`.`TwoFactorEnabled`, `a`.`UserName`, `a`.`Age`, `a`.`CreateAt`, `a`.`DeletedAt`, `a`.`ImageId`, `a`.`LastVisit`, `a`.`Name`, `a`.`ProfilePicture`
@@ -360,9 +360,9 @@ WHERE `a`.`UserId` = @__userId_0
 2025-07-05 19:00:51.285 +03:00 [INF] ✅ Access Token generated successfully for User ID: 54f3c4dd-ad04-4f23-9523-b4ed366f6a75
 2025-07-05 19:00:51.289 +03:00 [INF] 🔑 Generating Refresh Token for User ID: 54f3c4dd-ad04-4f23-9523-b4ed366f6a75
 2025-07-05 19:00:51.304 +03:00 [INF] RefreshToken Generated
-2025-07-05 19:00:51.352 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.TokenDtos.TokensDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-07-05 19:00:51.404 +03:00 [INF] Executed action E_Commers.Controllers.AccountController.LoginAsync (E-Commerce) in 820.6486ms
-2025-07-05 19:00:51.413 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.AccountController.LoginAsync (E-Commerce)'
+2025-07-05 19:00:51.352 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.TokenDtos.TokensDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-07-05 19:00:51.404 +03:00 [INF] Executed action E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce) in 820.6486ms
+2025-07-05 19:00:51.413 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce)'
 2025-07-05 19:00:51.521 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/Account/Login - 200 1408 application/json; charset=utf-8 3759.1295ms
 2025-07-05 19:01:24.134 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/categories - multipart/form-data; boundary=--------------------------901440678340941314241373 760022
 2025-07-05 19:01:24.205 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -371,8 +371,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:01:24.359 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.CreateAsync (E-Commerce)'
-2025-07-05 19:01:24.378 +03:00 [INF] Route matched with {action = "Create", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commers.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:01:24.359 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.CreateAsync (E-Commerce)'
+2025-07-05 19:01:24.378 +03:00 [INF] Route matched with {action = "Create", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commerce.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:01:24.461 +03:00 [INF] Executing CreateAsync
 2025-07-05 19:01:24.473 +03:00 [INF] Execute CreateAsync
 2025-07-05 19:01:24.551 +03:00 [INF] Executed DbCommand (56ms) [Parameters=[@__name_0='?' (Size = 20)], CommandType='"Text"', CommandTimeout='30']
@@ -380,9 +380,9 @@ SELECT `c`.`Id`, `c`.`CreatedAt`, `c`.`DeletedAt`, `c`.`Description`, `c`.`Displ
 FROM `Categories` AS `c`
 WHERE (`c`.`Name` = @__name_0) AND `c`.`DeletedAt` IS NULL
 LIMIT 1
-2025-07-05 19:01:24.615 +03:00 [INF] Executing ConflictObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-07-05 19:01:24.628 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.CreateAsync (E-Commerce) in 239.6105ms
-2025-07-05 19:01:24.631 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.CreateAsync (E-Commerce)'
+2025-07-05 19:01:24.615 +03:00 [INF] Executing ConflictObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-07-05 19:01:24.628 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.CreateAsync (E-Commerce) in 239.6105ms
+2025-07-05 19:01:24.631 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.CreateAsync (E-Commerce)'
 2025-07-05 19:01:24.642 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/categories - 409 333 application/json; charset=utf-8 507.7391ms
 2025-07-05 19:01:40.576 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/categories - multipart/form-data; boundary=--------------------------414159805270150774171100 760018
 2025-07-05 19:01:40.589 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -391,8 +391,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:01:40.622 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.CreateAsync (E-Commerce)'
-2025-07-05 19:01:40.627 +03:00 [INF] Route matched with {action = "Create", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commers.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:01:40.622 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.CreateAsync (E-Commerce)'
+2025-07-05 19:01:40.627 +03:00 [INF] Route matched with {action = "Create", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commerce.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:01:40.654 +03:00 [INF] Executing CreateAsync
 2025-07-05 19:01:40.659 +03:00 [INF] Execute CreateAsync
 2025-07-05 19:01:40.665 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__name_0='?' (Size = 20)], CommandType='"Text"', CommandTimeout='30']
@@ -515,9 +515,9 @@ ORDER BY `t`.`Id`, `i`.`Id`, `t0`.`Id`
 2025-07-05 19:01:41.641 +03:00 [INF] Category has 3 images
 2025-07-05 19:01:41.645 +03:00 [INF] Mapping category with 3 images
 2025-07-05 19:01:41.663 +03:00 [INF] Successfully mapped category to DTO
-2025-07-05 19:01:41.673 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-07-05 19:01:41.708 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.CreateAsync (E-Commerce) in 1073.5472ms
-2025-07-05 19:01:43.082 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.CreateAsync (E-Commerce)'
+2025-07-05 19:01:41.673 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-07-05 19:01:41.708 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.CreateAsync (E-Commerce) in 1073.5472ms
+2025-07-05 19:01:43.082 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.CreateAsync (E-Commerce)'
 2025-07-05 19:01:43.479 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/categories - 201 693 application/json; charset=utf-8 2902.8658ms
 2025-07-05 19:02:28.663 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:7288/api/categories?search=pan - null null
 2025-07-05 19:02:28.670 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -526,8 +526,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:02:28.685 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
-2025-07-05 19:02:28.695 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:02:28.685 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:02:28.695 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:02:28.721 +03:00 [INF] Executing GetAllAsync with filters
 2025-07-05 19:02:28.733 +03:00 [INF] Executing FilterAsync with filters
 2025-07-05 19:02:28.735 +03:00 [INF] Execute GetAll for entity Category
@@ -555,9 +555,9 @@ LEFT JOIN (
     WHERE NOT (`i0`.`IsMain`) AND (`i0`.`DeletedAt` IS NULL)
 ) AS `t2` ON `t`.`Id` = `t2`.`CategoryId`
 ORDER BY `t`.`DisplayOrder`, `t`.`Id`, `t0`.`Id`
-2025-07-05 19:02:28.885 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-07-05 19:02:28.898 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 197.632ms
-2025-07-05 19:02:28.902 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:02:28.885 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-07-05 19:02:28.898 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 197.632ms
+2025-07-05 19:02:28.902 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
 2025-07-05 19:02:28.904 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:7288/api/categories?search=pan - 200 1786 application/json; charset=utf-8 240.2193ms
 2025-07-05 19:03:10.740 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:7288/api/categories?search=pan&isActive=true - null null
 2025-07-05 19:03:10.826 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -566,8 +566,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:03:10.836 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
-2025-07-05 19:03:10.838 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:03:10.836 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:03:10.838 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:03:10.844 +03:00 [INF] Executing GetAllAsync with filters
 2025-07-05 19:03:10.846 +03:00 [INF] Executing FilterAsync with filters
 2025-07-05 19:03:10.853 +03:00 [INF] Execute GetAll for entity Category
@@ -595,9 +595,9 @@ LEFT JOIN (
     WHERE NOT (`i0`.`IsMain`) AND (`i0`.`DeletedAt` IS NULL)
 ) AS `t2` ON `t`.`Id` = `t2`.`CategoryId`
 ORDER BY `t`.`DisplayOrder`, `t`.`Id`, `t0`.`Id`
-2025-07-05 19:03:10.945 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-07-05 19:03:10.950 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 107.2801ms
-2025-07-05 19:03:10.953 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:03:10.945 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-07-05 19:03:10.950 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 107.2801ms
+2025-07-05 19:03:10.953 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
 2025-07-05 19:03:10.956 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:7288/api/categories?search=pan&isActive=true - 200 1786 application/json; charset=utf-8 215.931ms
 2025-07-05 19:04:08.889 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:7288/api/categories?search=pan&isActive=true&includeDeleted=true - null null
 2025-07-05 19:04:08.954 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -606,8 +606,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:04:08.972 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
-2025-07-05 19:04:08.974 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:04:08.972 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:04:08.974 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:04:08.979 +03:00 [INF] Executing GetAllAsync with filters
 2025-07-05 19:04:08.986 +03:00 [INF] Executing FilterAsync with filters
 2025-07-05 19:04:08.990 +03:00 [INF] Execute GetAll for entity Category
@@ -635,9 +635,9 @@ LEFT JOIN (
     WHERE NOT (`i0`.`IsMain`) AND (`i0`.`DeletedAt` IS NULL)
 ) AS `t2` ON `t`.`Id` = `t2`.`CategoryId`
 ORDER BY `t`.`DisplayOrder`, `t`.`Id`, `t0`.`Id`
-2025-07-05 19:04:09.101 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-07-05 19:04:09.110 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 131.7901ms
-2025-07-05 19:04:09.161 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:04:09.101 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-07-05 19:04:09.110 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 131.7901ms
+2025-07-05 19:04:09.161 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
 2025-07-05 19:04:09.173 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:7288/api/categories?search=pan&isActive=true&includeDeleted=true - 200 1786 application/json; charset=utf-8 284.5705ms
 2025-07-05 19:04:43.234 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:7288/api/categories?search=pan&isActive=true&includeDeleted=true&page=2&pageSize=10 - null null
 2025-07-05 19:04:43.238 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -646,8 +646,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:04:43.253 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
-2025-07-05 19:04:43.255 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:04:43.253 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:04:43.255 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:04:43.262 +03:00 [INF] Executing GetAllAsync with filters
 2025-07-05 19:04:43.264 +03:00 [INF] Executing FilterAsync with filters
 2025-07-05 19:04:43.266 +03:00 [INF] Execute GetAll for entity Category
@@ -675,9 +675,9 @@ LEFT JOIN (
     WHERE NOT (`i0`.`IsMain`) AND (`i0`.`DeletedAt` IS NULL)
 ) AS `t2` ON `t`.`Id` = `t2`.`CategoryId`
 ORDER BY `t`.`DisplayOrder`, `t`.`Id`, `t0`.`Id`
-2025-07-05 19:04:43.332 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-07-05 19:04:43.336 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 76.2501ms
-2025-07-05 19:04:43.343 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:04:43.332 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-07-05 19:04:43.336 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 76.2501ms
+2025-07-05 19:04:43.343 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
 2025-07-05 19:04:43.369 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:7288/api/categories?search=pan&isActive=true&includeDeleted=true&page=2&pageSize=10 - 404 283 application/json; charset=utf-8 135.316ms
 2025-07-05 19:04:56.172 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:7288/api/categories?search=pan&isActive=true&includeDeleted=true&page=1&pageSize=2 - null null
 2025-07-05 19:04:56.237 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -686,8 +686,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:04:56.271 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
-2025-07-05 19:04:56.276 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:04:56.271 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:04:56.276 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:04:56.283 +03:00 [INF] Executing GetAllAsync with filters
 2025-07-05 19:04:56.285 +03:00 [INF] Executing FilterAsync with filters
 2025-07-05 19:04:56.286 +03:00 [INF] Execute GetAll for entity Category
@@ -715,9 +715,9 @@ LEFT JOIN (
     WHERE NOT (`i0`.`IsMain`) AND (`i0`.`DeletedAt` IS NULL)
 ) AS `t2` ON `t`.`Id` = `t2`.`CategoryId`
 ORDER BY `t`.`DisplayOrder`, `t`.`Id`, `t0`.`Id`
-2025-07-05 19:04:56.364 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-07-05 19:04:56.369 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 87.3282ms
-2025-07-05 19:04:56.390 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:04:56.364 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-07-05 19:04:56.369 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 87.3282ms
+2025-07-05 19:04:56.390 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
 2025-07-05 19:04:56.398 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:7288/api/categories?search=pan&isActive=true&includeDeleted=true&page=1&pageSize=2 - 200 1269 application/json; charset=utf-8 241.9236ms
 2025-07-05 19:05:41.885 +03:00 [INF] 1 servers were removed due to timeout
 2025-07-05 19:06:04.570 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:7288/api/categories/13 - null null
@@ -727,8 +727,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:06:04.595 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.GetByIdAsync (E-Commerce)'
-2025-07-05 19:06:04.604 +03:00 [INF] Route matched with {action = "GetById", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]] GetByIdAsync(Int32) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:06:04.595 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.GetByIdAsync (E-Commerce)'
+2025-07-05 19:06:04.604 +03:00 [INF] Route matched with {action = "GetById", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]] GetByIdAsync(Int32) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:06:04.615 +03:00 [INF] Executing GetByIdAsync for id: 13
 2025-07-05 19:06:04.627 +03:00 [INF] Execute:GetCategoryByIdAsync in services
 2025-07-05 19:06:04.635 +03:00 [INF] Getting cache for key: categoryid:13
@@ -753,9 +753,9 @@ ORDER BY `t`.`Id`, `i`.`Id`, `t0`.`Id`
 2025-07-05 19:06:04.700 +03:00 [INF] Category with id: 13 exists
 2025-07-05 19:06:04.706 +03:00 [INF] Setting cache for key: categoryid:13
 2025-07-05 19:06:04.740 +03:00 [INF] Cache set successfully for key: categoryid:13 with tags: [category]
-2025-07-05 19:06:04.747 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-07-05 19:06:04.755 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.GetByIdAsync (E-Commerce) in 142.5226ms
-2025-07-05 19:06:04.758 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.GetByIdAsync (E-Commerce)'
+2025-07-05 19:06:04.747 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-07-05 19:06:04.755 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.GetByIdAsync (E-Commerce) in 142.5226ms
+2025-07-05 19:06:04.758 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.GetByIdAsync (E-Commerce)'
 2025-07-05 19:06:04.782 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:7288/api/categories/13 - 200 1015 application/json; charset=utf-8 211.0255ms
 2025-07-05 19:06:42.977 +03:00 [INF] Request starting HTTP/2 PATCH https://localhost:7288/api/Categories/12/ChangeActiveStatus - null null
 2025-07-05 19:06:43.022 +03:00 [INF] CORS policy execution successful.
@@ -781,8 +781,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:07:36.920 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce)'
-2025-07-05 19:07:36.931 +03:00 [INF] Route matched with {action = "ChangeActiveStatus", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.Boolean]]] ChangeActiveStatus(Int32) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:07:36.920 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce)'
+2025-07-05 19:07:36.931 +03:00 [INF] Route matched with {action = "ChangeActiveStatus", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.Boolean]]] ChangeActiveStatus(Int32) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:07:36.943 +03:00 [INF] Executing ChangeActiveStatus for categoryId: 13
 2025-07-05 19:07:36.948 +03:00 [INF] Executing ChangeActiveStatus for categoryId: 13
 2025-07-05 19:07:36.961 +03:00 [INF] Executing GetCategoryById for id: 13
@@ -818,9 +818,9 @@ FROM `adminOperationsLogs`
 WHERE ROW_COUNT() = 1 AND `Id` = LAST_INSERT_ID();
 2025-07-05 19:07:37.031 +03:00 [INF] Removing cache by tag: category
 2025-07-05 19:07:37.037 +03:00 [INF] Removed 1 cache entries for tag: category
-2025-07-05 19:07:37.046 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-07-05 19:07:37.055 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce) in 117.025ms
-2025-07-05 19:07:37.060 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce)'
+2025-07-05 19:07:37.046 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-07-05 19:07:37.055 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce) in 117.025ms
+2025-07-05 19:07:37.060 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce)'
 2025-07-05 19:07:37.066 +03:00 [INF] Request finished HTTP/1.1 PATCH https://localhost:7288/api/Categories/13/ChangeActiveStatus - 200 508 application/json; charset=utf-8 162.2146ms
 2025-07-05 19:08:07.178 +03:00 [INF] Request starting HTTP/1.1 PATCH https://localhost:7288/api/Categories/13/ChangeActiveStatus - null 0
 2025-07-05 19:08:07.185 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -829,8 +829,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:08:07.222 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce)'
-2025-07-05 19:08:07.224 +03:00 [INF] Route matched with {action = "ChangeActiveStatus", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.Boolean]]] ChangeActiveStatus(Int32) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:08:07.222 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce)'
+2025-07-05 19:08:07.224 +03:00 [INF] Route matched with {action = "ChangeActiveStatus", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.Boolean]]] ChangeActiveStatus(Int32) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:08:07.232 +03:00 [INF] Executing ChangeActiveStatus for categoryId: 13
 2025-07-05 19:08:07.235 +03:00 [INF] Executing ChangeActiveStatus for categoryId: 13
 2025-07-05 19:08:07.244 +03:00 [INF] Executing GetCategoryById for id: 13
@@ -866,9 +866,9 @@ FROM `adminOperationsLogs`
 WHERE ROW_COUNT() = 1 AND `Id` = LAST_INSERT_ID();
 2025-07-05 19:08:07.305 +03:00 [INF] Removing cache by tag: category
 2025-07-05 19:08:07.309 +03:00 [WRN] No cache entries found for tag: category
-2025-07-05 19:08:07.311 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-07-05 19:08:07.315 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce) in 84.7811ms
-2025-07-05 19:08:07.318 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce)'
+2025-07-05 19:08:07.311 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-07-05 19:08:07.315 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce) in 84.7811ms
+2025-07-05 19:08:07.318 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce)'
 2025-07-05 19:08:07.322 +03:00 [INF] Request finished HTTP/1.1 PATCH https://localhost:7288/api/Categories/13/ChangeActiveStatus - 200 505 application/json; charset=utf-8 143.5105ms
 2025-07-05 19:08:17.954 +03:00 [INF] Request starting HTTP/1.1 PATCH https://localhost:7288/api/Categories/13/ChangeActiveStatus - null 0
 2025-07-05 19:08:17.970 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -877,8 +877,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:08:17.996 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce)'
-2025-07-05 19:08:17.997 +03:00 [INF] Route matched with {action = "ChangeActiveStatus", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.Boolean]]] ChangeActiveStatus(Int32) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:08:17.996 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce)'
+2025-07-05 19:08:17.997 +03:00 [INF] Route matched with {action = "ChangeActiveStatus", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.Boolean]]] ChangeActiveStatus(Int32) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:08:18.012 +03:00 [INF] Executing ChangeActiveStatus for categoryId: 13
 2025-07-05 19:08:18.015 +03:00 [INF] Executing ChangeActiveStatus for categoryId: 13
 2025-07-05 19:08:18.020 +03:00 [INF] Executing GetCategoryById for id: 13
@@ -914,9 +914,9 @@ FROM `adminOperationsLogs`
 WHERE ROW_COUNT() = 1 AND `Id` = LAST_INSERT_ID();
 2025-07-05 19:08:18.105 +03:00 [INF] Removing cache by tag: category
 2025-07-05 19:08:18.109 +03:00 [WRN] No cache entries found for tag: category
-2025-07-05 19:08:18.111 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-07-05 19:08:18.115 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce) in 104.9425ms
-2025-07-05 19:08:18.119 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce)'
+2025-07-05 19:08:18.111 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-07-05 19:08:18.115 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce) in 104.9425ms
+2025-07-05 19:08:18.119 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.ChangeActiveStatus (E-Commerce)'
 2025-07-05 19:08:18.121 +03:00 [INF] Request finished HTTP/1.1 PATCH https://localhost:7288/api/Categories/13/ChangeActiveStatus - 200 508 application/json; charset=utf-8 167.0059ms
 2025-07-05 19:08:23.974 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:7288/api/categories/13 - null null
 2025-07-05 19:08:23.993 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -925,8 +925,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:08:24.002 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.GetByIdAsync (E-Commerce)'
-2025-07-05 19:08:24.004 +03:00 [INF] Route matched with {action = "GetById", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]] GetByIdAsync(Int32) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:08:24.002 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.GetByIdAsync (E-Commerce)'
+2025-07-05 19:08:24.004 +03:00 [INF] Route matched with {action = "GetById", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]] GetByIdAsync(Int32) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:08:24.036 +03:00 [INF] Executing GetByIdAsync for id: 13
 2025-07-05 19:08:24.038 +03:00 [INF] Execute:GetCategoryByIdAsync in services
 2025-07-05 19:08:24.040 +03:00 [INF] Getting cache for key: categoryid:13
@@ -951,9 +951,9 @@ ORDER BY `t`.`Id`, `i`.`Id`, `t0`.`Id`
 2025-07-05 19:08:24.078 +03:00 [INF] Category with id: 13 exists
 2025-07-05 19:08:24.082 +03:00 [INF] Setting cache for key: categoryid:13
 2025-07-05 19:08:24.085 +03:00 [INF] Cache set successfully for key: categoryid:13 with tags: [category]
-2025-07-05 19:08:24.089 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-07-05 19:08:24.092 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.GetByIdAsync (E-Commerce) in 57.4049ms
-2025-07-05 19:08:24.119 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.GetByIdAsync (E-Commerce)'
+2025-07-05 19:08:24.089 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-07-05 19:08:24.092 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.GetByIdAsync (E-Commerce) in 57.4049ms
+2025-07-05 19:08:24.119 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.GetByIdAsync (E-Commerce)'
 2025-07-05 19:08:24.122 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:7288/api/categories/13 - 200 1016 application/json; charset=utf-8 155.0224ms
 2025-07-05 19:08:57.547 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:7288/api/categories?search=pan&isActive=true&includeDeleted=true&page=1&pageSize=2 - null null
 2025-07-05 19:08:57.556 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -962,8 +962,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:08:57.572 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
-2025-07-05 19:08:57.577 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:08:57.572 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:08:57.577 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:08:57.584 +03:00 [INF] Executing GetAllAsync with filters
 2025-07-05 19:08:57.587 +03:00 [INF] Executing FilterAsync with filters
 2025-07-05 19:08:57.591 +03:00 [INF] Execute GetAll for entity Category
@@ -991,9 +991,9 @@ LEFT JOIN (
     WHERE NOT (`i0`.`IsMain`) AND (`i0`.`DeletedAt` IS NULL)
 ) AS `t2` ON `t`.`Id` = `t2`.`CategoryId`
 ORDER BY `t`.`DisplayOrder`, `t`.`Id`, `t0`.`Id`
-2025-07-05 19:08:57.660 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-07-05 19:08:57.665 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 82.2154ms
-2025-07-05 19:08:57.711 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:08:57.660 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-07-05 19:08:57.665 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 82.2154ms
+2025-07-05 19:08:57.711 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
 2025-07-05 19:08:57.714 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:7288/api/categories?search=pan&isActive=true&includeDeleted=true&page=1&pageSize=2 - 200 1245 application/json; charset=utf-8 167.635ms
 2025-07-05 19:09:09.818 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:7288/api/categories?search=pan&isActive=true&includeDeleted=false&page=1&pageSize=2 - null null
 2025-07-05 19:09:09.866 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -1002,8 +1002,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:09:09.902 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
-2025-07-05 19:09:09.906 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:09:09.902 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:09:09.906 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:09:09.911 +03:00 [INF] Executing GetAllAsync with filters
 2025-07-05 19:09:09.913 +03:00 [INF] Executing FilterAsync with filters
 2025-07-05 19:09:09.915 +03:00 [INF] Execute GetAll for entity Category
@@ -1031,9 +1031,9 @@ LEFT JOIN (
     WHERE NOT (`i0`.`IsMain`) AND (`i0`.`DeletedAt` IS NULL)
 ) AS `t2` ON `t`.`Id` = `t2`.`CategoryId`
 ORDER BY `t`.`DisplayOrder`, `t`.`Id`, `t0`.`Id`
-2025-07-05 19:09:09.999 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-07-05 19:09:10.001 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 91.1677ms
-2025-07-05 19:09:10.042 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:09:09.999 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-07-05 19:09:10.001 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 91.1677ms
+2025-07-05 19:09:10.042 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
 2025-07-05 19:09:10.044 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:7288/api/categories?search=pan&isActive=true&includeDeleted=false&page=1&pageSize=2 - 200 1245 application/json; charset=utf-8 225.594ms
 2025-07-05 19:09:19.571 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:7288/api/categories?search=pan&isActive=false&includeDeleted=false&page=1&pageSize=2 - null null
 2025-07-05 19:09:19.667 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -1042,8 +1042,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:09:19.759 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
-2025-07-05 19:09:19.761 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:09:19.759 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:09:19.761 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:09:19.767 +03:00 [INF] Executing GetAllAsync with filters
 2025-07-05 19:09:19.769 +03:00 [INF] Executing FilterAsync with filters
 2025-07-05 19:09:19.771 +03:00 [INF] Execute GetAll for entity Category
@@ -1071,9 +1071,9 @@ LEFT JOIN (
     WHERE NOT (`i0`.`IsMain`) AND (`i0`.`DeletedAt` IS NULL)
 ) AS `t2` ON `t`.`Id` = `t2`.`CategoryId`
 ORDER BY `t`.`DisplayOrder`, `t`.`Id`, `t0`.`Id`
-2025-07-05 19:09:19.853 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-07-05 19:09:19.857 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 91.6512ms
-2025-07-05 19:09:19.861 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:09:19.853 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-07-05 19:09:19.857 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 91.6512ms
+2025-07-05 19:09:19.861 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
 2025-07-05 19:09:19.880 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:7288/api/categories?search=pan&isActive=false&includeDeleted=false&page=1&pageSize=2 - 200 754 application/json; charset=utf-8 310.1638ms
 2025-07-05 19:15:14.827 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:7288/api/categories/13 - null null
 2025-07-05 19:15:14.852 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -1082,16 +1082,16 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:15:14.901 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.GetByIdAsync (E-Commerce)'
-2025-07-05 19:15:14.909 +03:00 [INF] Route matched with {action = "GetById", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]] GetByIdAsync(Int32) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:15:14.901 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.GetByIdAsync (E-Commerce)'
+2025-07-05 19:15:14.909 +03:00 [INF] Route matched with {action = "GetById", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]] GetByIdAsync(Int32) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:15:14.943 +03:00 [INF] Executing GetByIdAsync for id: 13
 2025-07-05 19:15:14.945 +03:00 [INF] Execute:GetCategoryByIdAsync in services
 2025-07-05 19:15:14.948 +03:00 [INF] Getting cache for key: categoryid:13
 2025-07-05 19:15:14.963 +03:00 [INF] Cache hit for key: categoryid:13
 2025-07-05 19:15:14.989 +03:00 [INF] Cache hit for category 13
-2025-07-05 19:15:15.003 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-07-05 19:15:15.021 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.GetByIdAsync (E-Commerce) in 80.6643ms
-2025-07-05 19:15:15.075 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.GetByIdAsync (E-Commerce)'
+2025-07-05 19:15:15.003 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-07-05 19:15:15.021 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.GetByIdAsync (E-Commerce) in 80.6643ms
+2025-07-05 19:15:15.075 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.GetByIdAsync (E-Commerce)'
 2025-07-05 19:15:15.109 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:7288/api/categories/13 - 200 1025 application/json; charset=utf-8 280.9055ms
 2025-07-05 19:24:55.513 +03:00 [INF] DB tables already exist. Exit install
 2025-07-05 19:24:57.259 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
@@ -1170,8 +1170,8 @@ RolesAuthorizationRequirement:User.IsInRole must be true for one of the followin
 2025-07-05 19:25:24.298 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:7288/api/categories/13 - 401 0 null 486.3058ms
 2025-07-05 19:28:52.774 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/Account/refresh-token - application/json 167
 2025-07-05 19:28:52.785 +03:00 [INF] Executing UserAuthenticationMiddleware
-2025-07-05 19:28:52.793 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.AccountController.RefreshTokenAsync (E-Commerce)'
-2025-07-05 19:28:52.839 +03:00 [INF] Route matched with {action = "RefreshTokenAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.String]]] RefreshTokenAsync(E_Commers.DtoModels.RefreshTokenDto) on controller E_Commers.Controllers.AccountController (E-Commerce).
+2025-07-05 19:28:52.793 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.AccountController.RefreshTokenAsync (E-Commerce)'
+2025-07-05 19:28:52.839 +03:00 [INF] Route matched with {action = "RefreshTokenAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.String]]] RefreshTokenAsync(E_Commerce.DtoModels.RefreshTokenDto) on controller E_Commerce.Controllers.AccountController (E-Commerce).
 2025-07-05 19:28:53.291 +03:00 [INF] In RefreshTokenAsync Method
 2025-07-05 19:28:53.345 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__p_0='?' (Size = 255)], CommandType='"Text"', CommandTimeout='30']
 SELECT `a`.`Id`, `a`.`AccessFailedCount`, `a`.`ConcurrencyStamp`, `a`.`Discriminator`, `a`.`Email`, `a`.`EmailConfirmed`, `a`.`LockoutEnabled`, `a`.`LockoutEnd`, `a`.`NormalizedEmail`, `a`.`NormalizedUserName`, `a`.`PasswordHash`, `a`.`PhoneNumber`, `a`.`PhoneNumberConfirmed`, `a`.`SecurityStamp`, `a`.`TwoFactorEnabled`, `a`.`UserName`, `a`.`Age`, `a`.`CreateAt`, `a`.`DeletedAt`, `a`.`ImageId`, `a`.`LastVisit`, `a`.`Name`, `a`.`ProfilePicture`
@@ -1189,9 +1189,9 @@ FROM `AspNetUserRoles` AS `a`
 INNER JOIN `AspNetRoles` AS `a0` ON `a`.`RoleId` = `a0`.`Id`
 WHERE `a`.`UserId` = @__userId_0
 2025-07-05 19:28:53.517 +03:00 [INF] ✅ Access Token generated successfully for User ID: 54f3c4dd-ad04-4f23-9523-b4ed366f6a75
-2025-07-05 19:28:53.562 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-07-05 19:28:53.602 +03:00 [INF] Executed action E_Commers.Controllers.AccountController.RefreshTokenAsync (E-Commerce) in 747.9045ms
-2025-07-05 19:28:53.684 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.AccountController.RefreshTokenAsync (E-Commerce)'
+2025-07-05 19:28:53.562 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-07-05 19:28:53.602 +03:00 [INF] Executed action E_Commerce.Controllers.AccountController.RefreshTokenAsync (E-Commerce) in 747.9045ms
+2025-07-05 19:28:53.684 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.AccountController.RefreshTokenAsync (E-Commerce)'
 2025-07-05 19:28:53.693 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/Account/refresh-token - 200 1240 application/json; charset=utf-8 919.1297ms
 2025-07-05 19:29:28.375 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:7288/api/categories?search=pan&isActive=false&includeDeleted=false&page=1&pageSize=2 - null null
 2025-07-05 19:29:28.408 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -1200,8 +1200,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 19:29:28.434 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
-2025-07-05 19:29:28.447 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 19:29:28.434 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:29:28.447 +03:00 [INF] Route matched with {action = "GetAll", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 19:29:28.471 +03:00 [INF] Executing GetAllAsync with filters
 2025-07-05 19:29:28.483 +03:00 [INF] Executing FilterAsync with filters
 2025-07-05 19:29:28.486 +03:00 [INF] Execute GetAll for entity Category
@@ -1229,9 +1229,9 @@ LEFT JOIN (
     WHERE NOT (`i0`.`IsMain`) AND (`i0`.`DeletedAt` IS NULL)
 ) AS `t2` ON `t`.`Id` = `t2`.`CategoryId`
 ORDER BY `t`.`DisplayOrder`, `t`.`Id`, `t0`.`Id`
-2025-07-05 19:29:28.700 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-07-05 19:29:28.729 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 271.788ms
-2025-07-05 19:29:28.732 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
+2025-07-05 19:29:28.700 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-07-05 19:29:28.729 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce) in 271.788ms
+2025-07-05 19:29:28.732 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.GetAllAsync (E-Commerce)'
 2025-07-05 19:29:28.734 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:7288/api/categories?search=pan&isActive=false&includeDeleted=false&page=1&pageSize=2 - 200 754 application/json; charset=utf-8 358.6677ms
 2025-07-05 19:29:59.863 +03:00 [INF] 1 servers were removed due to timeout
 2025-07-05 21:14:18.905 +03:00 [INF] DB tables already exist. Exit install
@@ -1295,8 +1295,8 @@ System.IndexOutOfRangeException: Index was outside the bounds of the array.
 2025-07-05 21:14:26.235 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 236.1596ms
 2025-07-05 21:15:25.948 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/Account/Login - application/json 75
 2025-07-05 21:15:28.530 +03:00 [INF] Executing UserAuthenticationMiddleware
-2025-07-05 21:15:28.598 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.AccountController.LoginAsync (E-Commerce)'
-2025-07-05 21:15:28.634 +03:00 [INF] Route matched with {action = "LoginAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.TokenDtos.TokensDto]]] LoginAsync(E_Commers.DtoModels.AccountDtos.LoginDTo) on controller E_Commers.Controllers.AccountController (E-Commerce).
+2025-07-05 21:15:28.598 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce)'
+2025-07-05 21:15:28.634 +03:00 [INF] Route matched with {action = "LoginAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.TokenDtos.TokensDto]]] LoginAsync(E_Commerce.DtoModels.AccountDtos.LoginDTo) on controller E_Commerce.Controllers.AccountController (E-Commerce).
 2025-07-05 21:15:28.916 +03:00 [INF] In LoginAsync Method 
 2025-07-05 21:15:28.930 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
 SELECT `a`.`Id`, `a`.`AccessFailedCount`, `a`.`ConcurrencyStamp`, `a`.`Discriminator`, `a`.`Email`, `a`.`EmailConfirmed`, `a`.`LockoutEnabled`, `a`.`LockoutEnd`, `a`.`NormalizedEmail`, `a`.`NormalizedUserName`, `a`.`PasswordHash`, `a`.`PhoneNumber`, `a`.`PhoneNumberConfirmed`, `a`.`SecurityStamp`, `a`.`TwoFactorEnabled`, `a`.`UserName`, `a`.`Age`, `a`.`CreateAt`, `a`.`DeletedAt`, `a`.`ImageId`, `a`.`LastVisit`, `a`.`Name`, `a`.`ProfilePicture`
@@ -1312,9 +1312,9 @@ WHERE `a`.`UserId` = @__userId_0
 2025-07-05 21:15:29.234 +03:00 [INF] ✅ Access Token generated successfully for User ID: 54f3c4dd-ad04-4f23-9523-b4ed366f6a75
 2025-07-05 21:15:29.238 +03:00 [INF] 🔑 Generating Refresh Token for User ID: 54f3c4dd-ad04-4f23-9523-b4ed366f6a75
 2025-07-05 21:15:29.250 +03:00 [INF] RefreshToken Generated
-2025-07-05 21:15:29.288 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.TokenDtos.TokensDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-07-05 21:15:29.321 +03:00 [INF] Executed action E_Commers.Controllers.AccountController.LoginAsync (E-Commerce) in 677.6319ms
-2025-07-05 21:15:29.328 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.AccountController.LoginAsync (E-Commerce)'
+2025-07-05 21:15:29.288 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.TokenDtos.TokensDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-07-05 21:15:29.321 +03:00 [INF] Executed action E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce) in 677.6319ms
+2025-07-05 21:15:29.328 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce)'
 2025-07-05 21:15:29.343 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/Account/Login - 200 1408 application/json; charset=utf-8 3395.1702ms
 2025-07-05 21:15:51.076 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/api/Discount - null null
 2025-07-05 21:15:51.188 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -1323,15 +1323,15 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 21:15:51.297 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.DiscountController.GetAllAsync (E-Commerce)'
-2025-07-05 21:15:51.308 +03:00 [INF] Route matched with {action = "GetAllAsync", controller = "Discount"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commers.DtoModels.DiscoutDtos.DiscountDto]]]] GetAllAsync() on controller E_Commers.Controllers.DiscountController (E-Commerce).
+2025-07-05 21:15:51.297 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.DiscountController.GetAllAsync (E-Commerce)'
+2025-07-05 21:15:51.308 +03:00 [INF] Route matched with {action = "GetAllAsync", controller = "Discount"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commerce.DtoModels.DiscoutDtos.DiscountDto]]]] GetAllAsync() on controller E_Commerce.Controllers.DiscountController (E-Commerce).
 2025-07-05 21:15:51.316 +03:00 [INF] Executing GetAllAsync
 2025-07-05 21:15:51.324 +03:00 [INF] Execute GetAll for entity Discount
 2025-07-05 21:15:51.387 +03:00 [ERR] Failed executing DbCommand (43ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
 SELECT `d`.`Id`, `d`.`Name`, `d`.`Description`, `d`.`DiscountPercent`, `d`.`StartDate`, `d`.`EndDate`, `d`.`IsActive`, `d`.`CreatedAt`, `d`.`ModifiedAt`
 FROM `Discount` AS `d`
 WHERE `d`.`DeletedAt` IS NULL
-2025-07-05 21:15:51.439 +03:00 [ERR] An exception occurred while iterating over the results of a query for context type 'E_Commers.Context.AppDbContext'.
+2025-07-05 21:15:51.439 +03:00 [ERR] An exception occurred while iterating over the results of a query for context type 'E_Commerce.Context.AppDbContext'.
 MySqlConnector.MySqlException (0x80004005): Unknown column 'd.StartDate' in 'field list'
    at MySqlConnector.Core.ServerSession.ReceiveReplyAsync(IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/Core/ServerSession.cs:line 894
    at MySqlConnector.Core.ResultSet.ReadResultSetHeaderAsync(IOBehavior ioBehavior) in /_/src/MySqlConnector/Core/ResultSet.cs:line 37
@@ -1374,10 +1374,10 @@ MySqlConnector.MySqlException (0x80004005): Unknown column 'd.StartDate' in 'fie
    at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
    at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
    at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
-   at E_Commers.Services.Discount.DiscountService.GetAllAsync() in D:\fashion\Projcet\E-Commers\E-Commers\Services\Discount\DiscountService.cs:line 37
-2025-07-05 21:15:53.429 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commers.DtoModels.DiscoutDtos.DiscountDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-07-05 21:15:53.438 +03:00 [INF] Executed action E_Commers.Controllers.DiscountController.GetAllAsync (E-Commerce) in 2125.2321ms
-2025-07-05 21:15:53.441 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.DiscountController.GetAllAsync (E-Commerce)'
+   at E_Commerce.Services.Discount.DiscountService.GetAllAsync() in D:\fashion\Projcet\E-Commers\E-Commers\Services\Discount\DiscountService.cs:line 37
+2025-07-05 21:15:53.429 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commerce.DtoModels.DiscoutDtos.DiscountDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-07-05 21:15:53.438 +03:00 [INF] Executed action E_Commerce.Controllers.DiscountController.GetAllAsync (E-Commerce) in 2125.2321ms
+2025-07-05 21:15:53.441 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.DiscountController.GetAllAsync (E-Commerce)'
 2025-07-05 21:15:53.444 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/api/Discount - 500 214 application/json; charset=utf-8 2368.2793ms
 2025-07-05 21:23:54.656 +03:00 [INF] Request starting HTTP/2 POST https://localhost:7288/api/SubCategory - multipart/form-data; boundary=----WebKitFormBoundaryFNzr268qnlXAFNBc 69659
 2025-07-05 21:23:54.703 +03:00 [INF] CORS policy execution successful.
@@ -1387,8 +1387,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 21:23:54.735 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.SubCategoryController.CreateAsync (E-Commerce)'
-2025-07-05 21:23:54.750 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "SubCategory"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.SubCategoryDto]]] CreateAsync(E_Commers.DtoModels.CategoryDtos.CreateSubCategoryDto) on controller E_Commers.Controllers.SubCategoryController (E-Commerce).
+2025-07-05 21:23:54.735 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.SubCategoryController.CreateAsync (E-Commerce)'
+2025-07-05 21:23:54.750 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "SubCategory"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.SubCategoryDto]]] CreateAsync(E_Commerce.DtoModels.CategoryDtos.CreateSubCategoryDto) on controller E_Commerce.Controllers.SubCategoryController (E-Commerce).
 2025-07-05 21:23:54.798 +03:00 [INF] Executing CreateAsync
 2025-07-05 21:23:54.808 +03:00 [INF] Execute CreateAsync
 2025-07-05 21:23:54.812 +03:00 [INF] Executing GetByIdAsync for entity Category with ID: 13
@@ -1411,10 +1411,10 @@ ORDER BY `t`.`Id`
 
 Mapping types:
 CreateSubCategoryDto -> SubCategory
-E_Commers.DtoModels.CategoryDtos.CreateSubCategoryDto -> E_Commers.Models.SubCategory
-2025-07-05 21:23:55.092 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.CategoryDtos.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-07-05 21:23:55.101 +03:00 [INF] Executed action E_Commers.Controllers.SubCategoryController.CreateAsync (E-Commerce) in 346.9149ms
-2025-07-05 21:23:55.103 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.SubCategoryController.CreateAsync (E-Commerce)'
+E_Commerce.DtoModels.CategoryDtos.CreateSubCategoryDto -> E_Commerce.Models.SubCategory
+2025-07-05 21:23:55.092 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.CategoryDtos.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-07-05 21:23:55.101 +03:00 [INF] Executed action E_Commerce.Controllers.SubCategoryController.CreateAsync (E-Commerce) in 346.9149ms
+2025-07-05 21:23:55.103 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.SubCategoryController.CreateAsync (E-Commerce)'
 2025-07-05 21:23:55.109 +03:00 [INF] Request finished HTTP/2 POST https://localhost:7288/api/SubCategory - 500 415 application/json; charset=utf-8 453.1178ms
 2025-07-05 21:24:24.259 +03:00 [INF] Request starting HTTP/2 POST https://localhost:7288/api/Categories - multipart/form-data; boundary=----WebKitFormBoundaryYM7Ikr3jXUQCFYsV 69660
 2025-07-05 21:24:24.268 +03:00 [INF] CORS policy execution successful.
@@ -1424,8 +1424,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 21:24:24.334 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.CategoriesController.CreateAsync (E-Commerce)'
-2025-07-05 21:24:24.341 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commers.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commers.Controllers.CategoriesController (E-Commerce).
+2025-07-05 21:24:24.334 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.CategoriesController.CreateAsync (E-Commerce)'
+2025-07-05 21:24:24.341 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "Categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commerce.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commerce.Controllers.CategoriesController (E-Commerce).
 2025-07-05 21:24:24.356 +03:00 [INF] Executing CreateAsync
 2025-07-05 21:24:24.365 +03:00 [INF] Execute CreateAsync
 2025-07-05 21:24:24.375 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__name_0='?' (Size = 20)], CommandType='"Text"', CommandTimeout='30']
@@ -1501,9 +1501,9 @@ ORDER BY `t`.`Id`, `i`.`Id`, `t0`.`Id`
 2025-07-05 21:24:24.969 +03:00 [INF] Category has 1 images
 2025-07-05 21:24:24.971 +03:00 [INF] Mapping category with 1 images
 2025-07-05 21:24:24.995 +03:00 [INF] Successfully mapped category to DTO
-2025-07-05 21:24:25.004 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-07-05 21:24:25.023 +03:00 [INF] Executed action E_Commers.Controllers.CategoriesController.CreateAsync (E-Commerce) in 677.1992ms
-2025-07-05 21:24:25.027 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.CategoriesController.CreateAsync (E-Commerce)'
+2025-07-05 21:24:25.004 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-07-05 21:24:25.023 +03:00 [INF] Executed action E_Commerce.Controllers.CategoriesController.CreateAsync (E-Commerce) in 677.1992ms
+2025-07-05 21:24:25.027 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.CategoriesController.CreateAsync (E-Commerce)'
 2025-07-05 21:24:25.035 +03:00 [INF] Request finished HTTP/2 POST https://localhost:7288/api/Categories - 201 623 application/json; charset=utf-8 774.5646ms
 2025-07-05 21:25:12.500 +03:00 [WRN] Stopping the server due to DomainUnload or ProcessExit event...
 2025-07-05 21:25:12.505 +03:00 [INF] Server mrrobot:19996:5029806c caught stopping signal...
@@ -1625,8 +1625,8 @@ RolesAuthorizationRequirement:User.IsInRole must be true for one of the followin
 2025-07-05 23:50:53.740 +03:00 [INF] Request finished HTTP/2 POST https://localhost:7288/api/SubCategory - 401 0 null 538.602ms
 2025-07-05 23:51:27.843 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/Account/Login - application/json 75
 2025-07-05 23:51:27.851 +03:00 [INF] Executing UserAuthenticationMiddleware
-2025-07-05 23:51:27.862 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.AccountController.LoginAsync (E-Commerce)'
-2025-07-05 23:51:27.950 +03:00 [INF] Route matched with {action = "LoginAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.TokenDtos.TokensDto]]] LoginAsync(E_Commers.DtoModels.AccountDtos.LoginDTo) on controller E_Commers.Controllers.AccountController (E-Commerce).
+2025-07-05 23:51:27.862 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce)'
+2025-07-05 23:51:27.950 +03:00 [INF] Route matched with {action = "LoginAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.TokenDtos.TokensDto]]] LoginAsync(E_Commerce.DtoModels.AccountDtos.LoginDTo) on controller E_Commerce.Controllers.AccountController (E-Commerce).
 2025-07-05 23:51:28.475 +03:00 [INF] In LoginAsync Method 
 2025-07-05 23:51:28.522 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
 SELECT `a`.`Id`, `a`.`AccessFailedCount`, `a`.`ConcurrencyStamp`, `a`.`Discriminator`, `a`.`Email`, `a`.`EmailConfirmed`, `a`.`LockoutEnabled`, `a`.`LockoutEnd`, `a`.`NormalizedEmail`, `a`.`NormalizedUserName`, `a`.`PasswordHash`, `a`.`PhoneNumber`, `a`.`PhoneNumberConfirmed`, `a`.`SecurityStamp`, `a`.`TwoFactorEnabled`, `a`.`UserName`, `a`.`Age`, `a`.`CreateAt`, `a`.`DeletedAt`, `a`.`ImageId`, `a`.`LastVisit`, `a`.`Name`, `a`.`ProfilePicture`
@@ -1642,9 +1642,9 @@ WHERE `a`.`UserId` = @__userId_0
 2025-07-05 23:51:28.931 +03:00 [INF] ✅ Access Token generated successfully for User ID: 54f3c4dd-ad04-4f23-9523-b4ed366f6a75
 2025-07-05 23:51:28.935 +03:00 [INF] 🔑 Generating Refresh Token for User ID: 54f3c4dd-ad04-4f23-9523-b4ed366f6a75
 2025-07-05 23:51:28.955 +03:00 [INF] RefreshToken Generated
-2025-07-05 23:51:29.016 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.TokenDtos.TokensDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-07-05 23:51:29.092 +03:00 [INF] Executed action E_Commers.Controllers.AccountController.LoginAsync (E-Commerce) in 1130.2454ms
-2025-07-05 23:51:29.332 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.AccountController.LoginAsync (E-Commerce)'
+2025-07-05 23:51:29.016 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.TokenDtos.TokensDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-07-05 23:51:29.092 +03:00 [INF] Executed action E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce) in 1130.2454ms
+2025-07-05 23:51:29.332 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce)'
 2025-07-05 23:51:29.343 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/Account/Login - 200 1408 application/json; charset=utf-8 1500.3774ms
 2025-07-05 23:55:56.904 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:7288/api/SubCategory - multipart/form-data; boundary=--------------------------541962757421677840769646 69721
 2025-07-05 23:55:57.014 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -1653,8 +1653,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 23:55:57.151 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.SubCategoryController.GetAllAsync (E-Commerce)'
-2025-07-05 23:55:57.162 +03:00 [INF] Route matched with {action = "GetAllAsync", controller = "SubCategory"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commers.DtoModels.CategoryDtos.SubCategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commers.Controllers.SubCategoryController (E-Commerce).
+2025-07-05 23:55:57.151 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.SubCategoryController.GetAllAsync (E-Commerce)'
+2025-07-05 23:55:57.162 +03:00 [INF] Route matched with {action = "GetAllAsync", controller = "SubCategory"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[System.Collections.Generic.List`1[E_Commerce.DtoModels.CategoryDtos.SubCategoryDto]]]] GetAllAsync(System.String, System.Nullable`1[System.Boolean], Boolean, Int32, Int32) on controller E_Commerce.Controllers.SubCategoryController (E-Commerce).
 2025-07-05 23:55:57.218 +03:00 [INF] Executing GetAllAsync with filters
 2025-07-05 23:55:57.231 +03:00 [INF] Executing FilterAsync with filters
 2025-07-05 23:55:57.236 +03:00 [INF] Execute GetAll for entity SubCategory
@@ -1683,9 +1683,9 @@ LEFT JOIN (
     WHERE NOT (`i0`.`IsMain`) AND (`i0`.`DeletedAt` IS NULL)
 ) AS `t2` ON `t`.`Id` = `t2`.`SubCategoryId`
 ORDER BY `t`.`Id`, `t0`.`Id`
-2025-07-05 23:55:57.476 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commers.DtoModels.CategoryDtos.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
-2025-07-05 23:55:57.486 +03:00 [INF] Executed action E_Commers.Controllers.SubCategoryController.GetAllAsync (E-Commerce) in 317.5053ms
-2025-07-05 23:55:57.489 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.SubCategoryController.GetAllAsync (E-Commerce)'
+2025-07-05 23:55:57.476 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[System.Collections.Generic.List`1[[E_Commerce.DtoModels.CategoryDtos.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-07-05 23:55:57.486 +03:00 [INF] Executed action E_Commerce.Controllers.SubCategoryController.GetAllAsync (E-Commerce) in 317.5053ms
+2025-07-05 23:55:57.489 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.SubCategoryController.GetAllAsync (E-Commerce)'
 2025-07-05 23:55:57.540 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:7288/api/SubCategory - 404 365 application/json; charset=utf-8 636.6662ms
 2025-07-05 23:56:14.472 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/SubCategory - multipart/form-data; boundary=--------------------------222569990181911962705197 69721
 2025-07-05 23:56:14.481 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -1694,8 +1694,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 23:56:14.507 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.SubCategoryController.CreateAsync (E-Commerce)'
-2025-07-05 23:56:14.520 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "SubCategory"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.SubCategoryDto]]] CreateAsync(E_Commers.DtoModels.CategoryDtos.CreateSubCategoryDto) on controller E_Commers.Controllers.SubCategoryController (E-Commerce).
+2025-07-05 23:56:14.507 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.SubCategoryController.CreateAsync (E-Commerce)'
+2025-07-05 23:56:14.520 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "SubCategory"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.SubCategoryDto]]] CreateAsync(E_Commerce.DtoModels.CategoryDtos.CreateSubCategoryDto) on controller E_Commerce.Controllers.SubCategoryController (E-Commerce).
 2025-07-05 23:56:14.562 +03:00 [INF] Executing CreateAsync
 2025-07-05 23:56:18.802 +03:00 [INF] Execute CreateAsync
 2025-07-05 23:56:19.070 +03:00 [INF] Executing GetByIdAsync for entity Category with ID: 13
@@ -1718,10 +1718,10 @@ ORDER BY `t`.`Id`
 
 Mapping types:
 CreateSubCategoryDto -> SubCategory
-E_Commers.DtoModels.CategoryDtos.CreateSubCategoryDto -> E_Commers.Models.SubCategory
-2025-07-05 23:56:20.063 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.CategoryDtos.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-07-05 23:56:20.072 +03:00 [INF] Executed action E_Commers.Controllers.SubCategoryController.CreateAsync (E-Commerce) in 5546.8663ms
-2025-07-05 23:56:20.082 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.SubCategoryController.CreateAsync (E-Commerce)'
+E_Commerce.DtoModels.CategoryDtos.CreateSubCategoryDto -> E_Commerce.Models.SubCategory
+2025-07-05 23:56:20.063 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.CategoryDtos.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-07-05 23:56:20.072 +03:00 [INF] Executed action E_Commerce.Controllers.SubCategoryController.CreateAsync (E-Commerce) in 5546.8663ms
+2025-07-05 23:56:20.082 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.SubCategoryController.CreateAsync (E-Commerce)'
 2025-07-05 23:56:20.098 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/SubCategory - 500 415 application/json; charset=utf-8 5625.9514ms
 2025-07-05 23:56:34.648 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/SubCategory - multipart/form-data; boundary=--------------------------459286687378485231581937 69721
 2025-07-05 23:56:34.657 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -1730,8 +1730,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-07-05 23:56:34.674 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.SubCategoryController.CreateAsync (E-Commerce)'
-2025-07-05 23:56:34.677 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "SubCategory"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.SubCategoryDto]]] CreateAsync(E_Commers.DtoModels.CategoryDtos.CreateSubCategoryDto) on controller E_Commers.Controllers.SubCategoryController (E-Commerce).
+2025-07-05 23:56:34.674 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.SubCategoryController.CreateAsync (E-Commerce)'
+2025-07-05 23:56:34.677 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "SubCategory"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.SubCategoryDto]]] CreateAsync(E_Commerce.DtoModels.CategoryDtos.CreateSubCategoryDto) on controller E_Commerce.Controllers.SubCategoryController (E-Commerce).
 2025-07-05 23:56:34.692 +03:00 [INF] Executing CreateAsync
 2025-07-05 23:56:37.474 +03:00 [INF] Execute CreateAsync
 2025-07-05 23:56:45.392 +03:00 [INF] Executing GetByIdAsync for entity Category with ID: 13
@@ -1754,10 +1754,10 @@ ORDER BY `t`.`Id`
 
 Mapping types:
 CreateSubCategoryDto -> SubCategory
-E_Commers.DtoModels.CategoryDtos.CreateSubCategoryDto -> E_Commers.Models.SubCategory
-2025-07-05 23:57:15.183 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.CategoryDtos.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-07-05 23:57:15.188 +03:00 [INF] Executed action E_Commers.Controllers.SubCategoryController.CreateAsync (E-Commerce) in 40508.1866ms
-2025-07-05 23:57:15.190 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.SubCategoryController.CreateAsync (E-Commerce)'
+E_Commerce.DtoModels.CategoryDtos.CreateSubCategoryDto -> E_Commerce.Models.SubCategory
+2025-07-05 23:57:15.183 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.CategoryDtos.SubCategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-07-05 23:57:15.188 +03:00 [INF] Executed action E_Commerce.Controllers.SubCategoryController.CreateAsync (E-Commerce) in 40508.1866ms
+2025-07-05 23:57:15.190 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.SubCategoryController.CreateAsync (E-Commerce)'
 2025-07-05 23:57:15.194 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/SubCategory - 500 415 application/json; charset=utf-8 40546.5367ms
 2025-07-05 23:59:52.450 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/index.html - null null
 2025-07-05 23:59:52.498 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/index.html - 200 null text/html;charset=utf-8 47.6097ms

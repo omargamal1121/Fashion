@@ -1,11 +1,11 @@
-using E_Commers.Context;
-using E_Commers.Enums;
-using E_Commers.Interfaces;
-using E_Commers.Models;
+using E_Commerce.Context;
+using E_Commerce.Enums;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace E_Commers.Repository
+namespace E_Commerce.Repository
 {
     public class OrderRepository : MainRepository<Order>, IOrderRepository
     {

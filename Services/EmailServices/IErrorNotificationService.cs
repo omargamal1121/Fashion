@@ -1,4 +1,4 @@
-namespace E_Commers.Services.EmailServices
+namespace E_Commerce.Services.EmailServices
 {
 	public interface IErrorNotificationService
     {

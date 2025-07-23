@@ -1,8 +1,8 @@
-using E_Commers.Models;
+using E_Commerce.Models;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace E_Commers.Interfaces
+namespace E_Commerce.Interfaces
 {
     public interface ISubCategoryRepository : IRepository<SubCategory>
     {

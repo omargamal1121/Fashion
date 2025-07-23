@@ -1,8 +1,8 @@
-using E_Commers.DtoModels.ImagesDtos;
-using E_Commers.DtoModels.ProductDtos;
-using E_Commers.DtoModels.Shared;
+using E_Commerce.DtoModels.ImagesDtos;
+using E_Commerce.DtoModels.ProductDtos;
+using E_Commerce.DtoModels.Shared;
 
-namespace E_Commers.DtoModels.CollectionDtos
+namespace E_Commerce.DtoModels.CollectionDtos
 {
     public class CollectionDto : BaseDto
     {

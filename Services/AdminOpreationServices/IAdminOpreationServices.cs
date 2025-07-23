@@ -1,7 +1,7 @@
-﻿using E_Commers.Enums;
-using E_Commers.Models;
+﻿using E_Commerce.Enums;
+using E_Commerce.Models;
 
-namespace E_Commers.Services.AdminOpreationServices
+namespace E_Commerce.Services.AdminOpreationServices
 {
 	public interface IAdminOpreationServices
 	{

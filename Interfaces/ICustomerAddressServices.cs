@@ -1,8 +1,8 @@
-using E_Commers.DtoModels.CustomerAddressDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.Services;
+using E_Commerce.DtoModels.CustomerAddressDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.Services;
 
-namespace E_Commers.Interfaces
+namespace E_Commerce.Interfaces
 {
 	public interface ICustomerAddressServices
 	{

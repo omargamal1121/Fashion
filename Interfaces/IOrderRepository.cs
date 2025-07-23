@@ -1,7 +1,7 @@
-using E_Commers.Enums;
-using E_Commers.Models;
+using E_Commerce.Enums;
+using E_Commerce.Models;
 
-namespace E_Commers.Interfaces
+namespace E_Commerce.Interfaces
 {
     public interface IOrderRepository : IRepository<Order>
     {

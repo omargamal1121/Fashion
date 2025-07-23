@@ -684,8 +684,8 @@ System.IndexOutOfRangeException: Index was outside the bounds of the array.
 2025-06-29 20:28:44.646 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 134.9342ms
 2025-06-29 20:31:08.984 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/Account/Login - application/json 75
 2025-06-29 20:31:11.330 +03:00 [INF] Executing UserAuthenticationMiddleware
-2025-06-29 20:31:11.366 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.AccountController.LoginAsync (E-Commerce)'
-2025-06-29 20:31:11.416 +03:00 [INF] Route matched with {action = "LoginAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.TokenDtos.TokensDto]]] LoginAsync(E_Commers.DtoModels.AccountDtos.LoginDTo) on controller E_Commers.Controllers.AccountController (E-Commerce).
+2025-06-29 20:31:11.366 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce)'
+2025-06-29 20:31:11.416 +03:00 [INF] Route matched with {action = "LoginAsync", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.TokenDtos.TokensDto]]] LoginAsync(E_Commerce.DtoModels.AccountDtos.LoginDTo) on controller E_Commerce.Controllers.AccountController (E-Commerce).
 2025-06-29 20:31:11.837 +03:00 [INF] In LoginAsync Method 
 2025-06-29 20:31:11.852 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
 SELECT `a`.`Id`, `a`.`AccessFailedCount`, `a`.`ConcurrencyStamp`, `a`.`Discriminator`, `a`.`Email`, `a`.`EmailConfirmed`, `a`.`LockoutEnabled`, `a`.`LockoutEnd`, `a`.`NormalizedEmail`, `a`.`NormalizedUserName`, `a`.`PasswordHash`, `a`.`PhoneNumber`, `a`.`PhoneNumberConfirmed`, `a`.`SecurityStamp`, `a`.`TwoFactorEnabled`, `a`.`UserName`, `a`.`Age`, `a`.`CreateAt`, `a`.`DeletedAt`, `a`.`ImageId`, `a`.`LastVisit`, `a`.`Name`, `a`.`ProfilePicture`
@@ -701,9 +701,9 @@ WHERE `a`.`UserId` = @__userId_0
 2025-06-29 20:31:12.432 +03:00 [INF] ✅ Access Token generated successfully for User ID: 54f3c4dd-ad04-4f23-9523-b4ed366f6a75
 2025-06-29 20:31:12.436 +03:00 [INF] 🔑 Generating Refresh Token for User ID: 54f3c4dd-ad04-4f23-9523-b4ed366f6a75
 2025-06-29 20:31:12.451 +03:00 [INF] RefreshToken Generated
-2025-06-29 20:31:12.507 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.TokenDtos.TokensDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-06-29 20:31:12.570 +03:00 [INF] Executed action E_Commers.Controllers.AccountController.LoginAsync (E-Commerce) in 1125.5972ms
-2025-06-29 20:31:12.635 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.AccountController.LoginAsync (E-Commerce)'
+2025-06-29 20:31:12.507 +03:00 [INF] Executing OkObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.TokenDtos.TokensDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-06-29 20:31:12.570 +03:00 [INF] Executed action E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce) in 1125.5972ms
+2025-06-29 20:31:12.635 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.AccountController.LoginAsync (E-Commerce)'
 2025-06-29 20:31:12.701 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/Account/Login - 200 1378 application/json; charset=utf-8 3716.9023ms
 2025-06-29 20:32:09.697 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/categories - multipart/form-data; boundary=--------------------------811204789006281088715873 759912
 2025-06-29 20:32:09.784 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -712,8 +712,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-06-29 20:32:09.939 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
-2025-06-29 20:32:09.962 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commers.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commers.Controllers.categoriesController (E-Commerce).
+2025-06-29 20:32:09.939 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:32:09.962 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commerce.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commerce.Controllers.categoriesController (E-Commerce).
 2025-06-29 20:32:10.038 +03:00 [INF] Executing CreateAsync in CategoryController
 2025-06-29 20:32:10.046 +03:00 [INF] Execute CreateAsync
 2025-06-29 20:32:10.079 +03:00 [INF] Executing CreateAsync for entity Category
@@ -812,16 +812,16 @@ FROM `Categories` AS `c`
 WHERE `c`.`Id` = @__id_0
 LIMIT 1
 2025-06-29 20:32:11.044 +03:00 [ERR] An error occurred using a transaction.
-2025-06-29 20:32:11.052 +03:00 [INF] Executed action E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce) in 1084.1053ms
-2025-06-29 20:32:11.055 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:32:11.052 +03:00 [INF] Executed action E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce) in 1084.1053ms
+2025-06-29 20:32:11.055 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
 2025-06-29 20:32:11.059 +03:00 [ERR] An unhandled exception has occurred while executing the request.
 System.InvalidOperationException: Already committed or rolled back.
    at MySqlConnector.MySqlTransaction.VerifyValid() in /_/src/MySqlConnector/MySqlTransaction.cs:line 287
    at MySqlConnector.MySqlTransaction.RollbackAsync(IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlTransaction.cs:line 65
    at Microsoft.EntityFrameworkCore.Storage.RelationalTransaction.RollbackAsync(CancellationToken cancellationToken)
    at Microsoft.EntityFrameworkCore.Storage.RelationalTransaction.RollbackAsync(CancellationToken cancellationToken)
-   at E_Commers.Services.Category.CategoryServices.CreateAsync(CreateCategotyDto model, String userId) in D:\fashion\Projcet\E-Commers\E-Commers\Services\Category\CategoryServices.cs:line 189
-   at E_Commers.Controllers.categoriesController.CreateAsync(CreateCategotyDto categoryDto) in D:\fashion\Projcet\E-Commers\E-Commers\Controllers\CategoryController.cs:line 100
+   at E_Commerce.Services.Category.CategoryServices.CreateAsync(CreateCategotyDto model, String userId) in D:\fashion\Projcet\E-Commers\E-Commers\Services\Category\CategoryServices.cs:line 189
+   at E_Commerce.Controllers.categoriesController.CreateAsync(CreateCategotyDto categoryDto) in D:\fashion\Projcet\E-Commers\E-Commers\Controllers\CategoryController.cs:line 100
    at lambda_method293(Closure, Object)
    at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
    at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
@@ -837,7 +837,7 @@ System.InvalidOperationException: Already committed or rolled back.
    at Microsoft.AspNetCore.RateLimiting.RateLimitingMiddleware.InvokeInternal(HttpContext context, EnableRateLimitingAttribute enableRateLimitingAttribute)
    at SecurityStampMiddleware.Invoke(HttpContext context) in D:\fashion\Projcet\E-Commers\E-Commers\MiddleWares\SecurityStampMiddleware.cs:line 75
    at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
-   at E_Commers.Middleware.UserAuthenticationMiddleware.InvokeAsync(HttpContext context) in D:\fashion\Projcet\E-Commers\E-Commers\Middleware\UserAuthenticationMiddleware.cs:line 38
+   at E_Commerce.Middleware.UserAuthenticationMiddleware.InvokeAsync(HttpContext context) in D:\fashion\Projcet\E-Commers\E-Commers\Middleware\UserAuthenticationMiddleware.cs:line 38
    at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
    at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
    at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
@@ -908,8 +908,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-06-29 20:33:11.620 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
-2025-06-29 20:33:11.709 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commers.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commers.Controllers.categoriesController (E-Commerce).
+2025-06-29 20:33:11.620 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:33:11.709 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commerce.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commerce.Controllers.categoriesController (E-Commerce).
 2025-06-29 20:33:12.545 +03:00 [INF] Executing CreateAsync in CategoryController
 2025-06-29 20:33:12.554 +03:00 [INF] Execute CreateAsync
 2025-06-29 20:33:12.603 +03:00 [INF] Executing CreateAsync for entity Category
@@ -920,7 +920,7 @@ VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7);
 SELECT `Id`
 FROM `Categories`
 WHERE ROW_COUNT() = 1 AND `Id` = LAST_INSERT_ID();
-2025-06-29 20:33:13.105 +03:00 [ERR] An exception occurred in the database while saving changes for context type 'E_Commers.Context.AppDbContext'.
+2025-06-29 20:33:13.105 +03:00 [ERR] An exception occurred in the database while saving changes for context type 'E_Commerce.Context.AppDbContext'.
 Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
  ---> MySqlConnector.MySqlException (0x80004005): Duplicate entry 'pantes' for key 'IX_Categories_Name'
    at MySqlConnector.Core.ServerSession.ReceiveReplyAsync(IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/Core/ServerSession.cs:line 894
@@ -964,9 +964,9 @@ Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving 
    at Pomelo.EntityFrameworkCore.MySql.Storage.Internal.MySqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
    at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
 2025-06-29 20:33:14.182 +03:00 [ERR] ❌ Exception in CreateAsync: An error occurred while saving the entity changes. See the inner exception for details.
-2025-06-29 20:33:14.531 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-06-29 20:33:14.595 +03:00 [INF] Executed action E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce) in 2869.2336ms
-2025-06-29 20:33:14.601 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:33:14.531 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-06-29 20:33:14.595 +03:00 [INF] Executed action E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce) in 2869.2336ms
+2025-06-29 20:33:14.601 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
 2025-06-29 20:33:14.627 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/categories - 500 299 application/json; charset=utf-8 3573.3979ms
 2025-06-29 20:34:09.954 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/categories - multipart/form-data; boundary=--------------------------377091933399161000150127 759912
 2025-06-29 20:34:09.966 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -975,8 +975,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-06-29 20:34:09.996 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
-2025-06-29 20:34:10.000 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commers.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commers.Controllers.categoriesController (E-Commerce).
+2025-06-29 20:34:09.996 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:34:10.000 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commerce.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commerce.Controllers.categoriesController (E-Commerce).
 2025-06-29 20:34:10.043 +03:00 [INF] Executing CreateAsync in CategoryController
 2025-06-29 20:34:10.045 +03:00 [INF] Execute CreateAsync
 2025-06-29 20:34:10.063 +03:00 [INF] Executing CreateAsync for entity Category
@@ -987,7 +987,7 @@ VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7);
 SELECT `Id`
 FROM `Categories`
 WHERE ROW_COUNT() = 1 AND `Id` = LAST_INSERT_ID();
-2025-06-29 20:34:10.098 +03:00 [ERR] An exception occurred in the database while saving changes for context type 'E_Commers.Context.AppDbContext'.
+2025-06-29 20:34:10.098 +03:00 [ERR] An exception occurred in the database while saving changes for context type 'E_Commerce.Context.AppDbContext'.
 Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
  ---> MySqlConnector.MySqlException (0x80004005): Duplicate entry 'pantes' for key 'IX_Categories_Name'
    at MySqlConnector.Core.ServerSession.ReceiveReplyAsync(IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/Core/ServerSession.cs:line 894
@@ -1031,9 +1031,9 @@ Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving 
    at Pomelo.EntityFrameworkCore.MySql.Storage.Internal.MySqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
    at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
 2025-06-29 20:36:51.568 +03:00 [ERR] ❌ Exception in CreateAsync: An error occurred while saving the entity changes. See the inner exception for details.
-2025-06-29 20:36:51.736 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-06-29 20:36:51.739 +03:00 [INF] Executed action E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce) in 161734.4673ms
-2025-06-29 20:36:51.741 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:36:51.736 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-06-29 20:36:51.739 +03:00 [INF] Executed action E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce) in 161734.4673ms
+2025-06-29 20:36:51.741 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
 2025-06-29 20:36:51.775 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/categories - 500 299 application/json; charset=utf-8 161821.0757ms
 2025-06-29 20:36:52.378 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/index.html - null null
 2025-06-29 20:36:53.934 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/index.html - 200 null text/html;charset=utf-8 1600.0692ms
@@ -1051,8 +1051,8 @@ FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
 2025-06-29 20:36:55.957 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - null null
-2025-06-29 20:36:55.993 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
-2025-06-29 20:36:56.059 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commers.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commers.Controllers.categoriesController (E-Commerce).
+2025-06-29 20:36:55.993 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:36:56.059 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commerce.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commerce.Controllers.categoriesController (E-Commerce).
 2025-06-29 20:36:56.128 +03:00 [INF] Executing CreateAsync in CategoryController
 2025-06-29 20:36:56.136 +03:00 [INF] Execute CreateAsync
 2025-06-29 20:36:56.160 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7288/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 202.4041ms
@@ -1061,9 +1061,9 @@ SELECT `c`.`Id`, `c`.`CreatedAt`, `c`.`DeletedAt`, `c`.`Description`, `c`.`Displ
 FROM `Categories` AS `c`
 WHERE `c`.`Name` = @__name_0
 LIMIT 1
-2025-06-29 20:36:56.523 +03:00 [INF] Executing ConflictObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-06-29 20:36:56.526 +03:00 [INF] Executed action E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce) in 461.3002ms
-2025-06-29 20:36:57.419 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:36:56.523 +03:00 [INF] Executing ConflictObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-06-29 20:36:56.526 +03:00 [INF] Executed action E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce) in 461.3002ms
+2025-06-29 20:36:57.419 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
 2025-06-29 20:36:57.424 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/categories - 409 294 application/json; charset=utf-8 2365.0075ms
 2025-06-29 20:37:05.488 +03:00 [INF] Execution Worker recovered from the Faulted state after 00:00:13.9219595 and is in the Running state now
 2025-06-29 20:37:06.079 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/categories - multipart/form-data; boundary=--------------------------784705440885837334693511 759913
@@ -1073,8 +1073,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-06-29 20:37:06.140 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
-2025-06-29 20:37:06.152 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commers.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commers.Controllers.categoriesController (E-Commerce).
+2025-06-29 20:37:06.140 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:37:06.152 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commerce.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commerce.Controllers.categoriesController (E-Commerce).
 2025-06-29 20:37:06.179 +03:00 [INF] Executing CreateAsync in CategoryController
 2025-06-29 20:37:06.181 +03:00 [INF] Execute CreateAsync
 2025-06-29 20:37:06.185 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__name_0='?' (Size = 20)], CommandType='"Text"', CommandTimeout='30']
@@ -1178,16 +1178,16 @@ FROM `Categories` AS `c`
 WHERE `c`.`Id` = @__id_0
 LIMIT 1
 2025-06-29 20:37:37.921 +03:00 [ERR] An error occurred using a transaction.
-2025-06-29 20:37:40.472 +03:00 [INF] Executed action E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce) in 34316.1432ms
-2025-06-29 20:37:40.480 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:37:40.472 +03:00 [INF] Executed action E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce) in 34316.1432ms
+2025-06-29 20:37:40.480 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
 2025-06-29 20:38:10.900 +03:00 [ERR] An unhandled exception has occurred while executing the request.
 System.InvalidOperationException: Already committed or rolled back.
    at MySqlConnector.MySqlTransaction.VerifyValid() in /_/src/MySqlConnector/MySqlTransaction.cs:line 287
    at MySqlConnector.MySqlTransaction.RollbackAsync(IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlTransaction.cs:line 65
    at Microsoft.EntityFrameworkCore.Storage.RelationalTransaction.RollbackAsync(CancellationToken cancellationToken)
    at Microsoft.EntityFrameworkCore.Storage.RelationalTransaction.RollbackAsync(CancellationToken cancellationToken)
-   at E_Commers.Services.Category.CategoryServices.CreateAsync(CreateCategotyDto model, String userId)
-   at E_Commers.Controllers.categoriesController.CreateAsync(CreateCategotyDto categoryDto)
+   at E_Commerce.Services.Category.CategoryServices.CreateAsync(CreateCategotyDto model, String userId)
+   at E_Commerce.Controllers.categoriesController.CreateAsync(CreateCategotyDto categoryDto)
    at lambda_method418(Closure, Object)
    at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
    at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
@@ -1203,7 +1203,7 @@ System.InvalidOperationException: Already committed or rolled back.
    at Microsoft.AspNetCore.RateLimiting.RateLimitingMiddleware.InvokeInternal(HttpContext context, EnableRateLimitingAttribute enableRateLimitingAttribute)
    at SecurityStampMiddleware.Invoke(HttpContext context)
    at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
-   at E_Commers.Middleware.UserAuthenticationMiddleware.InvokeAsync(HttpContext context)
+   at E_Commerce.Middleware.UserAuthenticationMiddleware.InvokeAsync(HttpContext context)
    at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
    at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
    at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
@@ -1227,8 +1227,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-06-29 20:39:47.903 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
-2025-06-29 20:39:47.911 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commers.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commers.Controllers.categoriesController (E-Commerce).
+2025-06-29 20:39:47.903 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:39:47.911 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commerce.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commerce.Controllers.categoriesController (E-Commerce).
 2025-06-29 20:39:47.944 +03:00 [INF] Executing CreateAsync in CategoryController
 2025-06-29 20:39:47.955 +03:00 [INF] Execute CreateAsync
 2025-06-29 20:39:47.961 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__name_0='?' (Size = 20)], CommandType='"Text"', CommandTimeout='30']
@@ -1236,9 +1236,9 @@ SELECT `c`.`Id`, `c`.`CreatedAt`, `c`.`DeletedAt`, `c`.`Description`, `c`.`Displ
 FROM `Categories` AS `c`
 WHERE `c`.`Name` = @__name_0
 LIMIT 1
-2025-06-29 20:39:47.968 +03:00 [INF] Executing ConflictObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-06-29 20:39:47.973 +03:00 [INF] Executed action E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce) in 56.5649ms
-2025-06-29 20:39:47.976 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:39:47.968 +03:00 [INF] Executing ConflictObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-06-29 20:39:47.973 +03:00 [INF] Executed action E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce) in 56.5649ms
+2025-06-29 20:39:47.976 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
 2025-06-29 20:39:47.983 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/categories - 409 295 application/json; charset=utf-8 149.1909ms
 2025-06-29 20:39:53.434 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/categories - multipart/form-data; boundary=--------------------------282613725260571291966554 759914
 2025-06-29 20:39:53.452 +03:00 [INF] Executing UserAuthenticationMiddleware
@@ -1247,8 +1247,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-06-29 20:39:53.470 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
-2025-06-29 20:39:53.472 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commers.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commers.Controllers.categoriesController (E-Commerce).
+2025-06-29 20:39:53.470 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:39:53.472 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commerce.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commerce.Controllers.categoriesController (E-Commerce).
 2025-06-29 20:39:53.502 +03:00 [INF] Executing CreateAsync in CategoryController
 2025-06-29 20:39:53.505 +03:00 [INF] Execute CreateAsync
 2025-06-29 20:39:53.509 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__name_0='?' (Size = 20)], CommandType='"Text"', CommandTimeout='30']
@@ -1392,8 +1392,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-06-29 20:41:57.308 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
-2025-06-29 20:41:57.379 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commers.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commers.Controllers.categoriesController (E-Commerce).
+2025-06-29 20:41:57.308 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:41:57.379 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commerce.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commerce.Controllers.categoriesController (E-Commerce).
 2025-06-29 20:42:13.887 +03:00 [INF] Executing CreateAsync in CategoryController
 2025-06-29 20:42:13.900 +03:00 [INF] Execute CreateAsync
 2025-06-29 20:42:13.924 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__name_0='?' (Size = 20)], CommandType='"Text"', CommandTimeout='30']
@@ -1476,18 +1476,18 @@ LIMIT 1
 
 Mapping types:
 Category -> CategoryDto
-E_Commers.Models.Category -> E_Commers.DtoModels.CategoryDtos.CategoryDto
+E_Commerce.Models.Category -> E_Commerce.DtoModels.CategoryDtos.CategoryDto
 
 Type Map configuration:
 Category -> CategoryDto
-E_Commers.Models.Category -> E_Commers.DtoModels.CategoryDtos.CategoryDto
+E_Commerce.Models.Category -> E_Commerce.DtoModels.CategoryDtos.CategoryDto
 
 Destination Member:
 images
 
-2025-06-29 20:42:16.875 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-06-29 20:42:16.923 +03:00 [INF] Executed action E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce) in 19532.9743ms
-2025-06-29 20:42:16.928 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:42:16.875 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-06-29 20:42:16.923 +03:00 [INF] Executed action E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce) in 19532.9743ms
+2025-06-29 20:42:16.928 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
 2025-06-29 20:42:16.943 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/categories - 500 299 application/json; charset=utf-8 20345.9157ms
 2025-06-29 20:44:34.260 +03:00 [ERR] Execution Worker is in the Failed state now due to an exception, execution will be retried in no more than 00:05:00
 MySqlConnector.MySqlException (0x80004005): Unable to connect to any of the specified MySQL hosts.
@@ -1569,7 +1569,7 @@ MySqlConnector.MySqlException (0x80004005): Unable to connect to any of the spec
 2025-06-29 20:45:03.420 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:7288/api/categories - multipart/form-data; boundary=--------------------------252552021773942580873942 759914
 2025-06-29 20:45:03.433 +03:00 [INF] Executing UserAuthenticationMiddleware
 2025-06-29 20:45:07.571 +03:00 [ERR] An error occurred using the connection to database 'Fashion_Site' on server 'localhost'.
-2025-06-29 20:45:07.596 +03:00 [ERR] An exception occurred while iterating over the results of a query for context type 'E_Commers.Context.AppDbContext'.
+2025-06-29 20:45:07.596 +03:00 [ERR] An exception occurred while iterating over the results of a query for context type 'E_Commerce.Context.AppDbContext'.
 System.InvalidOperationException: An exception has been raised that is likely due to a transient failure. Consider enabling transient error resiliency by adding 'EnableRetryOnFailure()' to the 'UseMySql' call.
  ---> MySqlConnector.MySqlException (0x80004005): Unable to connect to any of the specified MySQL hosts.
    at MySqlConnector.Core.ServerSession.OpenTcpSocketAsync(ConnectionSettings cs, ILoadBalancer loadBalancer, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/Core/ServerSession.cs:line 1063
@@ -1635,7 +1635,7 @@ System.InvalidOperationException: An exception has been raised that is likely du
    at Microsoft.EntityFrameworkCore.Query.ShapedQueryCompilingExpressionVisitor.SingleOrDefaultAsync[TSource](IAsyncEnumerable`1 asyncEnumerable, CancellationToken cancellationToken)
    at SecurityStampMiddleware.Invoke(HttpContext context)
    at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
-   at E_Commers.Middleware.UserAuthenticationMiddleware.InvokeAsync(HttpContext context)
+   at E_Commerce.Middleware.UserAuthenticationMiddleware.InvokeAsync(HttpContext context)
    at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
    at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
    at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
@@ -1665,8 +1665,8 @@ SELECT `a`.`Id`, `a`.`SecurityStamp`
 FROM `AspNetUsers` AS `a`
 WHERE (`a`.`Discriminator` = 'Customer') AND (`a`.`Id` = @__userId_0)
 LIMIT 1
-2025-06-29 20:45:43.955 +03:00 [INF] Executing endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
-2025-06-29 20:45:43.967 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commers.DtoModels.Responses.ApiResponse`1[E_Commers.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commers.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commers.Controllers.categoriesController (E-Commerce).
+2025-06-29 20:45:43.955 +03:00 [INF] Executing endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:45:43.967 +03:00 [INF] Route matched with {action = "CreateAsync", controller = "categories"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[E_Commerce.DtoModels.Responses.ApiResponse`1[E_Commerce.DtoModels.CategoryDtos.CategoryDto]]] CreateAsync(E_Commerce.DtoModels.CategoryDtos.CreateCategotyDto) on controller E_Commerce.Controllers.categoriesController (E-Commerce).
 2025-06-29 20:45:44.001 +03:00 [INF] Executing CreateAsync in CategoryController
 2025-06-29 20:45:44.003 +03:00 [INF] Execute CreateAsync
 2025-06-29 20:45:44.037 +03:00 [INF] Executed DbCommand (27ms) [Parameters=[@__name_0='?' (Size = 20)], CommandType='"Text"', CommandTimeout='30']
@@ -1749,18 +1749,18 @@ LIMIT 1
 
 Mapping types:
 Category -> CategoryDto
-E_Commers.Models.Category -> E_Commers.DtoModels.CategoryDtos.CategoryDto
+E_Commerce.Models.Category -> E_Commerce.DtoModels.CategoryDtos.CategoryDto
 
 Type Map configuration:
 Category -> CategoryDto
-E_Commers.Models.Category -> E_Commers.DtoModels.CategoryDtos.CategoryDto
+E_Commerce.Models.Category -> E_Commerce.DtoModels.CategoryDtos.CategoryDto
 
 Destination Member:
 images
 
-2025-06-29 20:45:46.522 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commers.DtoModels.Responses.ApiResponse`1[[E_Commers.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
-2025-06-29 20:45:46.526 +03:00 [INF] Executed action E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce) in 2551.1513ms
-2025-06-29 20:45:46.528 +03:00 [INF] Executed endpoint 'E_Commers.Controllers.categoriesController.CreateAsync (E-Commerce)'
+2025-06-29 20:45:46.522 +03:00 [INF] Executing ObjectResult, writing value of type 'E_Commerce.DtoModels.Responses.ApiResponse`1[[E_Commerce.DtoModels.CategoryDtos.CategoryDto, E-Commerce, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-06-29 20:45:46.526 +03:00 [INF] Executed action E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce) in 2551.1513ms
+2025-06-29 20:45:46.528 +03:00 [INF] Executed endpoint 'E_Commerce.Controllers.categoriesController.CreateAsync (E-Commerce)'
 2025-06-29 20:45:46.537 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:7288/api/categories - 500 299 application/json; charset=utf-8 2645.0965ms
 2025-06-29 20:46:02.569 +03:00 [INF] Execution Worker recovered from the Failed state after 00:01:28.1683675 and is in the Running state now
 2025-06-29 20:46:02.793 +03:00 [INF] Server mrrobot:13448:670a6ce5 is now able to continue sending heartbeats

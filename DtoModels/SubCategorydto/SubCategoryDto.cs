@@ -1,10 +1,10 @@
-﻿using E_Commers.DtoModels.ImagesDtos;
-using E_Commers.DtoModels.Shared;
-using E_Commers.DtoModels.ProductDtos;
+﻿using E_Commerce.DtoModels.ImagesDtos;
+using E_Commerce.DtoModels.Shared;
+using E_Commerce.DtoModels.ProductDtos;
 using System.ComponentModel.DataAnnotations;
 
 
-namespace E_Commers.DtoModels.SubCategorydto
+namespace E_Commerce.DtoModels.SubCategorydto
 {
 	public class SubCategoryDto: BaseDto
 	{

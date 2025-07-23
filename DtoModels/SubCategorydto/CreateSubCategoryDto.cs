@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 
-namespace E_Commers.DtoModels.SubCategorydto
+namespace E_Commerce.DtoModels.SubCategorydto
 {
     public class CreateSubCategoryDto
     {

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 
-namespace E_Commers.DtoModels.AccountDtos
+namespace E_Commerce.DtoModels.AccountDtos
 {
 	public class RegisterDto
 	{

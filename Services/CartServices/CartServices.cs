@@ -1,20 +1,20 @@
 using AutoMapper;
-using E_Commers.DtoModels.CartDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.Enums;
-using E_Commers.ErrorHnadling;
-using E_Commers.Interfaces;
-using E_Commers.Models;
-using E_Commers.Services.AdminOpreationServices;
-using E_Commers.Services.Cache;
-using E_Commers.Services.EmailServices;
-using E_Commers.UOW;
+using E_Commerce.DtoModels.CartDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.Enums;
+using E_Commerce.ErrorHnadling;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
+using E_Commerce.Services.AdminOpreationServices;
+using E_Commerce.Services.Cache;
+using E_Commerce.Services.EmailServices;
+using E_Commerce.UOW;
 using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace E_Commers.Services.Cart
+namespace E_Commerce.Services.Cart
 {
     public class CartServices : ICartServices
     {
@@ -461,7 +461,7 @@ namespace E_Commers.Services.Cart
             }
         }
 
-        private async Task<E_Commers.Models.Cart?> CreateNewCartAsync(string userId)
+        private async Task<E_Commerce.Models.Cart?> CreateNewCartAsync(string userId)
         {
             try
             {

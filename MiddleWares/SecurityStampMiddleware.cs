@@ -1,7 +1,7 @@
-﻿using E_Commers.Context;
-using E_Commers.DtoModels.Responses;
-using E_Commers.ErrorHnadling;
-using E_Commers.Models;
+﻿using E_Commerce.Context;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.ErrorHnadling;
+using E_Commerce.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;

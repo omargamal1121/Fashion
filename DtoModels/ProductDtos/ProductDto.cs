@@ -1,16 +1,16 @@
-﻿using E_Commers.DtoModels.DiscoutDtos;
-using E_Commers.DtoModels.Shared;
-using E_Commers.Models;
+﻿using E_Commerce.DtoModels.DiscoutDtos;
+using E_Commerce.DtoModels.Shared;
+using E_Commerce.Models;
 using System.ComponentModel.DataAnnotations;
-using E_Commers.DtoModels.InventoryDtos;
-using E_Commers.DtoModels.ImagesDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.DtoModels.ProductDtos;
-using E_Commers.Enums;
-using E_Commers.DtoModels.CollectionDtos;
-using E_Commers.DtoModels.SubCategorydto;
+using E_Commerce.DtoModels.InventoryDtos;
+using E_Commerce.DtoModels.ImagesDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.DtoModels.ProductDtos;
+using E_Commerce.Enums;
+using E_Commerce.DtoModels.CollectionDtos;
+using E_Commerce.DtoModels.SubCategorydto;
 
-namespace E_Commers.DtoModels.ProductDtos
+namespace E_Commerce.DtoModels.ProductDtos
 {
 	public class ProductDto:BaseDto
 	{
@@ -128,6 +128,6 @@ namespace E_Commers.DtoModels.ProductDtos
 
 		public List<ImageDto>? Images { get; set; }
 		public List<ProductVariantDto>? Variants { get; set; }
-		public decimal? PriceAfterDiscount { get; set; }
+		public decimal? FinalPrice { get; set; }
 	}
 }

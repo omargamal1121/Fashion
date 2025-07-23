@@ -1,14 +1,14 @@
-﻿using E_Commers.DtoModels;
-using E_Commers.DtoModels.DiscoutDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.ErrorHnadling;
-using E_Commers.Services;
-using E_Commers.Services.Discount;
+﻿using E_Commerce.DtoModels;
+using E_Commerce.DtoModels.DiscoutDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.ErrorHnadling;
+using E_Commerce.Services;
+using E_Commerce.Services.Discount;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace E_Commers.Controllers
+namespace E_Commerce.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
@@ -114,12 +114,12 @@ namespace E_Commers.Controllers
 
 		[HttpDelete("{id}")]
 		[ActionName(nameof(DeleteAsync))]
-		public async Task<ActionResult<ApiResponse<string>>> DeleteAsync(int id)
+		public async Task<ActionResult<ApiResponse<bool>>> DeleteAsync(int id)
 		{
 			_logger.LogInformation($"Executing {nameof(DeleteAsync)} for ID: {id}");
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var response = await _discountService.DeleteDiscountAsync(id, userId);
-			return HandleResult<string>(response, nameof(GetByIdAsync), id);
+			return HandleResult<bool>(response, nameof(GetByIdAsync), id);
 		}
 
 		[HttpPatch("{id}/restore")]
@@ -200,22 +200,22 @@ namespace E_Commers.Controllers
 
 		[HttpPatch("{id}/activate")]
 		[ActionName(nameof(ActivateAsync))]
-		public async Task<ActionResult<ApiResponse<string>>> ActivateAsync(int id)
+		public async Task<ActionResult<ApiResponse<bool>>> ActivateAsync(int id)
 		{
 			_logger.LogInformation($"Executing {nameof(ActivateAsync)} for ID: {id}");
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var response = await _discountService.ActivateDiscountAsync(id, userId);
-			return HandleResult<string>(response, nameof(GetByIdAsync), id);
+			return HandleResult<bool>(response, nameof(GetByIdAsync), id);
 		}
 
 		[HttpPatch("{id}/deactivate")]
 		[ActionName(nameof(DeactivateAsync))]
-		public async Task<ActionResult<ApiResponse<string>>> DeactivateAsync(int id)
+		public async Task<ActionResult<ApiResponse<bool>>> DeactivateAsync(int id)
 		{
 			_logger.LogInformation($"Executing {nameof(DeactivateAsync)} for ID: {id}");
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var response = await _discountService.DeactivateDiscountAsync(id, userId);
-			return HandleResult<string>(response, nameof(GetByIdAsync), id);
+			return HandleResult<bool>(response, nameof(GetByIdAsync), id);
 		}
 
 		[HttpGet("{id}/validate")]

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace E_Commers.Models
+namespace E_Commerce.Models
 {
 	public class BaseEntity
 	{

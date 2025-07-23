@@ -1,6 +1,6 @@
-using E_Commers.DtoModels.Responses;
+using E_Commerce.DtoModels.Responses;
 
-namespace E_Commers.Services.AccountServices.Password
+namespace E_Commerce.Services.AccountServices.Password
 {
     public interface IPasswordService
     {

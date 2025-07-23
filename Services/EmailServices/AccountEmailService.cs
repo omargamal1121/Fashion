@@ -1,10 +1,10 @@
-using E_Commers.Models;
+using E_Commerce.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
 
-namespace E_Commers.Services.EmailServices
+namespace E_Commerce.Services.EmailServices
 {
     public class AccountEmailService : IAccountEmailService
     {

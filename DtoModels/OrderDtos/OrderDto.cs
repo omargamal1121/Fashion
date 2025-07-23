@@ -1,10 +1,10 @@
-using E_Commers.DtoModels.CartDtos;
-using E_Commers.DtoModels.ImagesDtos;
-using E_Commers.DtoModels.ProductDtos;
-using E_Commers.DtoModels.Shared;
-using E_Commers.Enums;
+using E_Commerce.DtoModels.CartDtos;
+using E_Commerce.DtoModels.ImagesDtos;
+using E_Commerce.DtoModels.ProductDtos;
+using E_Commerce.DtoModels.Shared;
+using E_Commerce.Enums;
 
-namespace E_Commers.DtoModels.OrderDtos
+namespace E_Commerce.DtoModels.OrderDtos
 {
     public class OrderDto : BaseDto
     {

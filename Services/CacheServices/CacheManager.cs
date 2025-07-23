@@ -1,7 +1,7 @@
 using System.Text.Json;
 using StackExchange.Redis;
 
-namespace E_Commers.Services.Cache
+namespace E_Commerce.Services.Cache
 {
 	public class CacheManager : ICacheManager
 	{

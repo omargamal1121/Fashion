@@ -1,6 +1,6 @@
-using E_Commers.Context;
-using E_Commers.Interfaces;
-using E_Commers.Models;
+using E_Commerce.Context;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq;

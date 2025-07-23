@@ -1,11 +1,11 @@
-﻿using E_Commers.DtoModels.CategoryDtos;
-using E_Commers.DtoModels.ImagesDtos;
-using E_Commers.Services;
+﻿using E_Commerce.DtoModels.CategoryDtos;
+using E_Commerce.DtoModels.ImagesDtos;
+using E_Commerce.Services;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace E_Commers.Interfaces
+namespace E_Commerce.Interfaces
 {
 	public interface ICategoryServices
 	{

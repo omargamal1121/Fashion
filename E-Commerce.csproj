@@ -4,7 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>E_Commers</RootNamespace>
+    <RootNamespace>E_Commerce</RootNamespace>
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
 	<ItemGroup>

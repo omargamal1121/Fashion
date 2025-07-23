@@ -1,9 +1,9 @@
-using E_Commers.DtoModels.OrderDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.Enums;
-using E_Commers.Services;
+using E_Commerce.DtoModels.OrderDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.Enums;
+using E_Commerce.Services;
 
-namespace E_Commers.Interfaces
+namespace E_Commerce.Interfaces
 {
 	public interface IOrderServices
 	{

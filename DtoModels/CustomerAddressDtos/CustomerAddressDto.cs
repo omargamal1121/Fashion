@@ -1,7 +1,7 @@
-using E_Commers.DtoModels.Shared;
+using E_Commerce.DtoModels.Shared;
 using System.ComponentModel.DataAnnotations;
 
-namespace E_Commers.DtoModels.CustomerAddressDtos
+namespace E_Commerce.DtoModels.CustomerAddressDtos
 {
 	public class CustomerAddressDto : BaseDto
 	{

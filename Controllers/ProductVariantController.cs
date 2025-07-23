@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using E_Commers.Services.Product;
-using E_Commers.DtoModels.ProductDtos;
-using E_Commers.Enums;
+using E_Commerce.Services.Product;
+using E_Commerce.DtoModels.ProductDtos;
+using E_Commerce.Enums;
 using Microsoft.AspNetCore.Authorization;
-using E_Commers.DtoModels.Responses;
-using E_Commers.ErrorHnadling;
-using E_Commers.Services.ProductServices;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.ErrorHnadling;
+using E_Commerce.Services.ProductServices;
 
-namespace E_Commers.Controllers
+namespace E_Commerce.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -23,7 +23,7 @@ namespace E_Commers.Controllers
             _logger = logger;
         }
 
-        private ActionResult<ApiResponse<T>> HandleResult<T>(E_Commers.Services.Result<T> result, string actionName = null, int? id = null) 
+        private ActionResult<ApiResponse<T>> HandleResult<T>(E_Commerce.Services.Result<T> result, string actionName = null, int? id = null) 
         {
             var apiResponse = result.Success
                 ? ApiResponse<T>.CreateSuccessResponse(result.Message, result.Data, result.StatusCode, warnings: result.Warnings)

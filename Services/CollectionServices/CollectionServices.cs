@@ -1,17 +1,17 @@
 using AutoMapper;
-using E_Commers.DtoModels.CollectionDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.ErrorHnadling;
-using E_Commers.Interfaces;
-using E_Commers.Models;
-using E_Commers.Services.AdminOpreationServices;
-using E_Commers.Services.Cache;
-using E_Commers.Services.EmailServices;
-using E_Commers.UOW;
+using E_Commerce.DtoModels.CollectionDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.ErrorHnadling;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
+using E_Commerce.Services.AdminOpreationServices;
+using E_Commerce.Services.Cache;
+using E_Commerce.Services.EmailServices;
+using E_Commerce.UOW;
 using Hangfire;
 using Microsoft.Extensions.Logging;
 
-namespace E_Commers.Services.Collection
+namespace E_Commerce.Services.Collection
 {
     public class CollectionServices :  ICollectionServices
     {
@@ -197,7 +197,7 @@ namespace E_Commers.Services.Collection
                 {
                     foreach (var productId in collectionDto.ProductIds)
                     {
-                        var product = await _unitOfWork.Repository<E_Commers.Models.Product>().GetByIdAsync(productId);
+                        var product = await _unitOfWork.Repository<E_Commerce.Models.Product>().GetByIdAsync(productId);
                         if (product == null)
                         {
                             await transaction.RollbackAsync();
@@ -206,7 +206,7 @@ namespace E_Commers.Services.Collection
                     }
                 }
 
-                var collection = _mapper.Map<E_Commers.Models.Collection>(collectionDto);
+                var collection = _mapper.Map<E_Commerce.Models.Collection>(collectionDto);
                 var createdCollection = await _collectionRepository.CreateAsync(collection);
                 if (createdCollection == null)
                 {
@@ -294,7 +294,7 @@ namespace E_Commers.Services.Collection
                 {
                     foreach (var productId in collectionDto.ProductIds)
                     {
-                        var product = await _unitOfWork.Repository<E_Commers.Models.Product>().GetByIdAsync(productId);
+                        var product = await _unitOfWork.Repository<E_Commerce.Models.Product>().GetByIdAsync(productId);
                         if (product == null)
                         {
                             await transaction.RollbackAsync();
@@ -456,7 +456,7 @@ namespace E_Commers.Services.Collection
                 // Validate product IDs
                 foreach (var productId in productsDto.ProductIds)
                 {
-                    var product = await _unitOfWork.Repository<E_Commers.Models.Product>().GetByIdAsync(productId);
+                    var product = await _unitOfWork.Repository<E_Commerce.Models.Product>().GetByIdAsync(productId);
                     if (product == null)
                     {
                         await transaction.RollbackAsync();

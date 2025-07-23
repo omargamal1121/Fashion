@@ -1,6 +1,6 @@
-using E_Commers.DtoModels.Shared;
+using E_Commerce.DtoModels.Shared;
 
-namespace E_Commers.Interfaces
+namespace E_Commerce.Interfaces
 {
     public interface ILinkBuilder
     {

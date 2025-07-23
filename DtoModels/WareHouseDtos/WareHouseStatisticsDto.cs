@@ -1,4 +1,4 @@
-namespace E_Commers.DtoModels.WareHouseDtos
+namespace E_Commerce.DtoModels.WareHouseDtos
 {
     public class WareHouseStatisticsDto
     {

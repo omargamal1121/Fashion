@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace E_Commers.Models
+namespace E_Commerce.Models
 {
     public class Review
     {

@@ -1,30 +1,30 @@
 ﻿using AutoMapper;
-using E_Commers.DtoModels.CategoryDtos;
-using E_Commers.DtoModels.CollectionDtos;
-using E_Commers.DtoModels.DiscoutDtos;
-using E_Commers.DtoModels.ImagesDtos;
-using E_Commers.DtoModels.ProductDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.Enums;
-using E_Commers.ErrorHnadling;
-using E_Commers.Interfaces;
-using E_Commers.Models;
-using E_Commers.Services.AdminOpreationServices;
-using E_Commers.Services.EmailServices;
-using E_Commers.UOW;
+using E_Commerce.DtoModels.CategoryDtos;
+using E_Commerce.DtoModels.CollectionDtos;
+using E_Commerce.DtoModels.DiscoutDtos;
+using E_Commerce.DtoModels.ImagesDtos;
+using E_Commerce.DtoModels.ProductDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.Enums;
+using E_Commerce.ErrorHnadling;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
+using E_Commerce.Services.AdminOpreationServices;
+using E_Commerce.Services.EmailServices;
+using E_Commerce.UOW;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using E_Commers.Services.Cache;
+using E_Commerce.Services.Cache;
 using Hangfire;
 using System.Linq.Expressions;
 
-namespace E_Commers.Services.ProductServices
+namespace E_Commerce.Services.ProductServices
 {
 	public interface IProductCatalogService
 	{
 		
 		Task<Result<ProductDetailDto>> GetProductByIdAsync(int id, bool? isActive, bool? deletedOnly);
-		public void UpdateProductQuantity(E_Commers.Models.Product Product  );
+		public void UpdateProductQuantity(E_Commerce.Models.Product Product  );
 		Task<Result<ProductDto>> CreateProductAsync(CreateProductDto dto, string userId);
 		Task<Result<ProductDto>> UpdateProductAsync(int id, UpdateProductDto dto, string userId);
 		Task<Result<bool>> DeleteProductAsync(int id, string userId);
@@ -70,7 +70,7 @@ namespace E_Commers.Services.ProductServices
 		private string GetProductsBySubCategoryCacheKey(int subCategoryId, bool? isActive, bool? deletedOnly) => $"products_subcategory:{subCategoryId}:isActive={isActive}:deletedOnly={deletedOnly}";
 
 
-		private static Expression<Func<E_Commers.Models.Product, ProductDto>> maptoProductDtoexpression = p =>
+		private static Expression<Func<E_Commerce.Models.Product, ProductDto>> maptoProductDtoexpression = p =>
 		 new ProductDto
 		 {
 			 Id = p.Id,
@@ -81,10 +81,10 @@ namespace E_Commers.Services.ProductServices
 			 Description = p.Description,
 			 SubCategoryId = p.SubCategoryId,
 			 CreatedAt = p.CreatedAt,
-			 DiscountPrecentage = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate == null || p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.DiscountPercent : null,
-			 FinalPrice = p.FinalPrice,
-			 DiscountName = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate == null || p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.Name : null,
-			 EndAt = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate == null || p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.EndDate : null,
+			 DiscountPrecentage = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (  p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.DiscountPercent : null,
+			 FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (   p.Discount.EndDate > DateTime.UtcNow)) ?Math.Round( p.Price-(p.Discount.DiscountPercent *p.Price)) : p.Price,
+			 DiscountName = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (   p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.Name : null,
+			 EndAt = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (   p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.EndDate : null,
 			 fitType = p.fitType,
 			 Gender = p.Gender,
 			 
@@ -97,7 +97,7 @@ namespace E_Commers.Services.ProductServices
 				 Url = img.Url
 			 })
 		 };
-		private static Expression<Func< E_Commers.Models.Product, ProductDetailDto>> maptoProductDetailDtoexpression = p =>
+		private static Expression<Func< E_Commerce.Models.Product, ProductDetailDto>> maptoProductDetailDtoexpression = p =>
 		 new ProductDetailDto
 		 {
 			 Id = p.Id,
@@ -110,11 +110,12 @@ namespace E_Commers.Services.ProductServices
 			 ModifiedAt = p.ModifiedAt,
 			 IsActive = p.IsActive,
 			 Price = p.Price,
-			 PriceAfterDiscount = p.FinalPrice,
+			 FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (   p.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(p.Price - (p.Discount.DiscountPercent * p.Price)) : p.Price,
+
 			 fitType = p.fitType,
 
 			 SubCategoryId = p.SubCategoryId,
-			 Discount = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate == null || p.Discount.EndDate > DateTime.UtcNow)) ? new DiscountDto
+			 Discount = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (  p.Discount.EndDate > DateTime.UtcNow)) ? new DiscountDto
 			 {
 				 Id = p.Discount.Id,
 				 DiscountPercent = p.Discount.DiscountPercent,
@@ -197,7 +198,7 @@ namespace E_Commers.Services.ProductServices
 			
 			BackgroundJob.Enqueue(() => _cacheManager.RemoveByTagsAsync(PRODUCT_CACHE_TAGS));
 		}
-		private ProductDto Maptoproductdto(E_Commers.Models. Product p)
+		private ProductDto Maptoproductdto(E_Commerce.Models. Product p)
 		{
 			var productdto = new ProductDto
 			{
@@ -209,13 +210,14 @@ namespace E_Commers.Services.ProductServices
 				Description = p.Description,
 				SubCategoryId = p.SubCategoryId,
 				CreatedAt = p.CreatedAt,
-				FinalPrice = p.FinalPrice,
+				FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (  p.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(p.Price - (p.Discount.DiscountPercent * p.Price)) : p.Price,
+
 				fitType = p.fitType,
 				Gender = p.Gender,
 				ModifiedAt = p.ModifiedAt,
 				DeletedAt = p.DeletedAt,
 			};
-			if (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate == null || p.Discount.EndDate > DateTime.UtcNow)){
+			if (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && ( p.Discount.EndDate > DateTime.UtcNow)){
 				productdto.EndAt = p.Discount.EndDate;
 				productdto.DiscountPrecentage = p.Discount.DiscountPercent;
 				productdto.DiscountName = p.Discount.Name;
@@ -275,7 +277,7 @@ namespace E_Commers.Services.ProductServices
 				// Log admin operation
 				await _adminOpreationServices.AddAdminOpreationAsync(
 					$"Create Product {product.Id}",
-					E_Commers.Enums.Opreations.AddOpreation,
+					E_Commerce.Enums.Opreations.AddOpreation,
 					userId,
 					product.Id
 				);
@@ -351,7 +353,7 @@ namespace E_Commers.Services.ProductServices
 
 				await _adminOpreationServices.AddAdminOpreationAsync(
 					updates.ToString(),
-					E_Commers.Enums.Opreations.UpdateOpreation,
+					E_Commerce.Enums.Opreations.UpdateOpreation,
 					userId,
 					id
 				);
@@ -384,7 +386,7 @@ namespace E_Commers.Services.ProductServices
 				// Log admin operation
 				await _adminOpreationServices.AddAdminOpreationAsync(
 					$"Delete Product {id}",
-					E_Commers.Enums.Opreations.DeleteOpreation,
+					E_Commerce.Enums.Opreations.DeleteOpreation,
 					userId,
 					id
 				);
@@ -418,7 +420,7 @@ namespace E_Commers.Services.ProductServices
 				// Log admin operation
 				await _adminOpreationServices.AddAdminOpreationAsync(
 					$"Restore Product {id}",
-					E_Commers.Enums.Opreations.UpdateOpreation,
+					E_Commerce.Enums.Opreations.UpdateOpreation,
 					userId,
 					id
 				);
@@ -497,7 +499,7 @@ namespace E_Commers.Services.ProductServices
 
 			await _adminOpreationServices.AddAdminOpreationAsync(
 				$"Activate Product {productId}",
-				E_Commers.Enums.Opreations.UpdateOpreation,
+				E_Commerce.Enums.Opreations.UpdateOpreation,
 				userId,
 				productId
 			);
@@ -522,7 +524,7 @@ namespace E_Commers.Services.ProductServices
 
 			await _adminOpreationServices.AddAdminOpreationAsync(
 				$"Deactivate Product {productId}",
-				E_Commers.Enums.Opreations.UpdateOpreation,
+				E_Commerce.Enums.Opreations.UpdateOpreation,
 				userId,
 				productId
 			);

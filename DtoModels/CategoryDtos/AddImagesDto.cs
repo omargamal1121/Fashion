@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace E_Commers.DtoModels.CategoryDtos
+namespace E_Commerce.DtoModels.CategoryDtos
 {
 	public class AddImagesDto
 	{

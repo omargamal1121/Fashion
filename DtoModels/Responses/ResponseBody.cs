@@ -1,8 +1,8 @@
-﻿using E_Commers.DtoModels.Shared;
-using E_Commers.ErrorHnadling;
+﻿using E_Commerce.DtoModels.Shared;
+using E_Commerce.ErrorHnadling;
 using System.Collections.Generic;
 
-namespace E_Commers.DtoModels.Responses
+namespace E_Commerce.DtoModels.Responses
 {
 	public class ResponseBody<T> 
 	{

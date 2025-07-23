@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace E_Commers.DtoModels
+namespace E_Commerce.DtoModels
 {
 	public class RefreshTokenDto
 	{

@@ -1,19 +1,19 @@
 ﻿using AutoMapper;
-using E_Commers.DtoModels.AccountDtos;
-using E_Commers.DtoModels.CartDtos;
-using E_Commers.DtoModels.CategoryDtos;
-using E_Commers.DtoModels.DiscoutDtos;
-using E_Commers.DtoModels.CollectionDtos;
-using E_Commers.DtoModels.ImagesDtos;
-using E_Commers.DtoModels.InventoryDtos;
-using E_Commers.DtoModels.OrderDtos;
-using E_Commers.DtoModels.ProductDtos;
-using E_Commers.DtoModels.WareHouseDtos;
-using E_Commers.Models;
-using E_Commers.DtoModels.CustomerAddressDtos;
-using E_Commers.DtoModels.SubCategorydto;
+using E_Commerce.DtoModels.AccountDtos;
+using E_Commerce.DtoModels.CartDtos;
+using E_Commerce.DtoModels.CategoryDtos;
+using E_Commerce.DtoModels.DiscoutDtos;
+using E_Commerce.DtoModels.CollectionDtos;
+using E_Commerce.DtoModels.ImagesDtos;
+using E_Commerce.DtoModels.InventoryDtos;
+using E_Commerce.DtoModels.OrderDtos;
+using E_Commerce.DtoModels.ProductDtos;
+using E_Commerce.DtoModels.WareHouseDtos;
+using E_Commerce.Models;
+using E_Commerce.DtoModels.CustomerAddressDtos;
+using E_Commerce.DtoModels.SubCategorydto;
 
-namespace E_Commers.Mappings
+namespace E_Commerce.Mappings
 {
 	public class MappingProfile:Profile
 	{

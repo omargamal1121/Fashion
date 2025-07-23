@@ -1,24 +1,24 @@
 ﻿using AutoMapper;
-using E_Commers.DtoModels;
-using E_Commers.DtoModels.CategoryDtos;
-using E_Commers.DtoModels.ImagesDtos;
-using E_Commers.DtoModels.ProductDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.DtoModels.SubCategorydto;
-using E_Commers.Enums;
-using E_Commers.ErrorHnadling;
-using E_Commers.Interfaces;
-using E_Commers.Models;
-using E_Commers.Services.AdminOpreationServices;
-using E_Commers.Services.Cache;
-using E_Commers.Services.EmailServices;
-using E_Commers.UOW;
+using E_Commerce.DtoModels;
+using E_Commerce.DtoModels.CategoryDtos;
+using E_Commerce.DtoModels.ImagesDtos;
+using E_Commerce.DtoModels.ProductDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.DtoModels.SubCategorydto;
+using E_Commerce.Enums;
+using E_Commerce.ErrorHnadling;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
+using E_Commerce.Services.AdminOpreationServices;
+using E_Commerce.Services.Cache;
+using E_Commerce.Services.EmailServices;
+using E_Commerce.UOW;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace E_Commers.Services.Category
+namespace E_Commerce.Services.Category
 {
 	public class CategoryServices : ICategoryServices
 	{
@@ -61,7 +61,7 @@ namespace E_Commers.Services.Category
 			_backgroundJobClient.Enqueue( ()=>  _cacheManager.RemoveByTagsAsync(CACHE_TAGS_CATEGORY));
 		}
 
-		private static readonly Expression<Func<E_Commers.Models. Category, CategoryDto>> CategorySelector = c => new CategoryDto
+		private static readonly Expression<Func<E_Commerce.Models. Category, CategoryDto>> CategorySelector = c => new CategoryDto
 		{
 			Id = c.Id,
 			Name = c.Name,
@@ -78,7 +78,7 @@ namespace E_Commers.Services.Category
 				IsMain = i.IsMain
 			}).ToList()
 		};
-		private IQueryable<E_Commers.Models. Category> BasicFilter(IQueryable<E_Commers.Models. Category> query, bool? isActive = null, bool? isDeleted = null)
+		private IQueryable<E_Commerce.Models. Category> BasicFilter(IQueryable<E_Commerce.Models. Category> query, bool? isActive = null, bool? isDeleted = null)
 		{
 			if (isActive.HasValue)
 				query = query.Where(c => c.IsActive == isActive.Value);
@@ -185,7 +185,7 @@ namespace E_Commers.Services.Category
 			_backgroundJobClient.Enqueue<IErrorNotificationService>(_ => _.SendErrorNotificationAsync(message, stackTrace));
 		}
 
-		private CategorywithdataDto MapToCategoryWithDataDto(E_Commers.Models. Category c)
+		private CategorywithdataDto MapToCategoryWithDataDto(E_Commerce.Models. Category c)
 		{
 			return new CategorywithdataDto
 			{

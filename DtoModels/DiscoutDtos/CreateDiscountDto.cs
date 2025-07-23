@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace E_Commers.DtoModels.DiscoutDtos
+namespace E_Commerce.DtoModels.DiscoutDtos
 {
 	public class CreateDiscountDto
 	{
@@ -12,7 +12,6 @@ namespace E_Commers.DtoModels.DiscoutDtos
 		[Range(1, 100, ErrorMessage = "Discount percentage must be between 1 and 100")]
 		public decimal DiscountPercent { get; set; }
 
-		public bool? IsActive { get; set; } = true;
 
 		[Required(ErrorMessage = "Start date is required")]
 		public DateTime StartDate { get; set; }

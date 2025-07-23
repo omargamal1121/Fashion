@@ -1,4 +1,4 @@
-﻿namespace E_Commers.DtoModels.ImagesDtos
+﻿namespace E_Commerce.DtoModels.ImagesDtos
 {
 	public class ImageDto
 	{

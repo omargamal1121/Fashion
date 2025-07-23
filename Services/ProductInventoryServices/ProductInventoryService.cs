@@ -1,18 +1,18 @@
 using AutoMapper;
-using E_Commers.DtoModels;
-using E_Commers.DtoModels.InventoryDtos;
-using E_Commers.DtoModels.ProductDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.Enums;
-using E_Commers.ErrorHnadling;
-using E_Commers.Interfaces;
-using E_Commers.Models;
-using E_Commers.Services.AdminOpreationServices;
-using E_Commers.Services.Cache;
-using E_Commers.UOW;
+using E_Commerce.DtoModels;
+using E_Commerce.DtoModels.InventoryDtos;
+using E_Commerce.DtoModels.ProductDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.Enums;
+using E_Commerce.ErrorHnadling;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
+using E_Commerce.Services.AdminOpreationServices;
+using E_Commerce.Services.Cache;
+using E_Commerce.UOW;
 using Microsoft.EntityFrameworkCore;
 
-namespace E_Commers.Services.ProductInventoryServices
+namespace E_Commerce.Services.ProductInventoryServices
 {
     public class ProductInventoryService : IProductInventoryService
     {

@@ -1,7 +1,7 @@
-using E_Commers.DtoModels.AccountDtos;
-using E_Commers.DtoModels.Responses;
+using E_Commerce.DtoModels.AccountDtos;
+using E_Commerce.DtoModels.Responses;
 
-namespace E_Commers.Services.AccountServices.Registration
+namespace E_Commerce.Services.AccountServices.Registration
 {
     public interface IRegistrationService
     {

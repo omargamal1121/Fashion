@@ -1,10 +1,10 @@
-﻿using E_Commers.DtoModels;
-using E_Commers.DtoModels.AccountDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.DtoModels.TokenDtos;
-using E_Commers.Models;
+﻿using E_Commerce.DtoModels;
+using E_Commerce.DtoModels.AccountDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.DtoModels.TokenDtos;
+using E_Commerce.Models;
 
-namespace E_Commers.Services.AccountServices.Shared
+namespace E_Commerce.Services.AccountServices.Shared
 {
 	public interface IAccountServices
 	{

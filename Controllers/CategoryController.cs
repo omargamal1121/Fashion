@@ -1,18 +1,18 @@
 ﻿using AutoMapper;
-using E_Commers.DtoModels;
-using E_Commers.DtoModels.CategoryDtos;
-using E_Commers.DtoModels.ImagesDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.DtoModels.Shared;
-using E_Commers.ErrorHnadling;
-using E_Commers.Interfaces;
-using E_Commers.Services;
+using E_Commerce.DtoModels;
+using E_Commerce.DtoModels.CategoryDtos;
+using E_Commerce.DtoModels.ImagesDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.DtoModels.Shared;
+using E_Commerce.ErrorHnadling;
+using E_Commerce.Interfaces;
+using E_Commerce.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace E_Commers.Controllers
+namespace E_Commerce.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]

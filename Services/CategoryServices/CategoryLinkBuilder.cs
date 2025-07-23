@@ -1,8 +1,8 @@
-﻿using E_Commers.Controllers;
-using E_Commers.DtoModels.Shared;
-using E_Commers.Interfaces;
+﻿using E_Commerce.Controllers;
+using E_Commerce.DtoModels.Shared;
+using E_Commerce.Interfaces;
 
-namespace E_Commers.Services.Category
+namespace E_Commerce.Services.Category
 {
     public class CategoryLinkBuilder : BaseLinkBuilder, ICategoryLinkBuilder
     {

@@ -2,25 +2,25 @@
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using E_Commers.DtoModels;
-using E_Commers.DtoModels.AccountDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.DtoModels.TokenDtos;
-using E_Commers.Enums;
-using E_Commers.ErrorHnadling;
-using E_Commers.Interfaces;
-using E_Commers.Models;
-using E_Commers.Services.AccountServices;
-using E_Commers.Services.AccountServices.Shared;
-using E_Commers.Services.EmailServices;
-using E_Commers.UOW;
+using E_Commerce.DtoModels;
+using E_Commerce.DtoModels.AccountDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.DtoModels.TokenDtos;
+using E_Commerce.Enums;
+using E_Commerce.ErrorHnadling;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
+using E_Commerce.Services.AccountServices;
+using E_Commerce.Services.AccountServices.Shared;
+using E_Commerce.Services.EmailServices;
+using E_Commerce.UOW;
 using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.WebUtilities;
 
-namespace E_Commers.Services.AccountServices
+namespace E_Commerce.Services.AccountServices
 {
     public class AccountServices : IAccountServices
     {

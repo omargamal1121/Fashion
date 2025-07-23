@@ -1,8 +1,8 @@
-﻿using E_Commers.Context;
-using E_Commers.Interfaces;
-using E_Commers.Models;
-using E_Commers.Repository;
-using E_Commers.UOW;
+﻿using E_Commerce.Context;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
+using E_Commerce.Repository;
+using E_Commerce.UOW;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;

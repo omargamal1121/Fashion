@@ -1,6 +1,6 @@
-using E_Commers.Models;
+using E_Commerce.Models;
 
-namespace E_Commers.Services.EmailServices
+namespace E_Commerce.Services.EmailServices
 {
     public interface IAccountEmailService
     {

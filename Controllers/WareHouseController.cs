@@ -1,28 +1,28 @@
-﻿using E_Commers.DtoModels.DiscoutDtos;
-using E_Commers.DtoModels.InventoryDtos;
-using E_Commers.DtoModels.ProductDtos;
-using E_Commers.DtoModels.WareHouseDtos;
-using E_Commers.Services;
-using E_Commers.Models;
-using E_Commers.UOW;
+﻿using E_Commerce.DtoModels.DiscoutDtos;
+using E_Commerce.DtoModels.InventoryDtos;
+using E_Commerce.DtoModels.ProductDtos;
+using E_Commerce.DtoModels.WareHouseDtos;
+using E_Commerce.Services;
+using E_Commerce.Models;
+using E_Commerce.UOW;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using E_Commers.Interfaces;
-using E_Commers.Enums;
-using E_Commers.DtoModels.CategoryDtos;
+using E_Commerce.Interfaces;
+using E_Commerce.Enums;
+using E_Commerce.DtoModels.CategoryDtos;
 using Microsoft.AspNetCore.Authorization;
 using System.Transactions;
 using System.Linq;
-using E_Commers.DtoModels;
+using E_Commerce.DtoModels;
 using System.IdentityModel.Tokens.Jwt;
-using E_Commers.Services.WareHouseServices;
-using E_Commers.DtoModels.Responses;
-using E_Commers.ErrorHnadling;
-using E_Commers.Services.EmailServices;
+using E_Commerce.Services.WareHouseServices;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.ErrorHnadling;
+using E_Commerce.Services.EmailServices;
 
-namespace E_Commers.Controllers
+namespace E_Commerce.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]

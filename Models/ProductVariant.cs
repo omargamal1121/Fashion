@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using E_Commers.Enums;
+using E_Commerce.Enums;
 
-namespace E_Commers.Models
+namespace E_Commerce.Models
 {
     public class ProductVariant : BaseEntity
     {

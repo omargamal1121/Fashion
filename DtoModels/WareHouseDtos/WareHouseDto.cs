@@ -1,9 +1,9 @@
-﻿using E_Commers.DtoModels.InventoryDtos;
-using E_Commers.Models;
+﻿using E_Commerce.DtoModels.InventoryDtos;
+using E_Commerce.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace E_Commers.DtoModels.WareHouseDtos
+namespace E_Commerce.DtoModels.WareHouseDtos
 {
 	public class WareHouseDto : BaseEntity
 	{

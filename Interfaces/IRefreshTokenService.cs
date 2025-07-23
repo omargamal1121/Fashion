@@ -1,6 +1,6 @@
-﻿using E_Commers.Services;
+﻿using E_Commerce.Services;
 
-namespace E_Commers.Interfaces
+namespace E_Commerce.Interfaces
 {
 	public interface IRefreshTokenService 
 	{

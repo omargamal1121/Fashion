@@ -1,0 +1,163 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\project_fashion\\E-Commerce-API-main\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\services\\discountservices\\discountservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|solutionrelative:services\\discountservices\\discountservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\services\\discountservices\\idiscountservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|solutionrelative:services\\discountservices\\idiscountservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\services\\productservices\\productsearchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|solutionrelative:services\\productservices\\productsearchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\services\\productservices\\productsservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|solutionrelative:services\\productservices\\productsservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\services\\productservices\\productcatalogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|solutionrelative:services\\productservices\\productcatalogservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\dtomodels\\productdtos\\productdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|solutionrelative:dtomodels\\productdtos\\productdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|d:\\project_fashion\\e-commerce-api-main\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{94F97F80-D94C-978E-C845-20D69BD1A077}|E-Commerce.csproj|solutionrelative:controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "DiscountService.cs",
+              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Services\\DiscountServices\\DiscountService.cs",
+              "RelativeDocumentMoniker": "Services\\DiscountServices\\DiscountService.cs",
+              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\Services\\DiscountServices\\DiscountService.cs",
+              "RelativeToolTip": "Services\\DiscountServices\\DiscountService.cs",
+              "ViewState": "AgIAAEMAAAAAAAAAAAAUwFQAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-22T23:18:58.998Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "IDiscountService.cs",
+              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Services\\DiscountServices\\IDiscountService.cs",
+              "RelativeDocumentMoniker": "Services\\DiscountServices\\IDiscountService.cs",
+              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\Services\\DiscountServices\\IDiscountService.cs",
+              "RelativeToolTip": "Services\\DiscountServices\\IDiscountService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-22T23:18:56.38Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ProductsServices.cs",
+              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductsServices.cs",
+              "RelativeDocumentMoniker": "Services\\ProductServices\\ProductsServices.cs",
+              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductsServices.cs",
+              "RelativeToolTip": "Services\\ProductServices\\ProductsServices.cs",
+              "ViewState": "AgIAACAAAAAAAAAAAAAuwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-22T23:18:11.452Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ProductCatalogService.cs",
+              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductCatalogService.cs",
+              "RelativeDocumentMoniker": "Services\\ProductServices\\ProductCatalogService.cs",
+              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductCatalogService.cs",
+              "RelativeToolTip": "Services\\ProductServices\\ProductCatalogService.cs",
+              "ViewState": "AgIAALQAAAAAAAAAAAAiwMMAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-22T23:17:42.339Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ProductSearchService.cs",
+              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductSearchService.cs",
+              "RelativeDocumentMoniker": "Services\\ProductServices\\ProductSearchService.cs",
+              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\Services\\ProductServices\\ProductSearchService.cs",
+              "RelativeToolTip": "Services\\ProductServices\\ProductSearchService.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAAswB4AAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-22T21:18:25.725Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ProductDto.cs",
+              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\DtoModels\\ProductDtos\\ProductDto.cs",
+              "RelativeDocumentMoniker": "DtoModels\\ProductDtos\\ProductDto.cs",
+              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\DtoModels\\ProductDtos\\ProductDto.cs",
+              "RelativeToolTip": "DtoModels\\ProductDtos\\ProductDto.cs",
+              "ViewState": "AgIAAGgAAAAAAAAAAAAcwHQAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-22T21:17:21.361Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ProductController.cs",
+              "DocumentMoniker": "D:\\project_fashion\\E-Commerce-API-main\\Controllers\\ProductController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ProductController.cs",
+              "ToolTip": "D:\\project_fashion\\E-Commerce-API-main\\Controllers\\ProductController.cs",
+              "RelativeToolTip": "Controllers\\ProductController.cs",
+              "ViewState": "AgIAAFcBAAAAAAAAAAAnwF0BAAA8AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-22T20:39:17.686Z"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 1304,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

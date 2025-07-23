@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace E_Commers.DtoModels.CartDtos
+namespace E_Commerce.DtoModels.CartDtos
 {
     public class CreateCartItemDto
     {

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace E_Commers.Migrations
+namespace E_Commerce.Migrations
 {
     /// <inheritdoc />
     public partial class init : Migration

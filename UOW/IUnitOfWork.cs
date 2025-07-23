@@ -1,8 +1,8 @@
-﻿using E_Commers.Interfaces;
-using E_Commers.Models;
+﻿using E_Commerce.Interfaces;
+using E_Commerce.Models;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace E_Commers.UOW
+namespace E_Commerce.UOW
 {
 	public interface IUnitOfWork:IDisposable 
 	{

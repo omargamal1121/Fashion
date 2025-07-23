@@ -1,20 +1,20 @@
-using E_Commers.DtoModels.DiscoutDtos;
-using E_Commers.DtoModels.ImagesDtos;
-using E_Commers.DtoModels.ProductDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.Enums;
-using E_Commers.ErrorHnadling;
-using E_Commers.Interfaces;
-using E_Commers.Models;
-using E_Commers.Services.AdminOpreationServices;
-using E_Commers.Services.Cache;
-using E_Commers.Services.EmailServices;
-using E_Commers.UOW;
+using E_Commerce.DtoModels.DiscoutDtos;
+using E_Commerce.DtoModels.ImagesDtos;
+using E_Commerce.DtoModels.ProductDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.Enums;
+using E_Commerce.ErrorHnadling;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
+using E_Commerce.Services.AdminOpreationServices;
+using E_Commerce.Services.Cache;
+using E_Commerce.Services.EmailServices;
+using E_Commerce.UOW;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace E_Commers.Services.ProductServices
+namespace E_Commerce.Services.ProductServices
 {
 	public interface IProductDiscountService
 	{
@@ -63,7 +63,7 @@ namespace E_Commers.Services.ProductServices
 				var productInfo = await _unitOfWork.Product.GetAll()
 					.AsNoTracking()
 					.Where(p => p.Id == productId)
-					.Select(p => new { p.Discount })
+					.Include(p=>p.Discount )
 					.FirstOrDefaultAsync();
 
 				if (productInfo == null)
@@ -74,7 +74,7 @@ namespace E_Commers.Services.ProductServices
 
 				var discount = productInfo.Discount;
 
-				if (!discount.IsActive || discount.DeletedAt != null || (discount.EndDate != null && discount.EndDate <= DateTime.UtcNow))
+				if (!discount.IsActive || discount.DeletedAt != null || !( discount.EndDate >= DateTime.UtcNow))
 				{
 					return Result<DiscountDto>.Fail("No active discount found for this product", 404);
 				}
@@ -88,6 +88,8 @@ namespace E_Commers.Services.ProductServices
 					StartDate = discount.StartDate,
 					EndDate = discount.EndDate,
 					IsActive = discount.IsActive,
+					
+					
 					CreatedAt = discount.CreatedAt,
 					ModifiedAt = discount.ModifiedAt,
 					DeletedAt = discount.DeletedAt,
@@ -108,7 +110,7 @@ namespace E_Commers.Services.ProductServices
 			_backgroundJobClient.Enqueue(() => _cacheManager.RemoveByTagsAsync(PRODUCT_CACHE_TAGS));
 		}
 
-		private static Expression<Func<E_Commers.Models.Product, ProductDetailDto>> maptoProductDetailDtoexpression = p =>
+		private static Expression<Func<E_Commerce.Models.Product, ProductDetailDto>> maptoProductDetailDtoexpression = p =>
 		 new ProductDetailDto
 		 {
 			 Id = p.Id,
@@ -116,8 +118,16 @@ namespace E_Commers.Services.ProductServices
 			 Description = p.Description,
 			 AvailableQuantity = p.Quantity,
 			 Gender = p.Gender,
+			 CreatedAt = p.CreatedAt,
+			 DeletedAt = p.DeletedAt,
+			 ModifiedAt = p.ModifiedAt,
+			 fitType = p.fitType,
+			 IsActive= p.IsActive,
+			 FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(p.Price - (p.Discount.DiscountPercent * p.Price)) : p.Price,
+
+			 Price = p.Price,
 			 SubCategoryId = p.SubCategoryId,
-			 Discount = (p.Discount != null && p.Discount.IsActive && p.Discount.DeletedAt == null && (p.Discount.EndDate == null || p.Discount.EndDate > DateTime.UtcNow)) ? new DiscountDto
+			 Discount = (p.Discount != null  && p.Discount.DeletedAt == null && (p.Discount.EndDate > DateTime.UtcNow)) ? new DiscountDto
 			 {
 				 Id = p.Discount.Id,
 				 DiscountPercent = p.Discount.DiscountPercent,
@@ -149,19 +159,20 @@ namespace E_Commers.Services.ProductServices
 		public async Task<Result<ProductDetailDto>> AddDiscountToProductAsync(int productId, int discountId, string userId)
 		{
 			_logger.LogInformation($"Adding discount to product: {productId} with discount: {discountId}");
+				using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
 				var product = await _unitOfWork.Product.GetByIdAsync(productId);
 				if (product == null)
 					return Result<ProductDetailDto>.Fail("Product not found", 404);
 
-				var discount = await _unitOfWork.Repository<E_Commers.Models.Discount>().GetByIdAsync(discountId);
+				var discount = await _unitOfWork.Repository<E_Commerce.Models.Discount>().GetByIdAsync(discountId);
 				if (discount == null||discount.DeletedAt!=null)
 					return Result<ProductDetailDto>.Fail("Discount not found", 404);
 
-				using var transaction = await _unitOfWork.BeginTransactionAsync();
 
 				product.DiscountId = discount.Id;
+				
 				var productResult = _unitOfWork.Product.Update(product);
 				if (!productResult)
 				{
@@ -176,8 +187,10 @@ namespace E_Commers.Services.ProductServices
 					productId
 				);
 
-				await _unitOfWork.CommitAsync();
+			
 				await UpdateProductPriceAfteDiscount(productId);
+				await _unitOfWork.CommitAsync();
+				await transaction.CommitAsync();
 				RemoveProductCachesAsync();
 
 				var updatedProduct = await _unitOfWork.Product.GetAll()
@@ -208,7 +221,7 @@ namespace E_Commers.Services.ProductServices
 				if (product == null)
 					return Result<ProductDetailDto>.Fail("Product not found", 404);
 
-				var discount = await _unitOfWork.Repository<E_Commers.Models.Discount>().GetByIdAsync(discountId);
+				var discount = await _unitOfWork.Repository<E_Commerce.Models.Discount>().GetByIdAsync(discountId);
 				if (discount == null||discount.DeletedAt!=null)
 					return Result<ProductDetailDto>.Fail("Discount not found", 404);
 
@@ -374,7 +387,7 @@ namespace E_Commers.Services.ProductServices
 				var originalPrice = product.Price;
 				var discountedPrice = originalPrice;
 
-				// Check if discount is active and valid
+			
 				if (product.Discount != null && 
 					product.Discount.IsActive && 
 					product.Discount.DeletedAt == null &&
@@ -383,11 +396,11 @@ namespace E_Commers.Services.ProductServices
 				{
 					var discountAmount = originalPrice * (product.Discount.DiscountPercent / 100m);
 					discountedPrice = originalPrice - discountAmount;
-					product.FinalPrice = discountedPrice;
+					
 				}
 				else
 				{
-					product.FinalPrice = originalPrice; 
+					
 				}
 				var updateResult = _unitOfWork.Product.Update(product);
 				if (!updateResult)

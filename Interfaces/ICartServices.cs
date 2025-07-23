@@ -1,8 +1,8 @@
-using E_Commers.DtoModels.CartDtos;
-using E_Commers.DtoModels.Responses;
-using E_Commers.Services;
+using E_Commerce.DtoModels.CartDtos;
+using E_Commerce.DtoModels.Responses;
+using E_Commerce.Services;
 
-namespace E_Commers.Interfaces
+namespace E_Commerce.Interfaces
 {
     public interface ICartServices
     {

@@ -1,4 +1,4 @@
-﻿namespace E_Commers.Services
+﻿namespace E_Commerce.Services
 {
 	public class Result<T>
 	{

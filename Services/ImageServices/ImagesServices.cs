@@ -3,15 +3,15 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using E_Commers.Interfaces;
-using E_Commers.Models;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
 using Hangfire;
-using E_Commers.Services.EmailServices;
-using E_Commers.Services.AdminOpreationServices;
-using E_Commers.Enums;
-using E_Commers.UOW;
+using E_Commerce.Services.EmailServices;
+using E_Commerce.Services.AdminOpreationServices;
+using E_Commerce.Enums;
+using E_Commerce.UOW;
 
-namespace E_Commers.Services
+namespace E_Commerce.Services
 {
 	public class ImagesServices : IImagesServices
 	{

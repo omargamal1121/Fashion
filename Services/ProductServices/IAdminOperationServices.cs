@@ -1,4 +1,4 @@
-﻿namespace E_Commers.Services.Product
+﻿namespace E_Commerce.Services.Product
 {
 	public interface IAdminOperationServices
 	{

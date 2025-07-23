@@ -1,13 +1,13 @@
-﻿using E_Commers.Context;
-using E_Commers.Services;
-using E_Commers.Interfaces;
-using E_Commers.Models;
-using E_Commers.Enums;
+﻿using E_Commerce.Context;
+using E_Commerce.Services;
+using E_Commerce.Interfaces;
+using E_Commerce.Models;
+using E_Commerce.Enums;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using System.Collections;
 
-namespace E_Commers.Repository
+namespace E_Commerce.Repository
 {
 	public class ProductRepository : MainRepository<Product>, IProductRepository
 	{
