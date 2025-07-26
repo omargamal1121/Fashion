@@ -237,7 +237,6 @@ namespace E_Commerce.Services.Order
 						
 						Quantity = cartItem.Quantity,
 						UnitPrice = cartItem.UnitPrice,
-						TotalPrice = cartItem.TotalPrice,
 						OrderedAt = DateTime.UtcNow
 					};
 

@@ -100,7 +100,7 @@ namespace E_Commerce.Mappings
 			// Cart mappings
 			CreateMap<Cart, CartDto>()
 				.ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
-				.ForMember(dest => dest.Customer, opt => opt.MapFrom(src => src.Customer))
+				
 				.ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))
 				.ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.TotalPrice))
 				.ForMember(dest => dest.TotalItems, opt => opt.MapFrom(src => src.TotalItems))
@@ -111,14 +111,10 @@ namespace E_Commerce.Mappings
 				.ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product))
 
 				.ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => CalculateUnitPrice(src)))
-				.ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => CalculateCartItemTotalPrice(src)))
+				
 				.ForMember(dest => dest.AddedAt, opt => opt.MapFrom(src => src.AddedAt));
 
-			CreateMap<Customer, CustomerDto>()
-				.ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
-				.ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
-				.ForMember(dest => dest.ProfilePicture, opt => opt.MapFrom(src => src.ProfilePicture));
-
+			
 			// Order mappings
 			CreateMap<Order, OrderDto>()
 				.ForMember(dest => dest.OrderNumber, opt => opt.MapFrom(src => src.OrderNumber))
@@ -163,50 +159,17 @@ namespace E_Commerce.Mappings
 
 
 			CreateMap<Collection, CollectionDto>()
-				.ForMember(dest => dest.MainImage, opt => opt.Ignore())
+
 				.ForMember(dest => dest.Images, opt => opt.Ignore())
 				.ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.ProductCollections.Select(pc => pc.Product)))
-				.ForMember(dest => dest.TotalProducts, opt => opt.MapFrom(src => src.ProductCollections.Count))
-				.AfterMap((src, dest) =>
-				{
-					if (src.Images == null)
-					{
-						dest.Images = new List<ImageDto>();
-						dest.MainImage = null;
-						return;
-					}
-
-					var main = src.Images.FirstOrDefault(i => i.IsMain && i.DeletedAt == null);
-					if (main != null)
-					{
-						dest.MainImage = new ImageDto
-						{
-							Id = main.Id,
-							Url = main.Url,
-
-						};
-					}
-					else
-					{
-						dest.MainImage = null;
-					}
-
-					dest.Images = src.Images
-						.Where(i => i.DeletedAt == null)
-						.Select(i => new ImageDto
-						{
-							Id = i.Id,
-							Url = i.Url,
-
-						})
-						.ToList();
-				});
+				.ForMember(dest => dest.TotalProducts, opt => opt.MapFrom(src => src.ProductCollections.Count));
+				
 
 			CreateMap<CreateCollectionDto, Collection>()
 				.ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name.Trim()))
 				.ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
 				.ForMember(dest => dest.DisplayOrder, opt => opt.MapFrom(src => src.DisplayOrder))
-				.ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive))
+			
 				.ForMember(dest => dest.Id, opt => opt.Ignore())
 				.ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
 				.ForMember(dest => dest.ModifiedAt, opt => opt.Ignore())
@@ -218,7 +181,7 @@ namespace E_Commerce.Mappings
 				.ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name.Trim()))
 				.ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
 				.ForMember(dest => dest.DisplayOrder, opt => opt.MapFrom(src => src.DisplayOrder))
-				.ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive))
+	
 				.ForMember(dest => dest.Id, opt => opt.Ignore())
 				.ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
 				.ForMember(dest => dest.ModifiedAt, opt => opt.Ignore())
@@ -227,31 +190,9 @@ namespace E_Commerce.Mappings
 				.ForMember(dest => dest.Images, opt => opt.Ignore());
 
 			CreateMap<Collection, CollectionSummaryDto>()
-				.ForMember(dest => dest.MainImage, opt => opt.Ignore())
-				.ForMember(dest => dest.TotalProducts, opt => opt.MapFrom(src => src.ProductCollections.Count))
-				.AfterMap((src, dest) =>
-				{
-					if (src.Images == null)
-					{
-						dest.MainImage = null;
-						return;
-					}
 
-					var main = src.Images.FirstOrDefault(i => i.IsMain && i.DeletedAt == null);
-					if (main != null)
-					{
-						dest.MainImage = new ImageDto
-						{
-							Id = main.Id,
-							Url = main.Url,
-
-						};
-					}
-					else
-					{
-						dest.MainImage = null;
-					}
-				});
+				.ForMember(dest => dest.TotalProducts, opt => opt.MapFrom(src => src.ProductCollections.Count));
+			
 
 			// CustomerAddress mappings
 			CreateMap<CustomerAddress, CustomerAddressDto>()

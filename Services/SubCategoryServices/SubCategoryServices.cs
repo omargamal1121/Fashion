@@ -914,21 +914,33 @@ namespace E_Commerce.Services.SubCategoryServices
 
         public async Task<Result<bool>> DeactivateSubCategoryAsync(int subCategoryId, string userId)
         {
-            _logger.LogInformation($"Deactivating subcategory {subCategoryId}");
-            var subCategory = await _unitOfWork.SubCategory.GetByIdAsync(subCategoryId);
-            if (subCategory == null)
-                return Result<bool>.Fail($"SubCategory with id {subCategoryId} not found", 404);
-            if (!subCategory.IsActive)
-                return Result<bool>.Fail( "SubCategory is already inactive", 200);
-            subCategory.IsActive = false;
-            var updateResult = _unitOfWork.SubCategory.Update(subCategory);
-            if (!updateResult)
-                return Result<bool>.Fail("Failed to deactivate subcategory", 500);
-            await _unitOfWork.CommitAsync();
-           RemoveSubCategoryCaches();
-            // Deactivate parent category if needed
-            await DeactivateCategoryIfNoActiveSubcategories(subCategory.CategoryId, userId);
-            return Result<bool>.Ok(true, "SubCategory deactivated successfully", 200);
+            try
+            {
+                _logger.LogInformation($"Deactivating subcategory {subCategoryId}");
+                var subCategory = await _unitOfWork.SubCategory.GetByIdAsync(subCategoryId);
+                if (subCategory == null)
+                    return Result<bool>.Fail($"SubCategory with id {subCategoryId} not found", 404);
+                if (!subCategory.IsActive)
+                {
+                    _logger.LogInformation($"SubCategory {subCategoryId} is already inactive. No action taken.");
+                    return Result<bool>.Fail("SubCategory is already inactive", 200);
+                }
+                subCategory.IsActive = false;
+                var updateResult = _unitOfWork.SubCategory.Update(subCategory);
+                if (!updateResult)
+                    return Result<bool>.Fail("Failed to deactivate subcategory", 500);
+                await _unitOfWork.CommitAsync();
+                RemoveSubCategoryCaches();
+                // Deactivate parent category if needed
+                await DeactivateCategoryIfNoActiveSubcategories(subCategory.CategoryId, userId);
+                return Result<bool>.Ok(true, "SubCategory deactivated successfully", 200);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error in DeactivateSubCategoryAsync for subCategoryId: {subCategoryId}");
+                NotifyAdminOfError($"Exception in DeactivateSubCategoryAsync for subcategory {subCategoryId}: {ex.Message}", ex.StackTrace);
+                return Result<bool>.Fail("An error occurred while deactivating subcategory", 500);
+            }
         }
 
         private async Task DeactivateCategoryIfNoActiveSubcategories(int categoryId, string userId = null)
@@ -945,31 +957,50 @@ namespace E_Commerce.Services.SubCategoryServices
 
 		public async Task DeactivateSubCategoryIfAllProductsAreInactiveAsync(int subCategoryId, string userId)
 		{
-			_logger.LogInformation($"Checking if subcategory {subCategoryId} needs to be deactivated.");
-			var subCategory = await _unitOfWork.SubCategory.GetSubCategoryById(subCategoryId, isActive: true, isDeleted: false);
-
-			if (subCategory == null)
+			try
 			{
-				_logger.LogWarning($"Subcategory {subCategoryId} not found or not active.");
-				return;
+				_logger.LogInformation($"Checking if subcategory {subCategoryId} needs to be deactivated.");
+				var subCategory = await _unitOfWork.SubCategory.GetSubCategoryById(subCategoryId, isActive: true, isDeleted: false);
+
+				if (subCategory == null)
+				{
+					_logger.LogWarning($"Subcategory {subCategoryId} not found or not active.");
+					return;
+				}
+
+				if (!subCategory.IsActive)
+				{
+					_logger.LogInformation($"Subcategory {subCategoryId} is already inactive. No action taken.");
+					return;
+				}
+
+				if (subCategory.Products.All(p => !p.IsActive))
+				{
+					_logger.LogInformation($"All products in subcategory {subCategoryId} are inactive. Deactivating subcategory.");
+					subCategory.IsActive = false;
+					_unitOfWork.SubCategory.Update(subCategory);
+
+					await _adminopreationservices.AddAdminOpreationAsync(
+						$"Deactivated SubCategory {subCategoryId} because all its products became inactive.",
+						Opreations.UpdateOpreation,
+						userId,
+						subCategoryId
+					);
+
+					await _unitOfWork.CommitAsync();
+					RemoveSubCategoryCaches();
+					await DeactivateCategoryIfNoActiveSubcategories(subCategory.CategoryId, userId);
+				}
+				else
+				{
+					_logger.LogInformation($"Subcategory {subCategoryId} not deactivated: still has active products.");
+				}
 			}
-
-			if (subCategory.Products.All(p => !p.IsActive))
+			catch (Exception ex)
 			{
-				_logger.LogInformation($"All products in subcategory {subCategoryId} are inactive. Deactivating subcategory.");
-				subCategory.IsActive = false;
-				_unitOfWork.SubCategory.Update(subCategory);
-
-				await _adminopreationservices.AddAdminOpreationAsync(
-					$"Deactivated SubCategory {subCategoryId} because all its products became inactive.",
-					Opreations.UpdateOpreation,
-					userId,
-					subCategoryId
-				);
-
-				await _unitOfWork.CommitAsync();
-				RemoveSubCategoryCaches();
-				await DeactivateCategoryIfNoActiveSubcategories(subCategory.CategoryId, userId);
+				_logger.LogError(ex, $"Error in DeactivateSubCategoryIfAllProductsAreInactiveAsync for subCategoryId: {subCategoryId}");
+				NotifyAdminOfError($"Exception in DeactivateSubCategoryIfAllProductsAreInactiveAsync for subcategory {subCategoryId}: {ex.Message}", ex.StackTrace);
+				throw;
 			}
 		}
 

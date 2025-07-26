@@ -67,6 +67,8 @@ namespace E_Commerce.Repository
 			return true;
 		}
 
+		public async Task<bool> IsExsistAndActive(int id) => await _entity.AnyAsync(p => p.Id == id && p.IsActive && p.DeletedAt == null && p.Quantity>0);
+
 		public async Task<bool> UpdateVariantQuantityAsync(int variantId, int newQuantity)
 		{
 			_logger.LogInformation($"Updating quantity for variant {variantId} to {newQuantity}");
@@ -113,13 +115,7 @@ namespace E_Commerce.Repository
 				.ToListAsync();
 		}
 
-		// Statistics
-		//public async Task<decimal> GetAverageVariantPriceAsync()
-		//{
-		//	return await _entity
-		//		.Where(v => v.DeletedAt == null)
-		//		.AverageAsync(v => v.Price);
-		//}
+		
 
 
 	}

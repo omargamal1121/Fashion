@@ -57,6 +57,55 @@ namespace E_Commerce.Controllers
 			}
 		}
 
+
+		[HttpGet("{id}/discount")]
+		public async Task<ActionResult<ApiResponse<DiscountDto>>> GetProductDiscount(int id)
+		{
+			var response = await _productsServices.GetProductDiscountAsync(id);
+			return HandleResult(response, nameof(GetProductDiscount), id);
+		}
+
+		[HttpPost("{id}/discount")]
+		public async Task<ActionResult<ApiResponse<ProductDetailDto>>> AddDiscountToProduct(int id, [FromBody] int discountId)
+		{
+			if (!ModelState.IsValid || discountId <= 0)
+			{
+				var errors = string.Join(", ", ModelState.Values
+					.SelectMany(v => v.Errors)
+					.Select(e => e.ErrorMessage)
+					.ToList());
+				_logger.LogError($"Validation Errors: {errors}");
+				return BadRequest(ApiResponse<ProductDetailDto>.CreateErrorResponse("Invalid discount data", new ErrorResponse("Invalid data", errors ?? "Invalid discount ID")));
+			}
+			var userId = HttpContext.Items["UserId"]?.ToString();
+			var response = await _productsServices.AddDiscountToProductAsync(id, discountId, userId);
+			return HandleResult(response, nameof(AddDiscountToProduct), id);
+		}
+
+		[HttpPut("{id}/discount")]
+		public async Task<ActionResult<ApiResponse<ProductDetailDto>>> UpdateProductDiscount(int id, [FromBody] int discountId)
+		{
+			if (!ModelState.IsValid || discountId <= 0)
+			{
+				var errors = string.Join(", ", ModelState.Values
+					.SelectMany(v => v.Errors)
+					.Select(e => e.ErrorMessage)
+					.ToList());
+				_logger.LogError($"Validation Errors: {errors}");
+				return BadRequest(ApiResponse<ProductDetailDto>.CreateErrorResponse("Invalid discount data", new ErrorResponse("Invalid data", errors ?? "Invalid discount ID")));
+			}
+			var userId = HttpContext.Items["UserId"]?.ToString();
+			var response = await _productsServices.UpdateProductDiscountAsync(id, discountId, userId);
+			return HandleResult(response, nameof(UpdateProductDiscount), id);
+		}
+
+		[HttpDelete("{id}/discount")]
+		public async Task<ActionResult<ApiResponse<ProductDetailDto>>> RemoveDiscountFromProduct(int id)
+		{
+			var userId = HttpContext.Items["UserId"]?.ToString();
+			var response = await _productsServices.RemoveDiscountFromProductAsync(id, userId);
+			return HandleResult(response, nameof(RemoveDiscountFromProduct), id);
+		}
 		[HttpGet("admin/{id}")]
 		[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<ApiResponse<ProductDetailDto>>> GetProductAdmin(
@@ -245,54 +294,6 @@ namespace E_Commerce.Controllers
 		
 
 
-		[HttpGet("{id}/discount")]
-		public async Task<ActionResult<ApiResponse<DiscountDto>>> GetProductDiscount(int id)
-		{
-			var response = await _productsServices.GetProductDiscountAsync(id);
-			return HandleResult(response, nameof(GetProductDiscount), id);
-		}
-
-		[HttpPost("{id}/discount")]
-		public async Task<ActionResult<ApiResponse<ProductDetailDto>>> AddDiscountToProduct(int id, [FromBody] int discountId)
-		{
-			if (!ModelState.IsValid || discountId <= 0)
-			{
-				var errors = string.Join(", ", ModelState.Values
-					.SelectMany(v => v.Errors)
-					.Select(e => e.ErrorMessage)
-					.ToList());
-				_logger.LogError($"Validation Errors: {errors}");
-				return BadRequest(ApiResponse<ProductDetailDto>.CreateErrorResponse("Invalid discount data", new ErrorResponse("Invalid data", errors ?? "Invalid discount ID")));
-			}
-			var userId = HttpContext.Items["UserId"]?.ToString();
-			var response = await _productsServices.AddDiscountToProductAsync(id, discountId, userId);
-			return HandleResult(response, nameof(AddDiscountToProduct), id);
-		}
-
-		[HttpPut("{id}/discount")]
-		public async Task<ActionResult<ApiResponse<ProductDetailDto>>> UpdateProductDiscount(int id, [FromBody] int discountId)
-		{
-			if (!ModelState.IsValid || discountId <= 0)
-			{
-				var errors = string.Join(", ", ModelState.Values
-					.SelectMany(v => v.Errors)
-					.Select(e => e.ErrorMessage)
-					.ToList());
-				_logger.LogError($"Validation Errors: {errors}");
-				return BadRequest(ApiResponse<ProductDetailDto>.CreateErrorResponse("Invalid discount data", new ErrorResponse("Invalid data", errors ?? "Invalid discount ID")));
-			}
-			var userId = HttpContext.Items["UserId"]?.ToString();
-			var response = await _productsServices.UpdateProductDiscountAsync(id, discountId, userId);
-			return HandleResult(response, nameof(UpdateProductDiscount), id);
-		}
-
-		[HttpDelete("{id}/discount")]
-		public async Task<ActionResult<ApiResponse<ProductDetailDto>>> RemoveDiscountFromProduct(int id)
-		{
-			var userId = HttpContext.Items["UserId"]?.ToString();
-			var response = await _productsServices.RemoveDiscountFromProductAsync(id, userId);
-			return HandleResult(response, nameof(RemoveDiscountFromProduct), id);
-		}
 
 		[HttpGet("admin/list")]
 		[Authorize(Roles = "Admin")]

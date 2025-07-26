@@ -18,53 +18,27 @@ namespace E_Commerce.Repository
             _logger = logger;
         }
 
+     
+
         public async Task<Cart?> GetCartByUserIdAsync(string userId)
         {
-            _logger.LogInformation($"Getting cart for user: {userId}");
+            _logger.LogInformation($"Retrieving cart for user: {userId}");
             
-            return await _context.Cart
-                .Where(c => c.UserId == userId && c.DeletedAt == null)
-                .Include(c => c.Customer)
-                .Include(c => c.Items.Where(i => i.DeletedAt == null))
-                .ThenInclude(i => i.Product)
-                .ThenInclude(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-                .Include(c => c.Items.Where(i => i.DeletedAt == null))
-                .ThenInclude(i => i.Product)
-                .ThenInclude(p => p.Discount)
-                .Include(c => c.Items.Where(i => i.DeletedAt == null))
-                .ThenInclude(i => i.Product)
-                .ThenInclude(p => p.Images.Where(img => img.DeletedAt == null))
-                .Include(c => c.Items.Where(i => i.DeletedAt == null))
-                .ThenInclude(i => i.ProductVariant)
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task<CartItem?> GetCartItemAsync(int cartId, int productId, int? productVariantId = null)
-        {
-            _logger.LogInformation($"Getting cart item for cart: {cartId}, product: {productId}, variant: {productVariantId}");
-            
-            var query = _context.CartItems
-                .Where(i => i.CartId == cartId && i.ProductId == productId && i.DeletedAt == null);
-
-            if (productVariantId.HasValue)
+            try
             {
-                query = query.Where(i => i.ProductVariantId == productVariantId);
+                return await _context.Cart.Include(c=>c.Items.Where(i => i.DeletedAt == null)).FirstOrDefaultAsync(c => c.UserId == userId && c.DeletedAt == null);
             }
-            else
+            catch (Exception ex)
             {
-                query = query.Where(i => i.ProductVariantId == null);
+                _logger.LogError($"Error retrieving cart: {ex.Message}");
+                return null;
             }
+		}
+        public async Task<bool> IsExsistByUserId(string userid) => await _context.Cart.AnyAsync(c => c.UserId == userid && c.DeletedAt == null);
 
-            return await query
-                .Include(i => i.Product)
-                .ThenInclude(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-                .Include(i => i.Product)
-                .ThenInclude(p => p.Discount)
-                .Include(i => i.ProductVariant)
-                .FirstOrDefaultAsync();
-        }
 
-        public async Task<bool> AddItemToCartAsync(int cartId, CartItem item)
+
+		public async Task<bool> AddItemToCartAsync(int cartId, CartItem item)
         {
             _logger.LogInformation($"Adding item to cart: {cartId}");
             
@@ -81,72 +55,72 @@ namespace E_Commerce.Repository
             }
         }
 
-        public async Task<bool> UpdateCartItemAsync(CartItem item)
-        {
-            _logger.LogInformation($"Updating cart item: {item.Id}");
-            
-            try
-            {
-                _context.CartItems.Update(item);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error updating cart item: {ex.Message}");
-                return false;
-            }
-        }
 
-        public async Task<bool> RemoveCartItemAsync(int cartId, int productId, int? productVariantId = null)
-        {
-            _logger.LogInformation($"Removing item from cart: {cartId}, product: {productId}, variant: {productVariantId}");
-            
-            try
-            {
-                var item = await GetCartItemAsync(cartId, productId, productVariantId);
-                if (item == null)
+		public async Task<bool> RemoveCartItemAsync(int cartId, int productId, int? productVariantId = null)
+		{
+			_logger.LogInformation($"Removing item from cart: {cartId}, product: {productId}, variant: {productVariantId}");
+
+			try
+			{
+				var item = await _context.CartItems
+					.FirstOrDefaultAsync(i => i.CartId == cartId &&
+											  i.ProductId == productId &&
+											  i.ProductVariantId == productVariantId);
+
+				if (item == null)
+				{
+					_logger.LogWarning("Cart item not found for removal");
+					return false;
+				}
+
+				item.DeletedAt = DateTime.UtcNow;
+			var isdeleted=	_context.CartItems.Remove(item);
+                if(isdeleted == null)
                 {
-                    _logger.LogWarning($"Cart item not found for removal");
+                    _logger.LogError("Failed to update cart item for removal");
                     return false;
-                }
+				}
 
-                item.DeletedAt = DateTime.UtcNow;
-                _context.CartItems.Update(item);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error removing cart item: {ex.Message}");
-                return false;
-            }
-        }
+				_logger.LogInformation("Cart item removed successfully");
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError($"Error removing cart item: {ex.Message}");
+				return false;
+			}
+		}
 
-        public async Task<bool> ClearCartAsync(int cartId)
-        {
-            _logger.LogInformation($"Clearing cart: {cartId}");
-            
-            try
-            {
-                var items = await _context.CartItems
-                    .Where(i => i.CartId == cartId && i.DeletedAt == null)
-                    .ToListAsync();
+		public async Task<bool> ClearCartAsync(int cartId)
+		{
+			_logger.LogInformation($"Clearing cart: {cartId}");
 
-                foreach (var item in items)
-                {
-                    item.DeletedAt = DateTime.UtcNow;
-                }
+			try
+			{
+				var items = await _context.CartItems
+					.Where(i => i.CartId == cartId)
+					.ToListAsync();
 
-                _context.CartItems.UpdateRange(items);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error clearing cart: {ex.Message}");
-                return false;
-            }
-        }
+				if (!items.Any())
+				{
+					_logger.LogInformation($"No items to clear for cart {cartId}");
+					return true;
+				}
 
-        public async Task<bool> CartExistsAsync(string userId)
+				_context.CartItems.RemoveRange(items);
+
+				_logger.LogInformation($"Cart {cartId} cleared successfully");
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError($"Error clearing cart {cartId}: {ex.Message}");
+				return false;
+			}
+		}
+
+
+		public async Task<bool> CartExistsAsync(string userId)
         {
             return await _context.Cart
                 .AnyAsync(c => c.UserId == userId && c.DeletedAt == null);
@@ -160,10 +134,6 @@ namespace E_Commerce.Repository
                 .SumAsync(i => i.Quantity);
         }
 
-        public async Task<decimal> GetCartTotalPriceAsync(string userId)
-        {
-            var cart = await GetCartByUserIdAsync(userId);
-            return cart?.TotalPrice ?? 0;
-        }
+     
     }
 } 

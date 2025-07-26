@@ -8,6 +8,7 @@ namespace E_Commerce.Interfaces
 		// Basic Operations
 		public Task<bool> VariantExistsAsync(int id);
 		public Task<ProductVariant?> GetVariantById(int id);
+		public  Task<bool> IsExsistAndActive(int id);
 		public Task<List<ProductVariant>> GetVariantsByProductId(int productId);
 		
 		// Price Management

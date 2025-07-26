@@ -70,11 +70,7 @@ namespace E_Commerce.Controllers
         {
             try
             {
-                var userId = GetCurrentUserId();
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized(ApiResponse<CartDto>.CreateErrorResponse("Unauthorized", new ErrorResponse("Unauthorized", "User not authenticated"), 401));
-                }
+                var userId = HttpContext.Items["UserId"].ToString();
 
                 _logger.LogInformation("Executing GetCart");
                 var result = await _cartServices.GetCartAsync(userId);
@@ -91,9 +87,9 @@ namespace E_Commerce.Controllers
         /// Add an item to the cart
         /// </summary>
         /// <param name="itemDto">Item details to add</param>
-        /// <returns>Updated cart</returns>
+        /// <returns>Success/failure</returns>
         [HttpPost("add-item")]
-        public async Task<ActionResult<ApiResponse<CartDto>>> AddItemToCart([FromBody] CreateCartItemDto itemDto)
+        public async Task<ActionResult<ApiResponse<bool>>> AddItemToCart([FromBody] CreateCartItemDto itemDto)
         {
             try
             {
@@ -101,13 +97,13 @@ namespace E_Commerce.Controllers
                 {
                     var errors = GetModelErrors();
                     _logger.LogWarning($"ModelState errors: {string.Join(", ", errors)}");
-                    return BadRequest(ApiResponse<CartDto>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
+                    return BadRequest(ApiResponse<bool>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
                 }
 
                 var userId = GetCurrentUserId();
                 if (string.IsNullOrEmpty(userId))
                 {
-                    return Unauthorized(ApiResponse<CartDto>.CreateErrorResponse("Unauthorized", new ErrorResponse("Unauthorized", "User not authenticated"), 401));
+                    return Unauthorized(ApiResponse<bool>.CreateErrorResponse("Unauthorized", new ErrorResponse("Unauthorized", "User not authenticated"), 401));
                 }
 
                 _logger.LogInformation($"Executing AddItemToCart for product ID: {itemDto.ProductId}");
@@ -117,7 +113,7 @@ namespace E_Commerce.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"Error in AddItemToCart: {ex.Message}");
-                return StatusCode(500, ApiResponse<CartDto>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while adding item to cart"), 500));
+                return StatusCode(500, ApiResponse<bool>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while adding item to cart"), 500));
             }
         }
 
@@ -127,9 +123,9 @@ namespace E_Commerce.Controllers
         /// <param name="productId">Product ID</param>
         /// <param name="itemDto">Updated item details</param>
         /// <param name="productVariantId">Product variant ID (optional)</param>
-        /// <returns>Updated cart</returns>
+        /// <returns>Success/failure</returns>
         [HttpPut("update-item/{productId}")]
-        public async Task<ActionResult<ApiResponse<CartDto>>> UpdateCartItem(
+        public async Task<ActionResult<ApiResponse<bool>>> UpdateCartItem(
             int productId, 
             [FromBody] UpdateCartItemDto itemDto,
             [FromQuery] int? productVariantId = null)
@@ -140,13 +136,13 @@ namespace E_Commerce.Controllers
                 {
                     var errors = GetModelErrors();
                     _logger.LogWarning($"ModelState errors: {string.Join(", ", errors)}");
-                    return BadRequest(ApiResponse<CartDto>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
+                    return BadRequest(ApiResponse<bool>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
                 }
 
                 var userId = GetCurrentUserId();
                 if (string.IsNullOrEmpty(userId))
                 {
-                    return Unauthorized(ApiResponse<CartDto>.CreateErrorResponse("Unauthorized", new ErrorResponse("Unauthorized", "User not authenticated"), 401));
+                    return Unauthorized(ApiResponse<bool>.CreateErrorResponse("Unauthorized", new ErrorResponse("Unauthorized", "User not authenticated"), 401));
                 }
 
                 _logger.LogInformation($"Executing UpdateCartItem for product ID: {productId}, variant ID: {productVariantId}");
@@ -156,7 +152,7 @@ namespace E_Commerce.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"Error in UpdateCartItem: {ex.Message}");
-                return StatusCode(500, ApiResponse<CartDto>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while updating cart item"), 500));
+                return StatusCode(500, ApiResponse<bool>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while updating cart item"), 500));
             }
         }
 
@@ -164,9 +160,9 @@ namespace E_Commerce.Controllers
         /// Remove an item from the cart
         /// </summary>
         /// <param name="itemDto">Item details to remove</param>
-        /// <returns>Updated cart</returns>
+        /// <returns>Success/failure</returns>
         [HttpDelete("remove-item")]
-        public async Task<ActionResult<ApiResponse<CartDto>>> RemoveItemFromCart([FromBody] RemoveCartItemDto itemDto)
+        public async Task<ActionResult<ApiResponse<bool>>> RemoveItemFromCart([FromBody] RemoveCartItemDto itemDto)
         {
             try
             {
@@ -174,13 +170,13 @@ namespace E_Commerce.Controllers
                 {
                     var errors = GetModelErrors();
                     _logger.LogWarning($"ModelState errors: {string.Join(", ", errors)}");
-                    return BadRequest(ApiResponse<CartDto>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
+                    return BadRequest(ApiResponse<bool>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
                 }
 
                 var userId = GetCurrentUserId();
                 if (string.IsNullOrEmpty(userId))
                 {
-                    return Unauthorized(ApiResponse<CartDto>.CreateErrorResponse("Unauthorized", new ErrorResponse("Unauthorized", "User not authenticated"), 401));
+                    return Unauthorized(ApiResponse<bool>.CreateErrorResponse("Unauthorized", new ErrorResponse("Unauthorized", "User not authenticated"), 401));
                 }
 
                 _logger.LogInformation($"Executing RemoveItemFromCart for product ID: {itemDto.ProductId}");
@@ -190,23 +186,23 @@ namespace E_Commerce.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"Error in RemoveItemFromCart: {ex.Message}");
-                return StatusCode(500, ApiResponse<CartDto>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while removing item from cart"), 500));
+                return StatusCode(500, ApiResponse<bool>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while removing item from cart"), 500));
             }
         }
 
         /// <summary>
         /// Clear all items from the cart
         /// </summary>
-        /// <returns>Success message</returns>
+        /// <returns>Success/failure</returns>
         [HttpDelete("clear")]
-        public async Task<ActionResult<ApiResponse<string>>> ClearCart()
+        public async Task<ActionResult<ApiResponse<bool>>> ClearCart()
         {
             try
             {
                 var userId = GetCurrentUserId();
                 if (string.IsNullOrEmpty(userId))
                 {
-                    return Unauthorized(ApiResponse<string>.CreateErrorResponse("Unauthorized", new ErrorResponse("Unauthorized", "User not authenticated"), 401));
+                    return Unauthorized(ApiResponse<bool>.CreateErrorResponse("Unauthorized", new ErrorResponse("Unauthorized", "User not authenticated"), 401));
                 }
 
                 _logger.LogInformation("Executing ClearCart");
@@ -216,7 +212,7 @@ namespace E_Commerce.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"Error in ClearCart: {ex.Message}");
-                return StatusCode(500, ApiResponse<string>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while clearing cart"), 500));
+                return StatusCode(500, ApiResponse<bool>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while clearing cart"), 500));
             }
         }
 
@@ -246,32 +242,8 @@ namespace E_Commerce.Controllers
             }
         }
 
-        /// <summary>
-        /// Get the total price of all items in the cart
-        /// </summary>
-        /// <returns>Total price</returns>
-        [HttpGet("total-price")]
-        public async Task<ActionResult<ApiResponse<decimal>>> GetCartTotalPrice()
-        {
-            try
-            {
-                var userId = GetCurrentUserId();
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized(ApiResponse<decimal>.CreateErrorResponse("Unauthorized", new ErrorResponse("Unauthorized", "User not authenticated"), 401));
-                }
-
-                _logger.LogInformation("Executing GetCartTotalPrice");
-                var result = await _cartServices.GetCartTotalPriceAsync(userId);
-                return HandleResult(result, nameof(GetCartTotalPrice));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in GetCartTotalPrice: {ex.Message}");
-                return StatusCode(500, ApiResponse<decimal>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while getting cart total price"), 500));
-            }
-        }
-
+       
+      
         /// <summary>
         /// Check if the cart is empty
         /// </summary>

@@ -38,6 +38,25 @@ namespace E_Commerce.DtoModels.ProductDtos
 
 
 	}
+	public class ProductForCartDto
+	{
+		public int Id { get; set; }
+
+		public string Name { get; set; } = string.Empty;
+
+		public decimal Price { get; set; }
+
+		public decimal? FinalPrice { get; set; }
+
+		public string? DiscountName { get; set; }
+
+		public decimal? DiscountPrecentage { get; set; }
+
+		public string? MainImageUrl { get; set; } 
+
+		public bool IsActive { get; set; }
+	}
+
 
 	public class ProductVariantDto : BaseDto
 	{
@@ -50,8 +69,17 @@ namespace E_Commerce.DtoModels.ProductDtos
 		public bool IsActive { get; set; }
 
 	}
+	public class ProductVariantForCartDto : BaseDto
+	{
+		public string Color { get; set; } = string.Empty;
+		public VariantSize? Size { get; set; }
+		public int? Waist { get; set; }
+		public int? Length { get; set; }
+		public int Quantity { get; set; }
 
-	
+	}
+
+
 	public class ReviewDto : BaseDto
 	{
 		public int Rating { get; set; }
@@ -95,7 +123,7 @@ namespace E_Commerce.DtoModels.ProductDtos
 		public decimal Price { get; set; }
 		public Gender Gender { get; set; }
 		public decimal? PriceAfterDiscount { get; set; }
-		public List<ImageDto>? Images { get; set; }
+		public IEnumerable<ImageDto>? Images { get; set; }
 
 		public static ProductListItemDto FromDetail(ProductDetailDto dto)
 		{
@@ -126,8 +154,8 @@ namespace E_Commerce.DtoModels.ProductDtos
 		public bool IsActive { get; set; }
 		public  FitType fitType { get; set; }
 
-		public List<ImageDto>? Images { get; set; }
-		public List<ProductVariantDto>? Variants { get; set; }
+		public IEnumerable<ImageDto>? Images { get; set; }
+		public IEnumerable<ProductVariantDto>? Variants { get; set; }
 		public decimal? FinalPrice { get; set; }
 	}
 }

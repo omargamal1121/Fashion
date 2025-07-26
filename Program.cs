@@ -53,6 +53,7 @@ using E_Commerce.Services.AccountServices.AccountManagement;
 using E_Commerce.Services.AccountServices.Authentication;
 using E_Commerce.Services.ProductServices;
 using E_Commerce.Services.SubCategoryServices;
+using E_Commerce.Services.BackgroundServices;
 
 namespace E_Commerce
 {

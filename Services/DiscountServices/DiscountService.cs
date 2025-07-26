@@ -1,4 +1,5 @@
 using E_Commerce.DtoModels.DiscoutDtos;
+using E_Commerce.DtoModels.ProductDtos;
 using E_Commerce.DtoModels.Responses;
 using E_Commerce.Enums;
 using E_Commerce.ErrorHnadling;
@@ -7,6 +8,7 @@ using E_Commerce.Models;
 using E_Commerce.Services.AdminOpreationServices;
 using E_Commerce.Services.Cache;
 using E_Commerce.Services.EmailServices;
+using E_Commerce.Services.ProductServices;
 using E_Commerce.UOW;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +18,7 @@ namespace E_Commerce.Services.Discount
 	public class DiscountService : IDiscountService
 	{
 		private readonly IBackgroundJobClient _backgroundJobClient;
+		private readonly IProductDiscountService _productDiscountService;
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly ILogger<DiscountService> _logger;
 		private readonly IAdminOpreationServices _adminOpreationServices;
@@ -28,12 +31,16 @@ namespace E_Commerce.Services.Discount
 		private const string PRODUCT_WITH_VARIANT_TAG = "productwithvariantdata";
 
 		public DiscountService( 
+			ICacheManager cacheManager,
+			IProductDiscountService productDiscountService,
 			IBackgroundJobClient backgroundJobClient,	
 			IUnitOfWork unitOfWork,
 			ILogger<DiscountService> logger,
 			IAdminOpreationServices adminOpreationServices,
 			IErrorNotificationService errorNotificationService)
 		{
+			_cacheManager = cacheManager;
+			_productDiscountService = productDiscountService;
 			_backgroundJobClient = backgroundJobClient;
 			_unitOfWork = unitOfWork;
 			_logger = logger;
@@ -378,7 +385,7 @@ namespace E_Commerce.Services.Discount
 			try
 			{
 				var discount = await _unitOfWork.Repository<Models.Discount>().GetByIdAsync(id);
-				if (discount == null)
+				if (discount == null||discount.DeletedAt!=null)
 					return Result<bool>.Fail("Discount not found", 404);
 
 				using var transaction = await _unitOfWork.BeginTransactionAsync();
@@ -812,5 +819,7 @@ namespace E_Commerce.Services.Discount
 				return Result<decimal>.Fail("Error calculating discounted price", 500);
 			}
 		}
+
+	
 	}
 } 

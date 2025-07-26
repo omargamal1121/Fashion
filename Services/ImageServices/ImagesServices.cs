@@ -239,15 +239,18 @@ namespace E_Commerce.Services
 		
 		// Single image methods
 		public Task<Result<Image>> SaveCategoryImageAsync(IFormFile image, string userId) => SaveImageAsync(image, "CategoryPhotos", userId);
+		public Task<Result<Image>> SaveCollectionImageAsync(IFormFile image, string userId) => SaveImageAsync(image, "CollectionPhotos", userId);
 		public Task<Result<Image>> SaveProductImageAsync(IFormFile image, string userId) => SaveImageAsync(image, "ProductPhotos", userId);
 		public Task<Result<Image>> SaveSubCategoryImageAsync(IFormFile image, string userId) => SaveImageAsync(image, "SubCategoryPhotos", userId);
 		
 		// Multiple images methods
 		public Task<Result<List<Image>>> SaveCategoryImagesAsync(List<IFormFile> images, string userId) => SaveImagesAsync(images, "CategoryPhotos", userId);
+		public Task<Result<List<Image>>> SaveCollectionImagesAsync(List<IFormFile> images, string userId) => SaveImagesAsync(images, "CollectionPhotos", userId);
 		public Task<Result<List<Image>>> SaveProductImagesAsync(List<IFormFile> images, string userId) => SaveImagesAsync(images, "ProductPhotos", userId);
 		public Task<Result<List<Image>>> SaveSubCategoryImagesAsync(List<IFormFile> images, string userId) => SaveImagesAsync(images, "SubCategoryPhotos", userId);
 		
 		public Task<Result<Image>> SaveMainCategoryImageAsync(IFormFile image, string userId) => SaveMainImageAsync(image, "CategoryPhotos", userId);
+		public Task<Result<Image>> SaveMainCollectionImageAsync(IFormFile image, string userId) => SaveMainImageAsync(image, "CollectionPhotos", userId);
 		public Task<Result<Image>> SaveMainProductImageAsync(IFormFile image, string userId) => SaveMainImageAsync(image, "ProductPhotos", userId);
 		public Task<Result<Image>> SaveMainSubCategoryImageAsync(IFormFile image, string userId) => SaveMainImageAsync(image, "SubCategoryPhotos", userId);
 		public async Task<Result<string>> DeleteImageAsync(Image image)

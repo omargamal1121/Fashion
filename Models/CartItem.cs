@@ -21,7 +21,10 @@ namespace E_Commerce.Models
         [Range(1, 100, ErrorMessage = "Quantity must be between 1 and 100")]
         public int Quantity { get; set; }
 
+		public decimal UnitPrice
+		{ get; set; }
 
-        public DateTime AddedAt { get; set; } = DateTime.UtcNow;
+
+		public DateTime AddedAt { get; set; } = DateTime.UtcNow;
     }
 } 

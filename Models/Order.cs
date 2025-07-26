@@ -44,7 +44,6 @@ namespace E_Commerce.Models
 		public  Payment Payment { get; set; }
 		public ICollection<ReturnRequest> ReturnRequests { get; set; } = new List<ReturnRequest>();
 
-		// Calculated properties
 		public bool IsCancelled => Status == OrderStatus.Cancelled;
 		public bool IsDelivered => Status == OrderStatus.Delivered;
 		public bool IsShipped => Status == OrderStatus.Shipped;

@@ -56,6 +56,7 @@ namespace E_Commerce.Repository
 		}
 
 		public async Task< bool> IsExsistByNameAsync(string name)=> await _entity.AnyAsync(p => p.Name == name);
+		public async Task< bool> IsExsistAndActive(int id)=> await _entity.AnyAsync(p => p.Id==id&&p.IsActive&&p.DeletedAt==null);
 		
 		public async Task<Product> GetProductWithVariants(int productId)
 		{

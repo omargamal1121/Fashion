@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using E_Commerce.Services.ProductServices; // For IProductSearchService and AdvancedSearchDto
 
 namespace E_Commerce.Services.ProductServices
 {
@@ -51,6 +50,8 @@ namespace E_Commerce.Services.ProductServices
 		Task<Result<ProductDetailDto>> AddDiscountToProductAsync(int productId, int discountId, string userId);
 		Task<Result<ProductDetailDto>> UpdateProductDiscountAsync(int productId, int discountId, string userId);
 		Task<Result<ProductDetailDto>> RemoveDiscountFromProductAsync(int productId, string userId);
+		Task<Result<List<ProductDto>>> GetProductsWithActiveDiscountsAsync();
+		public Task<Result<List<ProductDto>>> ApplyDiscountToProductsAsync(ApplyDiscountToProductsDto dto);
 	}
 
 	public class ProductsServices : IProductsServices
@@ -181,6 +182,16 @@ namespace E_Commerce.Services.ProductServices
 		public async Task<Result<bool>> DeactivateProductAsync(int productId, string userId)
 		{
 			return await _productCatalogService.DeactivateProductAsync(productId, userId);
+		}
+
+		public Task<Result<List<ProductDto>>> GetProductsWithActiveDiscountsAsync()
+		{
+			return _productDiscountService.GetProductsWithActiveDiscountsAsync();
+		}
+
+		public Task<Result<List<ProductDto>>> ApplyDiscountToProductsAsync(ApplyDiscountToProductsDto dto)
+		{
+			return _productDiscountService.ApplyDiscountToProductsAsync(dto);
 		}
 	}
 }

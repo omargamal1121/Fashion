@@ -11,6 +11,7 @@ namespace E_Commerce.UOW
 		ISubCategoryRepository SubCategory { get; }
 		ICartRepository Cart { get; }
 		IOrderRepository Order { get; }
+		public IProductVariantRepository ProductVariant { get; }
 		ICollectionRepository Collection { get; }
 		IWareHouseRepository WareHouse { get; }
 		IProductInventoryRepository ProductInventory { get; }

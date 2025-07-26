@@ -4,14 +4,17 @@ namespace E_Commerce.Interfaces
 {
     public interface ICartRepository : IRepository<Cart>
     {
-        Task<Cart?> GetCartByUserIdAsync(string userId);
-        Task<CartItem?> GetCartItemAsync(int cartId, int productId, int? productVariantId = null);
+    
+    
         Task<bool> AddItemToCartAsync(int cartId, CartItem item);
-        Task<bool> UpdateCartItemAsync(CartItem item);
-        Task<bool> RemoveCartItemAsync(int cartId, int productId, int? productVariantId = null);
+        public  Task<Cart?> GetCartByUserIdAsync(string userId);
+        public  Task<bool> IsExsistByUserId(string userid);
+
+
+
+	  Task<bool> RemoveCartItemAsync(int cartId, int productId, int? productVariantId = null);
         Task<bool> ClearCartAsync(int cartId);
         Task<bool> CartExistsAsync(string userId);
-        Task<int> GetCartItemCountAsync(string userId);
-        Task<decimal> GetCartTotalPriceAsync(string userId);
+        Task<int> GetCartItemCountAsync(string userId);   
     }
 } 

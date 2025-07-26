@@ -33,7 +33,11 @@ namespace E_Commerce.DtoModels.OrderDtos
         public string StatusDisplay => Status.ToString();
     }
 
-    public class OrderItemDto : BaseDto
+	public class CustomerDto
+	{
+	}
+
+	public class OrderItemDto : BaseDto
     {
         public int ProductId { get; set; }
         public ProductDto? Product { get; set; }

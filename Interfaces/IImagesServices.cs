@@ -12,16 +12,19 @@ namespace E_Commerce.Interfaces
 		
 		// Single image methods
 		Task<Result<Image>> SaveCategoryImageAsync(IFormFile image, string userId);
+		Task<Result<Image>> SaveCollectionImageAsync(IFormFile image, string userId);
 		Task<Result<Image>> SaveProductImageAsync(IFormFile image, string userId);
 		Task<Result<Image>> SaveSubCategoryImageAsync(IFormFile image, string userId);
 		
 		// Multiple images methods
 		Task<Result<List<Image>>> SaveCategoryImagesAsync(List<IFormFile> images, string userId);
+		Task<Result<List<Image>>> SaveCollectionImagesAsync(List<IFormFile> images, string userId);
 		Task<Result<List<Image>>> SaveProductImagesAsync(List<IFormFile> images, string userId);
 		Task<Result<List<Image>>> SaveSubCategoryImagesAsync(List<IFormFile> images, string userId);
 		
 		// Main image methods
 		Task<Result<Image>> SaveMainCategoryImageAsync(IFormFile image, string userId);
+		Task<Result<Image>> SaveMainCollectionImageAsync(IFormFile image, string userId);
 		Task<Result<Image>> SaveMainProductImageAsync(IFormFile image, string userId);
 		Task<Result<Image>> SaveMainSubCategoryImageAsync(IFormFile image, string userId);
 		

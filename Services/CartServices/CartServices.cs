@@ -13,6 +13,7 @@ using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 
 namespace E_Commerce.Services.Cart
 {
@@ -52,8 +53,66 @@ namespace E_Commerce.Services.Cart
         {
             BackgroundJob.Enqueue<IErrorNotificationService>(_ => _.SendErrorNotificationAsync(message, stackTrace));
         }
+		public static Expression<Func<E_Commerce.Models.Cart, CartDto>> CartDtoSelector =>
+	cart => new CartDto
+	{
+		Id = cart.Id,
+		UserId = cart.UserId,
+		TotalItems = cart.Items.Count,
 
-        public async Task<Result<CartDto>> GetCartAsync(string userId)
+		Items = cart.Items.Select(item => new CartItemDto
+		{
+			Id = item.Id,
+			ProductId = item.ProductId,
+			Quantity = item.Quantity,
+			AddedAt = item.AddedAt,
+            
+			Product = new DtoModels.ProductDtos.ProductForCartDto
+			{
+				Id = item.Product.Id,
+				Name = item.Product.Name,
+				Price = item.Product.Price, 
+                
+				FinalPrice =
+					(item.Product.Discount != null
+					 && item.Product.Discount.IsActive
+					 && item.Product.Discount.DeletedAt == null
+					 && item.Product.Discount.EndDate > DateTime.UtcNow)
+						? item.Product.Price - ((item.Product.Discount.DiscountPercent / 100) * item.Product.Price)
+						: item.Product.Price,
+				DiscountName =
+					(item.Product.Discount != null
+					 && item.Product.Discount.IsActive
+					 && item.Product.Discount.DeletedAt == null
+					 && item.Product.Discount.EndDate > DateTime.UtcNow)
+						? item.Product.Discount.Name
+						: null,
+				DiscountPrecentage =
+					(item.Product.Discount != null
+					 && item.Product.Discount.IsActive
+					 && item.Product.Discount.DeletedAt == null
+					 && item.Product.Discount.EndDate > DateTime.UtcNow)
+						? item.Product.Discount.DiscountPercent
+						: 0,
+				MainImageUrl = item.Product.Images
+					.Where(img => img.IsMain && img.DeletedAt == null)
+					.Select(img => img.Url)
+					.FirstOrDefault(),
+				IsActive = item.Product.IsActive
+			},
+            UnitPrice=item.UnitPrice,
+			ProductVariantDto = new DtoModels.ProductDtos.ProductVariantForCartDto
+			{
+				Color = item.ProductVariant.Color,
+				Size = item.ProductVariant.Size,
+				Waist = item.ProductVariant.Waist,
+				Length = item.ProductVariant.Length,
+				Quantity = item.ProductVariant.Quantity
+			}
+		}).ToList()
+	};
+
+		public async Task<Result<CartDto>> GetCartAsync(string userId)
         {
             _logger.LogInformation($"Getting cart for user: {userId}");
 
@@ -67,21 +126,34 @@ namespace E_Commerce.Services.Cart
 
             try
             {
-                var cart = await _cartRepository.GetCartByUserIdAsync(userId);
-                if (cart == null)
+                var isexist = await _cartRepository.IsExsistByUserId(userId);
+				if (!isexist)
                 {
-                    // Create a new cart if it doesn't exist
-                    cart = await CreateNewCartAsync(userId);
-                    if (cart == null)
+               
+                    var newcart = await CreateNewCartAsync(userId);
+                    if (newcart == null)
                     {
-                        return Result<CartDto>.Fail("Failed to create cart", 500);
-                    }
+						return Result<CartDto>.Fail("Unexpected error while creating a new cart", 500);
+
+					}
+                    await _unitOfWork.CommitAsync();
+					return Result<CartDto>.Ok( new CartDto { CreatedAt=newcart.CreatedAt,Id=newcart.Id,UserId=userId}, "New cart created successfully", 201);
+				}
+                else{
+                     var cart = await _cartRepository.GetAll().Where(c=>c.UserId==userId&&c.DeletedAt==null).Select(CartDtoSelector).FirstOrDefaultAsync();
+					if (cart == null)
+					{
+						_logger.LogWarning($"Cart disappeared after existence check for user: {userId}");
+						return Result<CartDto>.Fail("Cart not found", 404);
+					}
+
+					cart.TotalPrice = cart.Items.Sum(i => i.Quantity * i.UnitPrice);
+                    
+                   
+					await _cacheManager.SetAsync(cacheKey, cart, tags: new[] { CACHE_TAG_CART });
+
+                    return Result<CartDto>.Ok(cart, "Cart retrieved successfully", 200);
                 }
-
-                var cartDto = _mapper.Map<CartDto>(cart);
-                await _cacheManager.SetAsync(cacheKey, cartDto, tags: new[] { CACHE_TAG_CART });
-
-                return Result<CartDto>.Ok(cartDto, "Cart retrieved successfully", 200);
             }
             catch (Exception ex)
             {
@@ -91,52 +163,177 @@ namespace E_Commerce.Services.Cart
             }
         }
 
-        public async Task<Result<CartDto>> AddItemToCartAsync(string userId, CreateCartItemDto itemDto)
+        /// <summary>
+        /// Updates the quantity of a cart item for a user, with full validation and transactional safety.
+        /// Skips update if the quantity is unchanged. Returns only success/failure.
+        /// </summary>
+        public async Task<Result<bool>> UpdateCartItemAsync(string userId, int productId, UpdateCartItemDto itemDto, int? productVariantId = null)
+        {
+            // Parameter validation
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                _logger.LogWarning("UpdateCartItemAsync called with empty userId");
+                return Result<bool>.Fail("Invalid user ID", 400);
+            }
+            if (itemDto == null)
+            {
+                _logger.LogWarning("UpdateCartItemAsync called with null itemDto");
+                return Result<bool>.Fail("Invalid item data", 400);
+            }
+            if (itemDto.Quantity <= 0)
+            {
+                _logger.LogWarning($"UpdateCartItemAsync called with non-positive quantity: {itemDto.Quantity}");
+                return Result<bool>.Fail("Quantity must be greater than zero", 400);
+            }
+            if (productVariantId == null)
+            {
+                _logger.LogWarning("UpdateCartItemAsync called with null productVariantId");
+                return Result<bool>.Fail("Product variant ID is required", 400);
+            }
+
+            _logger.LogInformation($"Updating cart item for user: {userId}, product: {productId}, variant: {productVariantId}");
+
+            using var transaction = await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+          
+                var cart = await _cartRepository.GetCartByUserIdAsync(userId);
+                if (cart == null)
+                {
+                    _logger.LogWarning($"Cart not found for user: {userId}");
+                    await transaction.RollbackAsync();
+                    return Result<bool>.Fail("Cart not found", 404);
+                }
+
+   
+                var cartItem = cart.Items.FirstOrDefault(i => i.ProductId == productId && i.ProductVariantId == productVariantId);
+                if (cartItem == null)
+                {
+                    _logger.LogWarning($"Cart item not found for user: {userId}, product: {productId}, variant: {productVariantId}");
+                    await transaction.RollbackAsync();
+                    return Result<bool>.Fail("Cart item not found", 404);
+                }
+
+                // Idempotency: skip update if quantity is unchanged
+                if (cartItem.Quantity == itemDto.Quantity)
+                {
+					await transaction.RollbackAsync();
+					_logger.LogInformation($"No update needed: cart item quantity is already {itemDto.Quantity} for user: {userId}, product: {productId}, variant: {productVariantId}");
+                    return Result<bool>.Ok(true, "Cart item already has the requested quantity", 200);
+                }
+
+                // Validate product and variant
+                var product = await _unitOfWork.Product.GetAll()
+                    .Where(p => p.Id == productId && p.DeletedAt == null && p.IsActive)
+                    .FirstOrDefaultAsync();
+
+                if (product == null)
+                {
+                    _logger.LogWarning($"Product not found or inactive: {productId}");
+                    await transaction.RollbackAsync();
+                    return Result<bool>.Fail("Product not found or inactive", 404);
+                }
+
+                // Fetch only the needed variant for performance
+                var variant = await _unitOfWork.ProductVariant.GetAll()
+                    .Where(v => v.Id == productVariantId && v.ProductId == productId && v.DeletedAt == null && v.IsActive)
+                    .FirstOrDefaultAsync();
+
+                if (variant == null)
+                {
+                    _logger.LogWarning($"Product variant not found or inactive: {productVariantId} for product: {productId}");
+                    await transaction.RollbackAsync();
+                    return Result<bool>.Fail("Product variant not found or inactive", 404);
+                }
+
+                if (variant.Quantity <= 0)
+                {
+                    _logger.LogWarning($"Insufficient or zero quantity for variant {productVariantId}. Requested: {itemDto.Quantity}, Available: {variant.Quantity}");
+                    await transaction.RollbackAsync();
+                    return Result<bool>.Fail($"Insufficient quantity. Available: {variant.Quantity}", 400);
+                }
+                if( itemDto.Quantity > variant.Quantity)
+                {
+                    _logger.LogWarning($"Requested quantity {itemDto.Quantity} exceeds available quantity {variant.Quantity} for variant {productVariantId}");
+                    await transaction.RollbackAsync();
+                    return Result<bool>.Fail($"Requested quantity exceeds available stock for this variant. Available: {variant.Quantity}", 400);
+				}
+
+				cartItem.Quantity = itemDto.Quantity;
+                cartItem.ModifiedAt = DateTime.UtcNow;
+                
+
+                var updateResult =  _unitOfWork.Repository<CartItem>().Update(cartItem);
+                if (!updateResult)
+                {
+                    _logger.LogError($"Failed to update cart item for user: {userId}, product: {productId}, variant: {productVariantId}");
+                    await transaction.RollbackAsync();
+                    return Result<bool>.Fail("Failed to update cart item", 500);
+                }
+
+           
+                var adminLog = await _adminOperationServices.AddAdminOpreationAsync(
+                    $"Updated cart item - Product: {productId}, Variant: {productVariantId}, Quantity: {itemDto.Quantity}",
+                    Opreations.UpdateOpreation,
+                    userId,
+                    cart.Id
+                );
+                if (!adminLog.Success)
+                {
+                    _logger.LogWarning($"Failed to log admin operation: {adminLog.Message}");
+                }
+
+                await _unitOfWork.CommitAsync();
+                await transaction.CommitAsync();
+
+                // Clear cache
+                await _cacheManager.RemoveByTagAsync(CACHE_TAG_CART);
+
+                _logger.LogInformation($"Cart item updated successfully for user: {userId}, product: {productId}, variant: {productVariantId}");
+                return Result<bool>.Ok(true, "Cart item updated successfully", 200);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, $"Error updating cart item for user {userId}, product {productId}, variant {productVariantId}");
+                NotifyAdminOfError($"Error updating cart item for user {userId}, product {productId}, variant {productVariantId}: {ex.Message}", ex.StackTrace);
+                return Result<bool>.Fail("An error occurred while updating cart item", 500);
+            }
+        }
+
+        public async Task<Result<bool>> AddItemToCartAsync(string userId, CreateCartItemDto itemDto)
         {
             _logger.LogInformation($"Adding item to cart for user: {userId}, product: {itemDto.ProductId}");
 
             using var transaction = await _unitOfWork.BeginTransactionAsync();
             try
             {
-                // Validate product exists and has sufficient quantity
+                var customer = await _userManager.FindByIdAsync(userId);
+
+                if (customer == null)
+                {
+                    await transaction.RollbackAsync();
+                    return Result<bool>.Fail($"No customer with this id:{userId}", 404);
+                }
+
+                
                 var product = await _unitOfWork.Product.GetAll()
-                    .Where(p => p.Id == itemDto.ProductId && p.DeletedAt == null)
-                    .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+                    .Where(p => p.Id == itemDto.ProductId && p.DeletedAt == null && p.IsActive)
                     .Include(p => p.Discount)
                     .FirstOrDefaultAsync();
-
                 if (product == null)
                 {
                     await transaction.RollbackAsync();
-                    return Result<CartDto>.Fail("Product not found", 404);
+                    return Result<bool>.Fail("Product not found Or is InActive", 404);
                 }
 
-                // Check if product variant exists if specified
-                if (itemDto.ProductVariantId.HasValue)
+                var productvarinat = await _unitOfWork.ProductVariant.GetByIdAsync(itemDto.ProductVariantId);
+                if (productvarinat==null)
                 {
-                    var variant = product.ProductVariants.FirstOrDefault(v => v.Id == itemDto.ProductVariantId);
-                    if (variant == null)
-                    {
-                        await transaction.RollbackAsync();
-                        return Result<CartDto>.Fail("Product variant not found", 404);
-                    }
-
-                    if (variant.Quantity < itemDto.Quantity)
-                    {
-                        await transaction.RollbackAsync();
-                        return Result<CartDto>.Fail($"Insufficient quantity. Available: {variant.Quantity}", 400);
-                    }
-                }
-                else
-                {
-                    if (product.Quantity < itemDto.Quantity)
-                    {
-                        await transaction.RollbackAsync();
-                        return Result<CartDto>.Fail($"Insufficient quantity. Available: {product.Quantity}", 400);
-                    }
+                    await transaction.RollbackAsync();
+                    return Result<bool>.Fail("No variant with this id or no quantity", 404);
                 }
 
-                // Get or create cart
                 var cart = await _cartRepository.GetCartByUserIdAsync(userId);
                 if (cart == null)
                 {
@@ -144,46 +341,72 @@ namespace E_Commerce.Services.Cart
                     if (cart == null)
                     {
                         await transaction.RollbackAsync();
-                        return Result<CartDto>.Fail("Failed to create cart", 500);
+                        return Result<bool>.Fail("Failed to create cart", 500);
                     }
+                    else
+                        await _unitOfWork.CommitAsync();
                 }
+                if(itemDto.Quantity > productvarinat.Quantity)
+                {
+                    await transaction.RollbackAsync();
+					return Result<bool>.Fail("Not enough quantity in stock for this variant", 400);
+				}
+				var existingItem = cart.Items.FirstOrDefault(i => i.ProductVariantId == itemDto.ProductVariantId);
+                decimal finalPrice = (product.Discount != null && product.Discount.IsActive && product.Discount.DeletedAt == null && product.Discount.EndDate > DateTime.UtcNow)
+                    ? Math.Round(product.Price - ((product.Discount.DiscountPercent / 100m) * product.Price), 2)
+                    : product.Price;
 
-                // Check if item already exists in cart
-                var existingItem = await _cartRepository.GetCartItemAsync(cart.Id, itemDto.ProductId, itemDto.ProductVariantId);
                 if (existingItem != null)
                 {
-                    // Update quantity
-                    existingItem.Quantity += itemDto.Quantity;
+					int totalRequestedQuantity = (existingItem?.Quantity ?? 0) + itemDto.Quantity;
+
+					if (totalRequestedQuantity > productvarinat.Quantity)
+					{
+						await transaction.RollbackAsync();
+						return Result<bool>.Fail("Not enough quantity in stock for this variant", 400);
+					}
+					existingItem.Quantity=totalRequestedQuantity;
                     existingItem.ModifiedAt = DateTime.UtcNow;
-                    
-                    var updateResult = await _cartRepository.UpdateCartItemAsync(existingItem);
+      
+                    var updateResult = _unitOfWork.Repository<CartItem>().Update(existingItem);
                     if (!updateResult)
                     {
                         await transaction.RollbackAsync();
-                        return Result<CartDto>.Fail("Failed to update cart item", 500);
+                        return Result<bool>.Fail("Failed to update cart item", 500);
                     }
                 }
                 else
                 {
-                    // Add new item
-                    var cartItem = new CartItem
-                    {
-                        CartId = cart.Id,
-                        ProductId = itemDto.ProductId,
-                        ProductVariantId = itemDto.ProductVariantId,
-                        Quantity = itemDto.Quantity,
-                        AddedAt = DateTime.UtcNow
-                    };
+					var hasValidDiscount = product.Discount != null &&
+						  product.Discount.StartDate <= DateTime.UtcNow &&
+						  product.Discount.EndDate > DateTime.UtcNow &&
+						  product.Discount.DeletedAt == null;
 
-                    var addResult = await _cartRepository.AddItemToCartAsync(cart.Id, cartItem);
-                    if (!addResult)
+					var unitPrice = hasValidDiscount
+						? Math.Round(product.Price - ((product.Discount.DiscountPercent / 100m) * product.Price), 2)
+						: product.Price;
+
+					var cartItem = new CartItem
+					{
+						CartId = cart.Id,
+						ProductId = itemDto.ProductId,
+						ProductVariantId = itemDto.ProductVariantId,
+						Quantity = itemDto.Quantity,
+						AddedAt = DateTime.UtcNow,
+						UnitPrice = unitPrice
+					};
+
+					var addResult = await _unitOfWork.Repository<CartItem>().CreateAsync(cartItem);
+                    if (addResult == null)
                     {
                         await transaction.RollbackAsync();
-                        return Result<CartDto>.Fail("Failed to add item to cart", 500);
+                        return Result<bool>.Fail("Failed to add cart item", 500);
                     }
                 }
 
-                // Log admin operation
+               
+            
+
                 var adminLog = await _adminOperationServices.AddAdminOpreationAsync(
                     $"Added item to cart - Product: {itemDto.ProductId}, Quantity: {itemDto.Quantity}",
                     Opreations.UpdateOpreation,
@@ -193,128 +416,30 @@ namespace E_Commerce.Services.Cart
 
                 if (!adminLog.Success)
                 {
+                    await transaction.RollbackAsync();
                     _logger.LogWarning($"Failed to log admin operation: {adminLog.Message}");
+                    return Result<bool>.Fail("Failed to log admin operation", 500);
                 }
 
                 await _unitOfWork.CommitAsync();
                 await transaction.CommitAsync();
 
-                // Clear cache and return updated cart
-                await _cacheManager.RemoveByTagAsync(CACHE_TAG_CART);
-                var updatedCart = await _cartRepository.GetCartByUserIdAsync(userId);
-                var cartDto = _mapper.Map<CartDto>(updatedCart);
+                var cacheKey = $"{CACHE_TAG_CART}_user_{userId}";
+                await _cacheManager.RemoveAsync(cacheKey);
 
-                return Result<CartDto>.Ok(cartDto, "Item added to cart successfully", 200);
+                _logger.LogInformation($"Item added to cart for user: {userId}, product: {itemDto.ProductId}");
+                return Result<bool>.Ok(true, "Item added to cart successfully", 200);
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
                 _logger.LogError($"Error adding item to cart for user {userId}: {ex.Message}");
                 NotifyAdminOfError($"Error adding item to cart for user {userId}: {ex.Message}", ex.StackTrace);
-                return Result<CartDto>.Fail("An error occurred while adding item to cart", 500);
+                return Result<bool>.Fail("An error occurred while adding item to cart", 500);
             }
         }
 
-        public async Task<Result<CartDto>> UpdateCartItemAsync(string userId, int productId, UpdateCartItemDto itemDto, int? productVariantId = null)
-        {
-            _logger.LogInformation($"Updating cart item for user: {userId}, product: {productId}");
-
-            using var transaction = await _unitOfWork.BeginTransactionAsync();
-            try
-            {
-                var cart = await _cartRepository.GetCartByUserIdAsync(userId);
-                if (cart == null)
-                {
-                    await transaction.RollbackAsync();
-                    return Result<CartDto>.Fail("Cart not found", 404);
-                }
-
-                var cartItem = await _cartRepository.GetCartItemAsync(cart.Id, productId, productVariantId);
-                if (cartItem == null)
-                {
-                    await transaction.RollbackAsync();
-                    return Result<CartDto>.Fail("Cart item not found", 404);
-                }
-
-                // Validate quantity
-                var product = await _unitOfWork.Product.GetAll()
-                    .Where(p => p.Id == productId && p.DeletedAt == null)
-                    .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-                    .FirstOrDefaultAsync();
-
-                if (product == null)
-                {
-                    await transaction.RollbackAsync();
-                    return Result<CartDto>.Fail("Product not found", 404);
-                }
-
-                if (productVariantId.HasValue)
-                {
-                    var variant = product.ProductVariants.FirstOrDefault(v => v.Id == productVariantId);
-                    if (variant == null)
-                    {
-                        await transaction.RollbackAsync();
-                        return Result<CartDto>.Fail("Product variant not found", 404);
-                    }
-
-                    if (variant.Quantity < itemDto.Quantity)
-                    {
-                        await transaction.RollbackAsync();
-                        return Result<CartDto>.Fail($"Insufficient quantity. Available: {variant.Quantity}", 400);
-                    }
-                }
-                else
-                {
-                    if (product.Quantity < itemDto.Quantity)
-                    {
-                        await transaction.RollbackAsync();
-                        return Result<CartDto>.Fail($"Insufficient quantity. Available: {product.Quantity}", 400);
-                    }
-                }
-
-                cartItem.Quantity = itemDto.Quantity;
-                cartItem.ModifiedAt = DateTime.UtcNow;
-
-                var updateResult = await _cartRepository.UpdateCartItemAsync(cartItem);
-                if (!updateResult)
-                {
-                    await transaction.RollbackAsync();
-                    return Result<CartDto>.Fail("Failed to update cart item", 500);
-                }
-
-                // Log admin operation
-                var adminLog = await _adminOperationServices.AddAdminOpreationAsync(
-                    $"Updated cart item - Product: {productId}, Quantity: {itemDto.Quantity}",
-                    Opreations.UpdateOpreation,
-                    userId,
-                    cart.Id
-                );
-
-                if (!adminLog.Success)
-                {
-                    _logger.LogWarning($"Failed to log admin operation: {adminLog.Message}");
-                }
-
-                await _unitOfWork.CommitAsync();
-                await transaction.CommitAsync();
-
-                // Clear cache and return updated cart
-                await _cacheManager.RemoveByTagAsync(CACHE_TAG_CART);
-                var updatedCart = await _cartRepository.GetCartByUserIdAsync(userId);
-                var cartDto = _mapper.Map<CartDto>(updatedCart);
-
-                return Result<CartDto>.Ok(cartDto, "Cart item updated successfully", 200);
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                _logger.LogError($"Error updating cart item for user {userId}: {ex.Message}");
-                NotifyAdminOfError($"Error updating cart item for user {userId}: {ex.Message}", ex.StackTrace);
-                return Result<CartDto>.Fail("An error occurred while updating cart item", 500);
-            }
-        }
-
-        public async Task<Result<CartDto>> RemoveItemFromCartAsync(string userId, RemoveCartItemDto itemDto)
+        public async Task<Result<bool>> RemoveItemFromCartAsync(string userId, RemoveCartItemDto itemDto)
         {
             _logger.LogInformation($"Removing item from cart for user: {userId}, product: {itemDto.ProductId}");
 
@@ -325,14 +450,14 @@ namespace E_Commerce.Services.Cart
                 if (cart == null)
                 {
                     await transaction.RollbackAsync();
-                    return Result<CartDto>.Fail("Cart not found", 404);
+                    return Result<bool>.Fail("Cart not found", 404);
                 }
 
                 var removeResult = await _cartRepository.RemoveCartItemAsync(cart.Id, itemDto.ProductId, itemDto.ProductVariantId);
                 if (!removeResult)
                 {
                     await transaction.RollbackAsync();
-                    return Result<CartDto>.Fail("Cart item not found", 404);
+                    return Result<bool>.Fail("Cart item not found", 404);
                 }
 
                 // Log admin operation
@@ -345,29 +470,30 @@ namespace E_Commerce.Services.Cart
 
                 if (!adminLog.Success)
                 {
-                    _logger.LogWarning($"Failed to log admin operation: {adminLog.Message}");
+					await transaction.RollbackAsync();
+					_logger.LogWarning($"Failed to log admin operation: {adminLog.Message}");
+					return Result<bool>.Fail("An error occurred while removing item from cart", 500);
                 }
 
                 await _unitOfWork.CommitAsync();
                 await transaction.CommitAsync();
 
-                // Clear cache and return updated cart
+                // Clear cache
                 await _cacheManager.RemoveByTagAsync(CACHE_TAG_CART);
-                var updatedCart = await _cartRepository.GetCartByUserIdAsync(userId);
-                var cartDto = _mapper.Map<CartDto>(updatedCart);
 
-                return Result<CartDto>.Ok(cartDto, "Item removed from cart successfully", 200);
+                _logger.LogInformation($"Item removed from cart for user: {userId}, product: {itemDto.ProductId}");
+                return Result<bool>.Ok(true, "Item removed from cart successfully", 200);
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
                 _logger.LogError($"Error removing item from cart for user {userId}: {ex.Message}");
                 NotifyAdminOfError($"Error removing item from cart for user {userId}: {ex.Message}", ex.StackTrace);
-                return Result<CartDto>.Fail("An error occurred while removing item from cart", 500);
+                return Result<bool>.Fail("An error occurred while removing item from cart", 500);
             }
         }
 
-        public async Task<Result<string>> ClearCartAsync(string userId)
+        public async Task<Result<bool>> ClearCartAsync(string userId)
         {
             _logger.LogInformation($"Clearing cart for user: {userId}");
 
@@ -378,14 +504,14 @@ namespace E_Commerce.Services.Cart
                 if (cart == null)
                 {
                     await transaction.RollbackAsync();
-                    return Result<string>.Fail("Cart not found", 404);
+                    return Result<bool>.Fail("Cart not found", 404);
                 }
 
                 var clearResult = await _cartRepository.ClearCartAsync(cart.Id);
                 if (!clearResult)
                 {
                     await transaction.RollbackAsync();
-                    return Result<string>.Fail("Failed to clear cart", 500);
+                    return Result<bool>.Fail("Failed to clear cart", 500);
                 }
 
                 // Log admin operation
@@ -398,23 +524,23 @@ namespace E_Commerce.Services.Cart
 
                 if (!adminLog.Success)
                 {
-                    _logger.LogWarning($"Failed to log admin operation: {adminLog.Message}");
-                }
+                    await transaction.RollbackAsync();
+					_logger.LogWarning($"Failed to log admin operation: {adminLog.Message}");
+                    return Result<bool>.Fail("An error occurred while clearing cart", 500);
+				}
 
                 await _unitOfWork.CommitAsync();
                 await transaction.CommitAsync();
-
-                // Clear cache
                 await _cacheManager.RemoveByTagAsync(CACHE_TAG_CART);
 
-                return Result<string>.Ok(null, "Cart cleared successfully", 200);
+                return Result<bool>.Ok(true, "Cart cleared successfully", 200);
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
                 _logger.LogError($"Error clearing cart for user {userId}: {ex.Message}");
                 NotifyAdminOfError($"Error clearing cart for user {userId}: {ex.Message}", ex.StackTrace);
-                return Result<string>.Fail("An error occurred while clearing cart", 500);
+                return Result<bool>.Fail("An error occurred while clearing cart", 500);
             }
         }
 
@@ -432,20 +558,7 @@ namespace E_Commerce.Services.Cart
             }
         }
 
-        public async Task<Result<decimal>> GetCartTotalPriceAsync(string userId)
-        {
-            try
-            {
-                var total = await _cartRepository.GetCartTotalPriceAsync(userId);
-                return Result<decimal>.Ok(total, "Cart total price retrieved", 200);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error getting cart total price for user {userId}: {ex.Message}");
-                return Result<decimal>.Fail("An error occurred while getting cart total price", 500);
-            }
-        }
-
+      
         public async Task<Result<bool>> IsCartEmptyAsync(string userId)
         {
             try
@@ -465,7 +578,7 @@ namespace E_Commerce.Services.Cart
         {
             try
             {
-                var customer = await _userManager.FindByIdAsync (userId);
+                var customer = await _userManager.FindByIdAsync(userId);
                 if (customer == null)
                 {
                     _logger.LogWarning($"Customer not found for user: {userId}");

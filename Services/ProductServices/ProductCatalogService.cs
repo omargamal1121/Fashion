@@ -41,15 +41,19 @@ namespace E_Commerce.Services.ProductServices
 		private readonly IBackgroundJobClient _backgroundJobClient;
 		private readonly ILogger<ProductCatalogService> _logger;
 		private readonly IAdminOpreationServices _adminOpreationServices;
+		private readonly ICollectionServices _collectionServices;
 		private readonly IErrorNotificationService _errorNotificationService;
 		private readonly ICacheManager _cacheManager;
+		private const string CACHE_TAG_COLLECTION_With_Product = "CollectionWithProduct";
+		
 		private const string CACHE_TAG_PRODUCT_SEARCH = "product_search";
 
 		public const string CACHE_TAG_CATEGORY_WITH_DATA = "categorywithdata";
-		private static readonly string[] PRODUCT_CACHE_TAGS = new[] { CACHE_TAG_PRODUCT_SEARCH, CACHE_TAG_CATEGORY_WITH_DATA, PRODUCT_WITH_VARIANT_TAG };
+		private static readonly string[] PRODUCT_CACHE_TAGS = new[] { CACHE_TAG_PRODUCT_SEARCH, CACHE_TAG_CATEGORY_WITH_DATA, PRODUCT_WITH_VARIANT_TAG,CACHE_TAG_COLLECTION_With_Product };
 		private const string PRODUCT_WITH_VARIANT_TAG = "productwithvariantdata";
 
-		public ProductCatalogService( 
+		public ProductCatalogService(
+			ICollectionServices collectionServices,
 			IBackgroundJobClient backgroundJobClient,
 			IUnitOfWork unitOfWork,
 			ISubCategoryServices subCategoryServices,
@@ -58,6 +62,7 @@ namespace E_Commerce.Services.ProductServices
 			IErrorNotificationService errorNotificationService,
 			ICacheManager cacheManager)
 		{
+			_collectionServices= collectionServices;
 			_backgroundJobClient = backgroundJobClient;
 			_unitOfWork = unitOfWork;
 			_subCategoryServices = subCategoryServices;
@@ -69,6 +74,14 @@ namespace E_Commerce.Services.ProductServices
 		private string GetProductByIdCacheKey(int id, bool? isActive, bool? deletedOnly) => $"product_detail:{id}:isActive={isActive}:deletedOnly={deletedOnly}";
 		private string GetProductsBySubCategoryCacheKey(int subCategoryId, bool? isActive, bool? deletedOnly) => $"products_subcategory:{subCategoryId}:isActive={isActive}:deletedOnly={deletedOnly}";
 
+		private void DeactiveCollectionMethod(int productid)
+		{
+			_backgroundJobClient.Enqueue(() => _collectionServices.CheckAndDeactivateEmptyCollectionsAsync(productid));
+		}
+		private void DeActiveSubcategory(int subcategoryid,string userid)
+		{
+			_backgroundJobClient.Enqueue(() =>  _subCategoryServices.DeactivateSubCategoryIfAllProductsAreInactiveAsync(subcategoryid, userid));
+		}
 
 		private static Expression<Func<E_Commerce.Models.Product, ProductDto>> maptoProductDtoexpression = p =>
 		 new ProductDto
@@ -82,7 +95,7 @@ namespace E_Commerce.Services.ProductServices
 			 SubCategoryId = p.SubCategoryId,
 			 CreatedAt = p.CreatedAt,
 			 DiscountPrecentage = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (  p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.DiscountPercent : null,
-			 FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (   p.Discount.EndDate > DateTime.UtcNow)) ?Math.Round( p.Price-(p.Discount.DiscountPercent *p.Price)) : p.Price,
+			 FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(p.Price - (((p.Discount.DiscountPercent) / 100) * p.Price)) : p.Price,
 			 DiscountName = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (   p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.Name : null,
 			 EndAt = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (   p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.EndDate : null,
 			 fitType = p.fitType,
@@ -129,7 +142,7 @@ namespace E_Commerce.Services.ProductServices
 			 {
 				 Id = i.Id,
 				 Url = i.Url
-			 }).ToList(),
+			 }),
 			 Variants = p.ProductVariants.Where(v => v.DeletedAt == null && v.Quantity != 0).Select(v => new ProductVariantDto
 			 {
 				 Id = v.Id,
@@ -143,7 +156,7 @@ namespace E_Commerce.Services.ProductServices
 				 Length = v.Length,
 				 Quantity = v.Quantity,
 				 ProductId = v.ProductId
-			 }).ToList()
+			 })
 		 };
 
 
@@ -392,7 +405,9 @@ namespace E_Commerce.Services.ProductServices
 				);
 				 await _unitOfWork.CommitAsync();
 				RemoveProductCaches();
-				await _subCategoryServices.DeactivateSubCategoryIfAllProductsAreInactiveAsync(product.SubCategoryId, userId);
+				DeactiveCollectionMethod(id);
+				DeActiveSubcategory(product.SubCategoryId, userId);
+
 				return Result<bool>.Ok(true, "Product deleted", 200);
 			}
 			catch (Exception ex)
@@ -531,15 +546,10 @@ namespace E_Commerce.Services.ProductServices
 
 			await _unitOfWork.CommitAsync();
 			RemoveProductCaches();
+			DeactiveCollectionMethod(productId);
+			DeActiveSubcategory(product.SubCategoryId, userId); // Only background job, no direct check
 
-			
-			var activeProducts = await _unitOfWork.Product.GetAll()
-				.Where(p => p.SubCategoryId == product.SubCategoryId && p.IsActive && p.DeletedAt == null)
-				.AnyAsync();
-			if (!activeProducts)
-			{
-				await _subCategoryServices.DeactivateSubCategoryAsync(product.SubCategoryId, userId);
-			}
+			_logger.LogInformation($"Product {productId} deactivated. Triggered background jobs for collection and subcategory checks.");
 
 			return Result<bool>.Ok(true, "Product deactivated successfully", 200);
 		}

@@ -7,12 +7,11 @@ namespace E_Commerce.Interfaces
     public interface ICartServices
     {
         Task<Result<CartDto>> GetCartAsync(string userId);
-        Task<Result<CartDto>> AddItemToCartAsync(string userId, CreateCartItemDto itemDto);
-        Task<Result<CartDto>> UpdateCartItemAsync(string userId, int productId, UpdateCartItemDto itemDto, int? productVariantId = null);
-        Task<Result<CartDto>> RemoveItemFromCartAsync(string userId, RemoveCartItemDto itemDto);
-        Task<Result<string>> ClearCartAsync(string userId);
+        Task<Result<bool>> AddItemToCartAsync(string userId, CreateCartItemDto itemDto);
+        Task<Result<bool>> UpdateCartItemAsync(string userId, int productId, UpdateCartItemDto itemDto, int? productVariantId = null);
+        Task<Result<bool>> RemoveItemFromCartAsync(string userId, RemoveCartItemDto itemDto);
+        Task<Result<bool>> ClearCartAsync(string userId);
         Task<Result<int?>> GetCartItemCountAsync(string userId);
-        Task<Result<decimal>> GetCartTotalPriceAsync(string userId);
         Task<Result<bool>> IsCartEmptyAsync(string userId);
     }
 } 

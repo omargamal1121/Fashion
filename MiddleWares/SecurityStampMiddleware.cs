@@ -41,16 +41,24 @@ public class SecurityStampMiddleware
 					await context.Response.WriteAsync(JsonConvert.SerializeObject(response));
 					return;
 				}
+				string tokenSecurityStamp = jwtToken.Claims.FirstOrDefault(c => c.Type == "SecurityStamp")?.Value ?? string.Empty;
+
+				if (string.IsNullOrEmpty(tokenSecurityStamp) )
+				{
+					context.Response.StatusCode = 401;
+					context.Response.ContentType = "application/json";
+					var response = ApiResponse<string>.CreateErrorResponse("Error", new ErrorResponse("Authentication", "Invalid Token - SecurityStamp mismatch"));
+					await context.Response.WriteAsync(JsonConvert.SerializeObject(response));
+					return;
+				}
 
 				using var scope = _serviceScopeFactory.CreateScope();
 				var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
 				var customer = await dbContext.customers
-					.Where(x => x.Id == userId)
-					.Select(x => new Customer { Id = x.Id, SecurityStamp = x.SecurityStamp })
-					.FirstOrDefaultAsync();
+					.AnyAsync(x=>x.Id==userId&&x.SecurityStamp==tokenSecurityStamp);
 
-				if (customer is null)
+				if (!customer)
 				{
 					context.Response.StatusCode = 401;
 					context.Response.ContentType = "application/json";
@@ -59,16 +67,8 @@ public class SecurityStampMiddleware
 					return;
 				}
 
-				string tokenSecurityStamp = jwtToken.Claims.FirstOrDefault(c => c.Type == "SecurityStamp")?.Value ?? string.Empty;
 
-				if (string.IsNullOrEmpty(customer.SecurityStamp) || tokenSecurityStamp != customer.SecurityStamp)
-				{
-					context.Response.StatusCode = 401;
-					context.Response.ContentType = "application/json";
-					var response = ApiResponse<string>.CreateErrorResponse("Error", new ErrorResponse("Authentication", "Invalid Token - SecurityStamp mismatch"));
-					await context.Response.WriteAsync(JsonConvert.SerializeObject(response));
-					return;
-				}
+				
 			}
 		}
 

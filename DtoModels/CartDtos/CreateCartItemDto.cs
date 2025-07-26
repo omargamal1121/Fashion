@@ -9,16 +9,14 @@ namespace E_Commerce.DtoModels.CartDtos
         public int ProductId { get; set; }
 
         [Required(ErrorMessage = "Quantity is required")]
-        [Range(1, 100, ErrorMessage = "Quantity must be between 1 and 100")]
         public int Quantity { get; set; }
 
-        public int? ProductVariantId { get; set; }
+        public int ProductVariantId { get; set; }
     }
 
     public class UpdateCartItemDto
     {
         [Required(ErrorMessage = "Quantity is required")]
-        [Range(1, 100, ErrorMessage = "Quantity must be between 1 and 100")]
         public int Quantity { get; set; }
     }
 

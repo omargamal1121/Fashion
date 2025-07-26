@@ -16,15 +16,7 @@ namespace E_Commerce.Models
 
 		public bool IsEmpty => !Items.Any();
 		public int TotalItems => Items.Sum(item => item.Quantity);
-		public decimal TotalPrice => Items.Sum(item => 
-		{
-			var price = item.Product?.Price ?? item.Product.Price;
-			var discount = item.Product.Discount;
-			if (discount != null && discount.IsActive)
-			{
-				price *= (1 - discount.DiscountPercent / 100);
-			}
-			return price * item.Quantity;
-		});
+		public decimal TotalPrice => Items.Sum(item => item.UnitPrice * item.Quantity);
+
 	}
 }

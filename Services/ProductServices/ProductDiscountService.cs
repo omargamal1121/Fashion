@@ -23,7 +23,7 @@ namespace E_Commerce.Services.ProductServices
 		Task<Result<ProductDetailDto>> UpdateProductDiscountAsync(int productId, int discountId, string userId);
 		Task<Result<ProductDetailDto>> RemoveDiscountFromProductAsync(int productId, string userId);
 		Task<Result<List<ProductDto>>> GetProductsWithActiveDiscountsAsync();
-		Task<Result<bool>> UpdateProductPriceAfteDiscount(int productId);
+		public Task<Result<List<ProductDto>>> ApplyDiscountToProductsAsync(ApplyDiscountToProductsDto dto);
 	}
 
 	public class ProductDiscountService : IProductDiscountService
@@ -55,6 +55,32 @@ namespace E_Commerce.Services.ProductServices
 			_adminOpreationServices = adminOpreationServices;
 			_errorNotificationService = errorNotificationService;
 		}
+
+		public async Task<Result<List<ProductDto>>> ApplyDiscountToProductsAsync(ApplyDiscountToProductsDto dto)
+		{
+			var discount = await _unitOfWork.Repository<Models.Discount>().GetByIdAsync(dto.Discountid);
+
+			if (discount == null||discount.DeletedAt!=null)
+				return Result<List<ProductDto>>.Fail("Discount not found or Deleted.");
+
+			var products = await _unitOfWork.Product.GetAll()
+				.Where(p => dto.ProductsId.Contains(p.Id))
+				.ToListAsync();
+
+			if (!products.Any())
+				return Result<List<ProductDto>>.Fail("No valid products found.");
+
+			foreach (var product in products)
+				product.DiscountId = dto.Discountid;
+
+			await _unitOfWork.CommitAsync();
+			var productsdto = await _unitOfWork.Product.GetAll().AsNoTracking()
+				.Where(p => dto.ProductsId.Contains(p.Id)).Select(maptoProductDtoexpression)
+				.ToListAsync();
+
+			return Result<List<ProductDto>>.Ok(productsdto);
+		}
+
 
 		public async Task<Result<DiscountDto>> GetProductDiscountAsync(int productId)
 		{
@@ -110,7 +136,7 @@ namespace E_Commerce.Services.ProductServices
 			_backgroundJobClient.Enqueue(() => _cacheManager.RemoveByTagsAsync(PRODUCT_CACHE_TAGS));
 		}
 
-		private static Expression<Func<E_Commerce.Models.Product, ProductDetailDto>> maptoProductDetailDtoexpression = p =>
+		private static Expression<Func<Models.Product, ProductDetailDto>> maptoProductDetailDtoexpression = p =>
 		 new ProductDetailDto
 		 {
 			 Id = p.Id,
@@ -123,11 +149,11 @@ namespace E_Commerce.Services.ProductServices
 			 ModifiedAt = p.ModifiedAt,
 			 fitType = p.fitType,
 			 IsActive= p.IsActive,
-			 FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(p.Price - (p.Discount.DiscountPercent * p.Price)) : p.Price,
+			 FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(p.Price - (((p.Discount.DiscountPercent) / 100) * p.Price)) : p.Price,
 
 			 Price = p.Price,
 			 SubCategoryId = p.SubCategoryId,
-			 Discount = (p.Discount != null  && p.Discount.DeletedAt == null && (p.Discount.EndDate > DateTime.UtcNow)) ? new DiscountDto
+			 Discount = p.Discount != null  && p.Discount.DeletedAt == null && p.Discount.EndDate > DateTime.UtcNow ? new DiscountDto
 			 {
 				 Id = p.Discount.Id,
 				 DiscountPercent = p.Discount.DiscountPercent,
@@ -166,7 +192,7 @@ namespace E_Commerce.Services.ProductServices
 				if (product == null)
 					return Result<ProductDetailDto>.Fail("Product not found", 404);
 
-				var discount = await _unitOfWork.Repository<E_Commerce.Models.Discount>().GetByIdAsync(discountId);
+				var discount = await _unitOfWork.Repository<Models.Discount>().GetByIdAsync(discountId);
 				if (discount == null||discount.DeletedAt!=null)
 					return Result<ProductDetailDto>.Fail("Discount not found", 404);
 
@@ -188,7 +214,7 @@ namespace E_Commerce.Services.ProductServices
 				);
 
 			
-				await UpdateProductPriceAfteDiscount(productId);
+			
 				await _unitOfWork.CommitAsync();
 				await transaction.CommitAsync();
 				RemoveProductCachesAsync();
@@ -221,7 +247,7 @@ namespace E_Commerce.Services.ProductServices
 				if (product == null)
 					return Result<ProductDetailDto>.Fail("Product not found", 404);
 
-				var discount = await _unitOfWork.Repository<E_Commerce.Models.Discount>().GetByIdAsync(discountId);
+				var discount = await _unitOfWork.Repository<Models.Discount>().GetByIdAsync(discountId);
 				if (discount == null||discount.DeletedAt!=null)
 					return Result<ProductDetailDto>.Fail("Discount not found", 404);
 
@@ -245,7 +271,7 @@ namespace E_Commerce.Services.ProductServices
 				);
 
 				await _unitOfWork.CommitAsync();
-				await UpdateProductPriceAfteDiscount(productId);
+				
 				RemoveProductCachesAsync();
 
 				// Retrieve updated product
@@ -297,7 +323,7 @@ namespace E_Commerce.Services.ProductServices
 				);
 
 				await _unitOfWork.CommitAsync();
-				await UpdateProductPriceAfteDiscount(productId);
+				
 				RemoveProductCachesAsync();
 
 				// Retrieve updated product
@@ -316,7 +342,34 @@ namespace E_Commerce.Services.ProductServices
 			}
 		}
 
-
+		private static Expression<Func<Models.Product, ProductDto>> maptoProductDtoexpression =
+			p => new ProductDto
+			{
+				Id = p.Id,
+				Name = p.Name,
+				Description = p.Description,
+				AvailableQuantity = p.Quantity,
+				Gender = p.Gender,
+				SubCategoryId = p.SubCategoryId,
+				Price = p.Price,
+				FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(p.Price - (((p.Discount.DiscountPercent) / 100) * p.Price)) : p.Price,
+				DiscountPrecentage = p.Discount != null && p.Discount.IsActive && p.Discount.DeletedAt == null ?  p.Discount.DiscountPercent : null,
+				DiscountName = p.Discount != null && p.Discount.DeletedAt==null ? p.Discount.Name : null,
+				EndAt = p.Discount != null && p.Discount.IsActive && p.Discount.DeletedAt == null ? p.Discount.EndDate : null,
+				IsActive = p.IsActive,
+				CreatedAt = p.CreatedAt,
+				ModifiedAt = p.ModifiedAt,
+				DeletedAt = p.DeletedAt,
+				fitType = p.fitType,
+				images = p.Images
+							.Where(i => i.DeletedAt == null)
+							.Select(i => new ImageDto
+							{
+								Id = i.Id,
+								Url = i.Url,
+								IsMain = i.IsMain
+							})
+			};
 		public async Task<Result<List<ProductDto>>> GetProductsWithActiveDiscountsAsync()
 		{
 			try
@@ -329,33 +382,7 @@ namespace E_Commerce.Services.ProductServices
 						&& p.Discount.DeletedAt == null
 						&& p.Discount.StartDate <= now
 						&& p.Discount.EndDate > now)
-					.Select(p => new ProductDto
-					{
-						Id = p.Id,
-						Name = p.Name,
-						Description = p.Description,
-						AvailableQuantity = p.Quantity,
-						Gender = p.Gender,
-						SubCategoryId = p.SubCategoryId,
-						Price = p.Price,
-						FinalPrice = p.Discount != null && p.Discount.IsActive ? p.Price - (p.Price * (p.Discount.DiscountPercent / 100m)) : p.Price,
-						DiscountPrecentage = p.Discount.DiscountPercent,
-						DiscountName = p.Discount.Name,
-						EndAt = p.Discount.EndDate,
-						IsActive = p.IsActive,
-						CreatedAt = p.CreatedAt,
-						ModifiedAt = p.ModifiedAt,
-						DeletedAt = p.DeletedAt,
-						fitType = p.fitType,
-						images = p.Images
-							.Where(i => i.DeletedAt == null)
-							.Select(i => new ImageDto
-							{
-								Id = i.Id,
-								Url = i.Url,
-								IsMain = i.IsMain
-							}).ToList()
-					})
+					.Select(maptoProductDtoexpression)
 					.ToListAsync();
 
 				if (!products.Any())
@@ -372,49 +399,6 @@ namespace E_Commerce.Services.ProductServices
 		}
 
 
-		public async Task<Result<bool>> UpdateProductPriceAfteDiscount(int productId)
-		{
-			try
-			{
-				var product = await _unitOfWork.Product.GetAll()
-					.Where(p => p.Id == productId)
-					.Include(p => p.Discount)
-					.FirstOrDefaultAsync();
-
-				if (product == null)
-					return Result<bool>.Fail("Product not found", 404);
-
-				var originalPrice = product.Price;
-				var discountedPrice = originalPrice;
-
-			
-				if (product.Discount != null && 
-					product.Discount.IsActive && 
-					product.Discount.DeletedAt == null &&
-					product.Discount.StartDate <= DateTime.UtcNow &&
-					product.Discount.EndDate > DateTime.UtcNow)
-				{
-					var discountAmount = originalPrice * (product.Discount.DiscountPercent / 100m);
-					discountedPrice = originalPrice - discountAmount;
-					
-				}
-				else
-				{
-					
-				}
-				var updateResult = _unitOfWork.Product.Update(product);
-				if (!updateResult)
-				{
-					return Result<bool>.Fail("Failed to update product price after discount", 400);
-				}await _unitOfWork.CommitAsync();
-				return Result<bool>.Ok(true, "Discounted price calculated successfully", 200);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, $"Error in CalculateDiscountedPriceAsync for productId: {productId}");
-				_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<bool>.Fail("Error calculating discounted price", 500);
-			}
-		}
+	
 	}
 } 

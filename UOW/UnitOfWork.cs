@@ -21,11 +21,13 @@ public class UnitOfWork : IUnitOfWork
 	public ICollectionRepository Collection { get; }
 	public IWareHouseRepository  WareHouse { get; }
 	public IProductRepository Product { get; }
+	public IProductVariantRepository ProductVariant { get; }
 	public IProductInventoryRepository ProductInventory { get; }
 	public IImageRepository Image { get; }
 	public ICustomerAddressRepository CustomerAddress { get; }
 
 	public UnitOfWork(
+		IProductVariantRepository productVariant,
 		ISubCategoryRepository subCategory,
 		IProductRepository product,
 		ICartRepository cart,
@@ -40,7 +42,8 @@ public class UnitOfWork : IUnitOfWork
 		IImageRepository imageRepository,
 		ICustomerAddressRepository customerAddressRepository)
 	{ 
-		 SubCategory = subCategory;
+		ProductVariant = productVariant;
+		SubCategory = subCategory;
 		Product = product;
 		Cart = cart;
 		Order = order;

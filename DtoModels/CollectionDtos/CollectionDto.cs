@@ -10,13 +10,10 @@ namespace E_Commerce.DtoModels.CollectionDtos
         public string? Description { get; set; }
         public int DisplayOrder { get; set; }
         public bool IsActive { get; set; }
-        public List<ProductDto> Products { get; set; } = new List<ProductDto>();
-        public List<ImageDto> Images { get; set; } = new List<ImageDto>();
-        public ImageDto? MainImage { get; set; }
+        public IEnumerable<ProductDto> Products { get; set; }
+        public IEnumerable<ImageDto> Images { get; set; } 
+       
         public int TotalProducts { get; set; }
-        public decimal MinPrice { get; set; }
-        public decimal MaxPrice { get; set; }
-        public decimal AveragePrice { get; set; }
     }
 
     public class CreateCollectionDto
@@ -24,17 +21,15 @@ namespace E_Commerce.DtoModels.CollectionDtos
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public int DisplayOrder { get; set; }
-        public bool IsActive { get; set; } = true;
-        public List<int> ProductIds { get; set; } = new List<int>();
+       
     }
 
     public class UpdateCollectionDto
     {
-        public string Name { get; set; } = string.Empty;
+        public string? Name { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public int DisplayOrder { get; set; }
-        public bool IsActive { get; set; }
-        public List<int> ProductIds { get; set; } = new List<int>();
+        public int? DisplayOrder { get; set; }
+     
     }
 
     public class AddProductsToCollectionDto
@@ -53,9 +48,8 @@ namespace E_Commerce.DtoModels.CollectionDtos
         public string? Description { get; set; }
         public int DisplayOrder { get; set; }
         public bool IsActive { get; set; }
-        public ImageDto? MainImage { get; set; }
+        public IEnumerable<ImageDto>? images { get; set; }
         public int TotalProducts { get; set; }
-        public decimal MinPrice { get; set; }
-        public decimal MaxPrice { get; set; }
+
     }
 } 

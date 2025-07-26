@@ -79,21 +79,7 @@ namespace E_Commerce.Services
 
 			string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 			_logger.LogInformation($"✅ Access Token generated successfully for User ID: {user.Id}");
-			//var test = new SecurityTokenDescriptor
-			//{
-			//	Subject= new ClaimsIdentity(claims),
-			//	Issuer= issuer,
-			//	Audience= audience,
-			//	SigningCredentials = signingCredentials,
-			//	EncryptingCredentials= new EncryptingCredentials(
-			//		new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-			//		SecurityAlgorithms.Aes128KW,
-			//		SecurityAlgorithms.Aes128CbcHmacSha256
-			//	),
-			//	Expires = DateTime.UtcNow.AddMinutes(expiresInMinutes)
-
-
-			//};
+		
 			return  Result<string>.Ok(tokenString,$"✅ Access Token generated successfully for User ID: {user.Id}") ;
 		}
 	

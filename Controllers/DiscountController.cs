@@ -1,5 +1,6 @@
 ﻿using E_Commerce.DtoModels;
 using E_Commerce.DtoModels.DiscoutDtos;
+using E_Commerce.DtoModels.ProductDtos;
 using E_Commerce.DtoModels.Responses;
 using E_Commerce.ErrorHnadling;
 using E_Commerce.Services;
@@ -48,6 +49,9 @@ namespace E_Commerce.Controllers
 					return StatusCode(result.StatusCode, apiResponse);
 			}
 		}
+
+
+
 
 		[HttpGet]
 		[ActionName(nameof(GetAllAsync))]

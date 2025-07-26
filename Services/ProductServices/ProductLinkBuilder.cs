@@ -85,26 +85,7 @@ namespace E_Commerce.Services.ProductServices
                     "GET"
                 ));
                
-                links.Add(new LinkDto(
-                    GetUriByAction(nameof(ProductController.GetProductDiscount), new { id }) ?? "",
-                    "get-discount",
-                    "GET"
-                ));
-                links.Add(new LinkDto(
-                    GetUriByAction(nameof(ProductController.AddDiscountToProduct), new { id }) ?? "",
-                    "add-discount",
-                    "POST"
-                ));
-                links.Add(new LinkDto(
-                    GetUriByAction(nameof(ProductController.UpdateProductDiscount), new { id }) ?? "",
-                    "update-discount",
-                    "PUT"
-                ));
-                links.Add(new LinkDto(
-                    GetUriByAction(nameof(ProductController.RemoveDiscountFromProduct), new { id }) ?? "",
-                    "remove-discount",
-                    "DELETE"
-                ));
+               
             }
             return links;
         }
