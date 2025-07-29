@@ -35,8 +35,9 @@ namespace E_Commerce.Services.ProductServices
 		private readonly IErrorNotificationService _errorNotificationService;
 		private readonly ICacheManager _cacheManager;
 		private const string CACHE_TAG_PRODUCT_SEARCH = "product_search";
+		private const string CACHE_TAG_CART = "cart";
 		private const string CACHE_TAG_SUBCATEGORY = "subcategory";
-		private static readonly string[] PRODUCT_CACHE_TAGS = new[] { CACHE_TAG_PRODUCT_SEARCH, CACHE_TAG_SUBCATEGORY, PRODUCT_WITH_VARIANT_TAG };
+		private static readonly string[] PRODUCT_CACHE_TAGS = new[] { CACHE_TAG_PRODUCT_SEARCH, CACHE_TAG_SUBCATEGORY, PRODUCT_WITH_VARIANT_TAG ,CACHE_TAG_CART};
 		private const string PRODUCT_WITH_VARIANT_TAG = "productwithvariantdata";
 
 

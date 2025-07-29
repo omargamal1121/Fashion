@@ -109,7 +109,7 @@ namespace E_Commerce.Services.ProductServices
 			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
-				var saveResult = await _imagesServices.SaveProductImagesAsync(images, userId);
+				var saveResult = await _imagesServices.SaveProductImagesAsync(images,productId, userId);
 				if (!saveResult.Success || saveResult.Data == null)
 				{
 					await transaction.RollbackAsync();
@@ -259,7 +259,7 @@ namespace E_Commerce.Services.ProductServices
 				_unitOfWork.Image.UpdateList(existingMainImages);
 
 				// Save new image
-				var saveResult = await _imagesServices.SaveMainProductImageAsync(mainImage, userId);
+				var saveResult = await _imagesServices.SaveMainProductImageAsync(mainImage,productId, userId);
 				if (!saveResult.Success || saveResult.Data == null)
 				{
 					await transaction.RollbackAsync();

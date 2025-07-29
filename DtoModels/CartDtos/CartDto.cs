@@ -12,13 +12,15 @@ namespace E_Commerce.DtoModels.CartDtos
         public decimal TotalPrice { get; set; }
         public int TotalItems { get; set; }
         public bool IsEmpty =>Items==null?false: !Items.Any();
-    }
+		public DateTime? CheckoutDate { get; set; }
 
-    public class CartItemDto : BaseDto
+	}
+
+	public class CartItemDto : BaseDto
     {
         public int ProductId { get; set; }
-        public ProductVariantForCartDto ProductVariantDto { get; set; }
-        public ProductForCartDto? Product { get; set; }
+      
+        public required ProductForCartDto Product { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public DateTime AddedAt { get; set; }

@@ -190,7 +190,7 @@ namespace E_Commerce.Context
 				.HasForeignKey(o => o.CustomerId)
 				.OnDelete(DeleteBehavior.Restrict);
 
-			// Order - OrderItem (1:M)
+			// Order - OrderItemOrderItem (1:M)
 			builder.Entity<Order>()
 				.HasMany(o => o.Items)
 				.WithOne(oi => oi.Order)
@@ -244,7 +244,7 @@ namespace E_Commerce.Context
 				.HasMany(pv => pv.OrderItems)
 				.WithOne(oi => oi.ProductVariant)
 				.HasForeignKey(oi => oi.ProductVariantId)
-				.OnDelete(DeleteBehavior.SetNull);
+				.OnDelete(DeleteBehavior.Restrict);
 
 			// Customer - ReturnRequest (1:M)
 			builder.Entity<Customer>()

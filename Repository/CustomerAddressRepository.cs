@@ -223,8 +223,7 @@ namespace E_Commerce.Repository
 
 			return await _context.CustomerAddresses
 				.Where(a => a.CustomerId == customerId && a.DeletedAt == null &&
-					(a.FirstName.Contains(searchTerm) || 
-					 a.LastName.Contains(searchTerm) || 
+					(
 					 a.City.Contains(searchTerm) || 
 					 a.State.Contains(searchTerm) || 
 					 a.Country.Contains(searchTerm) ||

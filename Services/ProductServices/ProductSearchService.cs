@@ -139,35 +139,7 @@ namespace E_Commerce.Services.ProductServices
 				return Result<List<ProductDto>>.Fail("Error retrieving new arrivals", 500);
 			}
 		}
-		private ProductListItemDto convertToProductListItemDto(E_Commerce.Models.Product p)
-		{
-			return new ProductListItemDto
-			{
-				Id = p.Id,
-				Name = p.Name,
-				Description = p.Description,
-				AvailableQuantity = p.Quantity,
-				Gender = p.Gender,
-				SubCategoryId = p.SubCategoryId,
-				Price = p.Price,
-				PriceAfterDiscount = p.Discount != null && p.Discount.IsActive ? p.Price - (p.Price * (p.Discount.DiscountPercent / 100m)) : p.Price,
-				Discount = p.Discount != null ? new DiscountDto
-				{
-					Id = p.Discount.Id,
-					Name = p.Discount.Name,
-					Description = p.Discount.Description,
-					DiscountPercent = p.Discount.DiscountPercent,
-					StartDate = p.Discount.StartDate,
-					EndDate = p.Discount.EndDate,
-					IsActive = p.Discount.IsActive,
-					CreatedAt = p.Discount.CreatedAt,
-					ModifiedAt = p.Discount.ModifiedAt,
-					DeletedAt = p.Discount.DeletedAt,
-					products = null
-				} : null,
-				Images = p.Images.Where(i => i.DeletedAt == null).Select(i => new ImageDto { Id = i.Id, Url = i.Url }).ToList()
-			};
-		}
+	
 
 		public async Task<Result<List<ProductDto>>> GetBestSellersAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
 		{

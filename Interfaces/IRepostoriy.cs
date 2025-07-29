@@ -9,6 +9,7 @@ namespace E_Commerce.Interfaces
 	{
 		Task<T?> CreateAsync(T model);
 		Task<bool> SoftDeleteAsync(int id);
+		public  Task<T[]> CreateRangeAsync(params T[] models);
 		Task<bool> IsDeletedAsync(int id);
 		Task<T?> GetByQuery(Expression<Func<T, bool>> predicate);
 		bool Update(T model);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -77,7 +77,7 @@ namespace E_Commerce.Services
 			BackgroundJob.Enqueue<IErrorNotificationService>(_ => _.SendErrorNotificationAsync(message, stackTrace));
 		}
 
-		private async Task<Result<Image>> SaveImageAsync(IFormFile image, string folderName, string? userId = null)
+		private async Task<Result<Image>> SaveImageAsync(IFormFile image, string folderName,int id, string? userId = null)
 		{
 			_logger.LogInformation($"📥 Saving image to {folderName}");
 			if (image is null) return Result<Image>.Fail("Image is null");
@@ -109,14 +109,33 @@ namespace E_Commerce.Services
 				string baseUrl = $"{request?.Scheme}://{request?.Host}";
 				string fullUrl = $"{baseUrl}/{folderName}/{uniqueName}";
 
+				
 				var savedImage = new Image
 				{
 					UploadDate = DateTime.Now,
 					Folder = folderName,
 					Url = fullUrl, 
 					FileSize = image.Length,
-					FileType = image.ContentType
+					FileType = image.ContentType,
 				};
+				switch (folderName.ToLower())
+				{
+					case "categoryphotos":
+						savedImage.CategoryId = id;
+						break;
+					case "productphotos":
+						savedImage.ProductId = id;
+						break;
+					case "subcategoryphotos":
+						savedImage.SubCategoryId = id;
+						break;
+					case "collectionphotos":
+						savedImage.CollectionId = id;
+						break;
+					case "customerphotos":
+						savedImage.CustomerId = userId;
+						break;
+				}
 
 				var imageRepo = _unitOfWork.Repository<Image>();
 				await imageRepo.CreateAsync(savedImage);
@@ -135,7 +154,7 @@ namespace E_Commerce.Services
 			}
 		}
 		
-		private async Task<Result<Image>> SaveMainImageAsync(IFormFile image, string folderName, string? userId = null)
+		private async Task<Result<Image>> SaveMainImageAsync(IFormFile image, string folderName, int id, string? userId = null)
 		{
 			_logger.LogInformation($"📥 Saving main image to {folderName}");
 			if (image is null) return Result<Image>.Fail("Image is null");
@@ -193,7 +212,7 @@ namespace E_Commerce.Services
 			}
 		}
 		
-		private async Task<Result<List<Image>>> SaveImagesAsync(List<IFormFile> images, string folderName, string userId)
+		private async Task<Result<List<Image>>> SaveImagesAsync(List<IFormFile> images,int id, string folderName, string userId)
 		{
 			_logger.LogInformation($"📥 Saving {images?.Count} images to {folderName}");
 			if (images == null || images.Count == 0) return Result<List<Image>>.Fail("Images are null or empty");
@@ -204,7 +223,7 @@ namespace E_Commerce.Services
 
 			foreach (var image in images)
 			{
-				var result = await SaveImageAsync(image, folderName, userId);
+				var result = await SaveImageAsync(image, folderName,id, userId);
 				if (!result.Success || result.Data == null)
 				{
 					errors.Add($"Image #{counter}: {result.Message}");
@@ -235,24 +254,24 @@ namespace E_Commerce.Services
 		}
 
 		// Public Wrappers
-		public Task<Result<Image>> SaveCustomerImageAsync(IFormFile image, string userId) => SaveImageAsync(image, "CustomerPhotos", userId);
+		public Task<Result<Image>> SaveCustomerImageAsync(IFormFile image, string userId) => SaveImageAsync(image, "CustomerPhotos", 0,userId);
 		
 		// Single image methods
-		public Task<Result<Image>> SaveCategoryImageAsync(IFormFile image, string userId) => SaveImageAsync(image, "CategoryPhotos", userId);
-		public Task<Result<Image>> SaveCollectionImageAsync(IFormFile image, string userId) => SaveImageAsync(image, "CollectionPhotos", userId);
-		public Task<Result<Image>> SaveProductImageAsync(IFormFile image, string userId) => SaveImageAsync(image, "ProductPhotos", userId);
-		public Task<Result<Image>> SaveSubCategoryImageAsync(IFormFile image, string userId) => SaveImageAsync(image, "SubCategoryPhotos", userId);
+		public Task<Result<Image>> SaveCategoryImageAsync(IFormFile image, int id, string userId) => SaveImageAsync(image, "CategoryPhotos", id, userId);
+		public Task<Result<Image>> SaveCollectionImageAsync(IFormFile image, int id, string userId) => SaveImageAsync(image, "CollectionPhotos", id, userId);
+		public Task<Result<Image>> SaveProductImageAsync(IFormFile image, int id, string userId) => SaveImageAsync(image, "ProductPhotos", id, userId);
+		public Task<Result<Image>> SaveSubCategoryImageAsync(IFormFile image, int id, string userId) => SaveImageAsync(image, "SubCategoryPhotos", id, userId);
 		
 		// Multiple images methods
-		public Task<Result<List<Image>>> SaveCategoryImagesAsync(List<IFormFile> images, string userId) => SaveImagesAsync(images, "CategoryPhotos", userId);
-		public Task<Result<List<Image>>> SaveCollectionImagesAsync(List<IFormFile> images, string userId) => SaveImagesAsync(images, "CollectionPhotos", userId);
-		public Task<Result<List<Image>>> SaveProductImagesAsync(List<IFormFile> images, string userId) => SaveImagesAsync(images, "ProductPhotos", userId);
-		public Task<Result<List<Image>>> SaveSubCategoryImagesAsync(List<IFormFile> images, string userId) => SaveImagesAsync(images, "SubCategoryPhotos", userId);
+		public Task<Result<List<Image>>> SaveCategoryImagesAsync(List<IFormFile> images,int id, string userId) => SaveImagesAsync(images, id, "CategoryPhotos", userId);
+		public Task<Result<List<Image>>> SaveCollectionImagesAsync(List<IFormFile> images, int id, string userId) => SaveImagesAsync(images,  id, "CollectionPhotos", userId);
+		public Task<Result<List<Image>>> SaveProductImagesAsync(List<IFormFile> images, int id, string userId) => SaveImagesAsync(images,  id, "ProductPhotos", userId);
+		public Task<Result<List<Image>>> SaveSubCategoryImagesAsync(List<IFormFile> images, int id, string userId) => SaveImagesAsync(images,  id, "SubCategoryPhotos", userId);
 		
-		public Task<Result<Image>> SaveMainCategoryImageAsync(IFormFile image, string userId) => SaveMainImageAsync(image, "CategoryPhotos", userId);
-		public Task<Result<Image>> SaveMainCollectionImageAsync(IFormFile image, string userId) => SaveMainImageAsync(image, "CollectionPhotos", userId);
-		public Task<Result<Image>> SaveMainProductImageAsync(IFormFile image, string userId) => SaveMainImageAsync(image, "ProductPhotos", userId);
-		public Task<Result<Image>> SaveMainSubCategoryImageAsync(IFormFile image, string userId) => SaveMainImageAsync(image, "SubCategoryPhotos", userId);
+		public Task<Result<Image>> SaveMainCategoryImageAsync(IFormFile image, int id, string? userId = null) => SaveMainImageAsync(image, "CategoryPhotos", id, userId);
+		public Task<Result<Image>> SaveMainCollectionImageAsync(IFormFile image, int id, string? userId = null) => SaveMainImageAsync(image, "CollectionPhotos", id, userId);
+		public Task<Result<Image>> SaveMainProductImageAsync(IFormFile image, int id, string? userId = null) => SaveMainImageAsync(image, "ProductPhotos", id, userId);
+		public Task<Result<Image>> SaveMainSubCategoryImageAsync(IFormFile image, int id, string? userId = null) => SaveMainImageAsync(image, "SubCategoryPhotos", id, userId);
 		public async Task<Result<string>> DeleteImageAsync(Image image)
 		{
 			_logger.LogInformation($"✅ Execute {nameof(DeleteImageAsync)} for image ID: {image.Id}");
@@ -275,7 +294,7 @@ namespace E_Commerce.Services
 				await _unitOfWork.CommitAsync();
 
 		
-				// File.Delete(fullPath);
+				//File.Delete(fullPath);
 
 				_logger.LogInformation("🗑️ Image marked as deleted: " + fullPath);
 				return Result<string>.Ok("Image marked as deleted successfully");
@@ -313,20 +332,6 @@ namespace E_Commerce.Services
 
 
 
-		public async Task<Result<List<Image>>> SaveCategoryImagesWithCategoryIdAsync(List<IFormFile> images, int categoryId, string userId)
-		{
-			var result = await SaveImagesAsync(images, "CategoryPhotos", userId);
-			if (!result.Success || result.Data == null)
-				return result;
-
-			var imageRepo = _unitOfWork.Repository<Image>();
-			foreach (var img in result.Data)
-			{
-				img.CategoryId = categoryId;
-				 imageRepo.Update(img);
-			}
-			await _unitOfWork.CommitAsync();
-			return result;
-		}
+	
 	}
 }

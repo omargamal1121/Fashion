@@ -54,6 +54,7 @@ using E_Commerce.Services.AccountServices.Authentication;
 using E_Commerce.Services.ProductServices;
 using E_Commerce.Services.SubCategoryServices;
 using E_Commerce.Services.BackgroundServices;
+using E_Commerce.Services.UserOpreationServices;
 
 namespace E_Commerce
 {
@@ -113,41 +114,29 @@ namespace E_Commerce
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<IImageRepository, ImageRepository>();
             builder.Services.AddScoped<ICategoryServices, CategoryServices>();
-            			builder.Services.AddScoped<IWareHouseRepository, WareHouseRepository>();
+            builder.Services.AddScoped<IWareHouseRepository, WareHouseRepository>();
             builder.Services.AddScoped<IProductRepository, ProductRepository>();
             builder.Services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
             builder.Services.AddScoped<IProductInventoryRepository, ProductInventoryRepository>();
             builder.Services.AddScoped<IAdminOpreationServices, AdminOpreationServices>();
+            builder.Services.AddScoped<IUserOpreationServices, UserOpreationServices>();
             builder.Services.AddScoped<IWareHouseServices, WareHouseServices>();
-            
-            // Cart Services
             builder.Services.AddScoped<ICartRepository, CartRepository>();
             builder.Services.AddScoped<ICartServices, CartServices>();
-            
-            // Order Services
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
             builder.Services.AddScoped<IOrderServices, OrderServices>();
-            
-            // Collection Services
             builder.Services.AddScoped<ICollectionRepository, CollectionRepository>();
             builder.Services.AddScoped<ICollectionServices, CollectionServices>();
-            
-            // CustomerAddress Services
             builder.Services.AddScoped<ICustomerAddressRepository, CustomerAddressRepository>();
             builder.Services.AddScoped<ICustomerAddressServices, CustomerAddressServices>();
-            
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped(typeof(IRepository<>), typeof(MainRepository<>));
             builder.Services.AddScoped<IAccountServices, AccountServices>();
-            
-            // Account Services Registration (SOLID Architecture)
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<IRegistrationService, RegistrationService>();
             builder.Services.AddScoped<IPasswordService, PasswordService>();
             builder.Services.AddScoped<IProfileService, ProfileService>();
             builder.Services.AddScoped<IAccountManagementService, AccountManagementService>();
-            
-            // Product Services Registration
             builder.Services.AddScoped<IProductCatalogService, ProductCatalogService>();
             builder.Services.AddScoped<IProductSearchService, ProductSearchService>();
             builder.Services.AddScoped<IProductImageService, ProductImageService>();
@@ -210,7 +199,7 @@ namespace E_Commerce
                         partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
                         factory: _ => new FixedWindowRateLimiterOptions
                         {
-                            PermitLimit = 100,
+                            PermitLimit = 20,
                             Window = TimeSpan.FromMinutes(1),
                             AutoReplenishment = true
                         }));
@@ -347,18 +336,18 @@ namespace E_Commerce
                 );
             }
 
+            app.UseRouting();
+            app.UseRateLimiter();
             app.UseAuthentication();
             app.UseUserAuthentication();
 			app.UseMiddleware<SecurityStampMiddleware>();
-            app.UseRateLimiter();
+            app.UseStaticFiles();
             app.UseResponseCaching();
-            app.UseRouting();
 			app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
-            app.UseStaticFiles();
 			app.Run();
         }
     }

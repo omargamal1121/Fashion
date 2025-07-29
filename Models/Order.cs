@@ -9,6 +9,7 @@ namespace E_Commerce.Models
 		[ForeignKey("Customer")]
 		public string CustomerId { get; set; } = string.Empty;
 		public  Customer Customer { get; set; }
+		public int  Addressid { get; set; }
 
 		[Required]
 		[StringLength(50, MinimumLength = 3, ErrorMessage = "Order number must be between 3 and 50 characters")]

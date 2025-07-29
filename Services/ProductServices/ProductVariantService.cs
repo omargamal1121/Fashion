@@ -242,10 +242,7 @@ namespace E_Commerce.Services.ProductServices
 					await transaction.RollbackAsync();
 					return Result<ProductVariantDto>.Fail("Failed to add variant", 400);
 				}
-
-				product.ProductVariants.Add(variant);
 				_productCatalogService.UpdateProductQuantity(product);
-				_unitOfWork.Product.Update(product);
 
 				await _adminOpreationServices.AddAdminOpreationAsync(
 					$"Add Variant to Product {productId}",

@@ -11,7 +11,7 @@ namespace E_Commerce.Services.BackgroundServices
 			var userManager = serviceProvider.GetRequiredService<UserManager<Customer>>();
 
 
-			string adminEmail = "Omargamal1132004@example.com";
+			string adminEmail = "Omargamal1132004@gmail.com";
 			string adminPassword = "Admin@123";
 			if (!await roleManager.RoleExistsAsync("Admin"))
 			{

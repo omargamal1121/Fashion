@@ -234,11 +234,7 @@ namespace E_Commerce.Services.CustomerAddress
 					return Result<CustomerAddressDto>.Fail("Unauthorized access to address", 403);
 				}
 
-				// Update only provided fields
-				if (!string.IsNullOrEmpty(addressDto.FirstName))
-					existingAddress.FirstName = addressDto.FirstName;
-				if (!string.IsNullOrEmpty(addressDto.LastName))
-					existingAddress.LastName = addressDto.LastName;
+				
 				if (!string.IsNullOrEmpty(addressDto.PhoneNumber))
 					existingAddress.PhoneNumber = addressDto.PhoneNumber;
 				if (!string.IsNullOrEmpty(addressDto.Country))
@@ -249,8 +245,7 @@ namespace E_Commerce.Services.CustomerAddress
 					existingAddress.City = addressDto.City;
 				if (!string.IsNullOrEmpty(addressDto.StreetAddress))
 					existingAddress.StreetAddress = addressDto.StreetAddress;
-				if (addressDto.ApartmentSuite != null)
-					existingAddress.ApartmentSuite = addressDto.ApartmentSuite;
+				
 				if (!string.IsNullOrEmpty(addressDto.PostalCode))
 					existingAddress.PostalCode = addressDto.PostalCode;
 				if (!string.IsNullOrEmpty(addressDto.AddressType))

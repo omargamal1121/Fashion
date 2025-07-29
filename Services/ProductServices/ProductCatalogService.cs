@@ -37,6 +37,7 @@ namespace E_Commerce.Services.ProductServices
 	public class ProductCatalogService : IProductCatalogService
 	{
 		private readonly IUnitOfWork _unitOfWork;
+		private readonly ICartServices _cartServices;
 		private readonly ISubCategoryServices _subCategoryServices;
 		private readonly IBackgroundJobClient _backgroundJobClient;
 		private readonly ILogger<ProductCatalogService> _logger;
@@ -47,12 +48,13 @@ namespace E_Commerce.Services.ProductServices
 		private const string CACHE_TAG_COLLECTION_With_Product = "CollectionWithProduct";
 		
 		private const string CACHE_TAG_PRODUCT_SEARCH = "product_search";
-
+		private const string CACHE_TAG_CART = "cart";
 		public const string CACHE_TAG_CATEGORY_WITH_DATA = "categorywithdata";
-		private static readonly string[] PRODUCT_CACHE_TAGS = new[] { CACHE_TAG_PRODUCT_SEARCH, CACHE_TAG_CATEGORY_WITH_DATA, PRODUCT_WITH_VARIANT_TAG,CACHE_TAG_COLLECTION_With_Product };
+		private static readonly string[] PRODUCT_CACHE_TAGS = new[] { CACHE_TAG_PRODUCT_SEARCH, CACHE_TAG_CATEGORY_WITH_DATA, PRODUCT_WITH_VARIANT_TAG,CACHE_TAG_COLLECTION_With_Product,CACHE_TAG_CART };
 		private const string PRODUCT_WITH_VARIANT_TAG = "productwithvariantdata";
 
 		public ProductCatalogService(
+			ICartServices cartServices,
 			ICollectionServices collectionServices,
 			IBackgroundJobClient backgroundJobClient,
 			IUnitOfWork unitOfWork,
@@ -62,6 +64,7 @@ namespace E_Commerce.Services.ProductServices
 			IErrorNotificationService errorNotificationService,
 			ICacheManager cacheManager)
 		{
+			_cartServices = cartServices;
 			_collectionServices= collectionServices;
 			_backgroundJobClient = backgroundJobClient;
 			_unitOfWork = unitOfWork;
@@ -77,6 +80,10 @@ namespace E_Commerce.Services.ProductServices
 		private void DeactiveCollectionMethod(int productid)
 		{
 			_backgroundJobClient.Enqueue(() => _collectionServices.CheckAndDeactivateEmptyCollectionsAsync(productid));
+		}
+		private void RemoveCartItem(string userid,int? ProductVariantId, int ProductId)
+		{
+			_backgroundJobClient.Enqueue(() => _cartServices.RemoveItemFromCartAsync(userid, new DtoModels.CartDtos.RemoveCartItemDto { ProductId = ProductId, ProductVariantId = ProductVariantId }));
 		}
 		private void DeActiveSubcategory(int subcategoryid,string userid)
 		{
@@ -123,7 +130,7 @@ namespace E_Commerce.Services.ProductServices
 			 ModifiedAt = p.ModifiedAt,
 			 IsActive = p.IsActive,
 			 Price = p.Price,
-			 FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (   p.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(p.Price - (p.Discount.DiscountPercent * p.Price)) : p.Price,
+			 FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(p.Price - (((p.Discount.DiscountPercent) / 100) * p.Price)) : p.Price,
 
 			 fitType = p.fitType,
 
@@ -223,7 +230,7 @@ namespace E_Commerce.Services.ProductServices
 				Description = p.Description,
 				SubCategoryId = p.SubCategoryId,
 				CreatedAt = p.CreatedAt,
-				FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (  p.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(p.Price - (p.Discount.DiscountPercent * p.Price)) : p.Price,
+				FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(p.Price - (((p.Discount.DiscountPercent) / 100) * p.Price)) : p.Price,
 
 				fitType = p.fitType,
 				Gender = p.Gender,
@@ -385,33 +392,46 @@ namespace E_Commerce.Services.ProductServices
 		public async Task<Result<bool>> DeleteProductAsync(int id, string userId)
 		{
 			_logger.LogInformation($"Deleting product: {id}");
+			var transacrion = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
 				var product = await _unitOfWork.Product.GetByIdAsync(id);
-				if (product == null)
+				if (product == null){
+					await transacrion.RollbackAsync();
 					return Result<bool>.Fail("Product not found", 404);
+				}
 
 				product.IsActive = false;
 				var result = await _unitOfWork.Product.SoftDeleteAsync(id);
-				if (!result)
-					return Result<bool>.Fail("Failed to delete product", 400);
-
+				if (!result){
+					await transacrion.RollbackAsync();
+					return Result<bool>.Fail("Failed to delete product", 500);
+}
 				// Log admin operation
-				await _adminOpreationServices.AddAdminOpreationAsync(
+				var isadded= await _adminOpreationServices.AddAdminOpreationAsync(
 					$"Delete Product {id}",
 					E_Commerce.Enums.Opreations.DeleteOpreation,
 					userId,
 					id
 				);
+
+				if(isadded==null||!isadded.Success)
+				{
+					await transacrion.RollbackAsync();
+					return Result<bool>.Fail("Failed to delete product", 500);
+				}
 				 await _unitOfWork.CommitAsync();
+				await transacrion.CommitAsync();
 				RemoveProductCaches();
 				DeactiveCollectionMethod(id);
 				DeActiveSubcategory(product.SubCategoryId, userId);
+				RemoveCartItem(userId, null, product.Id);
 
 				return Result<bool>.Ok(true, "Product deleted", 200);
 			}
 			catch (Exception ex)
 			{
+				await transacrion.CommitAsync();
 				_logger.LogError(ex, $"Error in DeleteProductAsync for id: {id}");
 				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<bool>.Fail("Error deleting product", 500);
@@ -421,30 +441,39 @@ namespace E_Commerce.Services.ProductServices
 		public async Task<Result<ProductDto>> RestoreProductAsync(int id, string userId)
 		{
 			_logger.LogInformation($"Restoring product: {id}");
+			var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
-				var product = await _unitOfWork.Product.GetAll().FirstOrDefaultAsync(p=>p.Id==id);
+				var product = await _unitOfWork.Product.GetAll().FirstOrDefaultAsync(p=>p.Id==id&&p.DeletedAt!=null);
 				if (product == null)
 					return Result<ProductDto>.Fail("Product not found", 404);
 
 				product.DeletedAt = null;
-				var result = _unitOfWork.Product.Update(product);
-				if (!result)
-					return Result<ProductDto>.Fail("Failed to restore product", 400);
+	
 
 				// Log admin operation
-				await _adminOpreationServices.AddAdminOpreationAsync(
+			var isadded=	await _adminOpreationServices.AddAdminOpreationAsync(
 					$"Restore Product {id}",
 					E_Commerce.Enums.Opreations.UpdateOpreation,
 					userId,
 					id
 				);
+				if(isadded==null ||!isadded.Success)
+				{
+					_logger.LogError("Can't Add Admin Oprearion");
+					await transaction.RollbackAsync();
+					return Result<ProductDto>.Fail("Error restoring product", 500);
+
+				}
 				 RemoveProductCaches();
+				await _unitOfWork.CommitAsync();
+				await transaction.CommitAsync();
 				var productdto = Maptoproductdto(product);
 				return Result<ProductDto>.Ok(productdto, "Product restored successfully", 200);
 			}
 			catch (Exception ex)
 			{
+				await transaction.RollbackAsync();
 				_logger.LogError(ex, $"Error in RestoreProductAsync for id: {id}");
 				BackgroundJob.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<ProductDto>.Fail("Error restoring product", 500);
@@ -521,6 +550,7 @@ namespace E_Commerce.Services.ProductServices
 
 			await _unitOfWork.CommitAsync();
 			RemoveProductCaches();
+	
 			return Result<bool>.Ok(true, "Product activated successfully", 200);
 		}
 
@@ -547,7 +577,8 @@ namespace E_Commerce.Services.ProductServices
 			await _unitOfWork.CommitAsync();
 			RemoveProductCaches();
 			DeactiveCollectionMethod(productId);
-			DeActiveSubcategory(product.SubCategoryId, userId); // Only background job, no direct check
+			DeActiveSubcategory(product.SubCategoryId, userId);
+			RemoveCartItem(userId, null, productId);
 
 			_logger.LogInformation($"Product {productId} deactivated. Triggered background jobs for collection and subcategory checks.");
 

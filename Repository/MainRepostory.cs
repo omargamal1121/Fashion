@@ -38,6 +38,21 @@ public class MainRepository<T> : IRepository<T> where T : BaseEntity
 		_logger.LogInformation($"{typeof(T).Name} added successfully (pending save)");
 		return model;
 	}
+	public async Task<T[]> CreateRangeAsync(params T[] models)
+	{
+		_logger.LogInformation($"Executing {nameof(CreateRangeAsync)} for entity {typeof(T).Name}");
+
+		if (models == null || models.Length == 0)
+		{
+			_logger.LogWarning($"{nameof(CreateRangeAsync)} called with null or empty models");
+			return Array.Empty<T>();
+		}
+
+		await _entities.AddRangeAsync(models);
+		_logger.LogInformation($"{models.Length} {typeof(T).Name} entities added successfully (pending save)");
+
+		return models;
+	}
 
 
 

@@ -137,7 +137,7 @@ namespace E_Commerce.Services.Collection
 					return Result<List<ImageDto>>.Fail($"collection with id {collectionid} not found", 404);
 				}
 
-				var imageResult = await _imagesServices.SaveCollectionImagesAsync(images, userId);
+				var imageResult = await _imagesServices.SaveCollectionImagesAsync(images,collectionid, userId);
 				if (!imageResult.Success || imageResult.Data == null)
 				{
 					await transaction.RollbackAsync();
@@ -188,7 +188,7 @@ namespace E_Commerce.Services.Collection
 				}
 
 
-				var mainImageResult = await _imagesServices.SaveMainCollectionImageAsync(mainImage, userId);
+				var mainImageResult = await _imagesServices.SaveMainCollectionImageAsync(mainImage,collectionid, userId);
 				if (!mainImageResult.Success || mainImageResult.Data == null)
 				{
 					await transaction.RollbackAsync();

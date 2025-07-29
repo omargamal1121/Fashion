@@ -9202,6 +9202,11 @@
           "isEmpty": {
             "type": "boolean",
             "readOnly": true
+          },
+          "checkoutDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -9250,6 +9255,9 @@
         "additionalProperties": false
       },
       "CartItemDto": {
+        "required": [
+          "product"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -9274,9 +9282,6 @@
           "productId": {
             "type": "integer",
             "format": "int32"
-          },
-          "productVariantDto": {
-            "$ref": "#/components/schemas/ProductVariantForCartDto"
           },
           "product": {
             "$ref": "#/components/schemas/ProductForCartDto"
@@ -9924,28 +9929,16 @@
         "additionalProperties": false
       },
       "CreateOrderDto": {
-        "required": [
-          "paymentMethodId",
-          "paymentProviderId"
-        ],
         "type": "object",
         "properties": {
-          "paymentMethodId": {
-            "maximum": 2147483647,
-            "minimum": 1,
-            "type": "integer",
-            "format": "int32"
-          },
-          "paymentProviderId": {
-            "maximum": 2147483647,
-            "minimum": 1,
-            "type": "integer",
-            "format": "int32"
-          },
           "taxAmount": {
             "minimum": 0,
             "type": "number",
             "format": "double"
+          },
+          "addressid": {
+            "type": "integer",
+            "format": "int32"
           },
           "shippingCost": {
             "minimum": 0,
@@ -10247,6 +10240,28 @@
       },
       "CustomerDto": {
         "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "phoneNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          }
+        },
         "additionalProperties": false
       },
       "DecimalApiResponse": {
@@ -10887,10 +10902,6 @@
             "type": "string",
             "nullable": true
           },
-          "customerId": {
-            "type": "string",
-            "nullable": true
-          },
           "customer": {
             "$ref": "#/components/schemas/CustomerDto"
           },
@@ -11086,20 +11097,8 @@
             "format": "date-time",
             "nullable": true
           },
-          "productId": {
-            "type": "integer",
-            "format": "int32"
-          },
           "product": {
-            "$ref": "#/components/schemas/ProductDto"
-          },
-          "productVariantId": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "productVariant": {
-            "$ref": "#/components/schemas/ProductVariantDto"
+            "$ref": "#/components/schemas/ProductForCartDto"
           },
           "quantity": {
             "type": "integer",
@@ -11570,8 +11569,7 @@
           },
           "finalPrice": {
             "type": "number",
-            "format": "double",
-            "nullable": true
+            "format": "double"
           },
           "discountName": {
             "type": "string",
@@ -11588,6 +11586,9 @@
           },
           "isActive": {
             "type": "boolean"
+          },
+          "productVariantForCartDto": {
+            "$ref": "#/components/schemas/ProductVariantForCartDto"
           }
         },
         "additionalProperties": false

@@ -5,18 +5,14 @@ namespace E_Commerce.DtoModels.OrderDtos
 {
     public class CreateOrderDto
     {
-        [Required(ErrorMessage = "Payment method ID is required")]
-        [Range(1, int.MaxValue, ErrorMessage = "Payment method ID must be greater than 0")]
-        public int PaymentMethodId { get; set; }
-
-        [Required(ErrorMessage = "Payment provider ID is required")]
-        [Range(1, int.MaxValue, ErrorMessage = "Payment provider ID must be greater than 0")]
-        public int PaymentProviderId { get; set; }
-
+     
+      
         [Range(0, double.MaxValue, ErrorMessage = "Tax amount cannot be negative")]
         public decimal TaxAmount { get; set; } = 0;
 
-        [Range(0, double.MaxValue, ErrorMessage = "Shipping cost cannot be negative")]
+		public int  Addressid { get; set; }
+
+		[Range(0, double.MaxValue, ErrorMessage = "Shipping cost cannot be negative")]
         public decimal ShippingCost { get; set; } = 0;
 
         [Range(0, double.MaxValue, ErrorMessage = "Discount amount cannot be negative")]

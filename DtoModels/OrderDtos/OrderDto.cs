@@ -9,7 +9,7 @@ namespace E_Commerce.DtoModels.OrderDtos
     public class OrderDto : BaseDto
     {
         public string OrderNumber { get; set; } = string.Empty;
-        public string CustomerId { get; set; } = string.Empty;
+ 
         public CustomerDto? Customer { get; set; }
         public OrderStatus Status { get; set; }
         public decimal Subtotal { get; set; }
@@ -24,7 +24,6 @@ namespace E_Commerce.DtoModels.OrderDtos
         public List<OrderItemDto> Items { get; set; } = new List<OrderItemDto>();
         public PaymentDto? Payment { get; set; }
         
-        // Calculated properties
         public bool IsCancelled => Status == OrderStatus.Cancelled;
         public bool IsDelivered => Status == OrderStatus.Delivered;
         public bool IsShipped => Status == OrderStatus.Shipped;
@@ -35,14 +34,21 @@ namespace E_Commerce.DtoModels.OrderDtos
 
 	public class CustomerDto
 	{
+
+		public string Id { get; set; } = string.Empty;
+		public string FullName { get; set; } = string.Empty;
+		public string Email { get; set; } = string.Empty;
+		public string PhoneNumber { get; set; } = string.Empty;
+		public string Address { get; set; }= string.Empty;
+
 	}
 
 	public class OrderItemDto : BaseDto
     {
-        public int ProductId { get; set; }
-        public ProductDto? Product { get; set; }
-        public int? ProductVariantId { get; set; }
-        public ProductVariantDto? ProductVariant { get; set; }
+
+        public ProductForCartDto Product { get; set; }
+
+      
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal TotalPrice { get; set; }

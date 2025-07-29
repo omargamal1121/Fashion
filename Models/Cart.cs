@@ -17,6 +17,8 @@ namespace E_Commerce.Models
 		public bool IsEmpty => !Items.Any();
 		public int TotalItems => Items.Sum(item => item.Quantity);
 		public decimal TotalPrice => Items.Sum(item => item.UnitPrice * item.Quantity);
+		public DateTime? CheckoutDate { get; set; }
+
 
 	}
 }

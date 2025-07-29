@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using E_Commerce.DtoModels.CartDtos;
 using E_Commerce.DtoModels.Responses;
 using E_Commerce.Enums;
@@ -20,7 +20,9 @@ namespace E_Commerce.Services.Cart
     public class CartServices : ICartServices
     {
         private readonly ILogger<CartServices> _logger;
-        private readonly IErrorNotificationService _errorNotificationService;
+   
+        private readonly IBackgroundJobClient _backgroundJobClient;
+		private readonly IErrorNotificationService _errorNotificationService;
         private readonly UserManager<Customer>_userManager;
 		private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
@@ -30,7 +32,9 @@ namespace E_Commerce.Services.Cart
         private const string CACHE_TAG_CART = "cart";
 
         public CartServices(
-            UserManager<Customer> userManager,
+  
+            IBackgroundJobClient backgroundJobClient,
+			UserManager<Customer> userManager,
             IErrorNotificationService errorNotificationService,
 			ILogger<CartServices> logger,
             IMapper mapper,
@@ -38,7 +42,8 @@ namespace E_Commerce.Services.Cart
             ICartRepository cartRepository,
             IAdminOpreationServices adminOperationServices,
             ICacheManager cacheManager)
-        { 
+        {
+            _backgroundJobClient = backgroundJobClient;
             _userManager = userManager;
             _errorNotificationService = errorNotificationService;
 			_logger = logger;
@@ -59,6 +64,8 @@ namespace E_Commerce.Services.Cart
 		Id = cart.Id,
 		UserId = cart.UserId,
 		TotalItems = cart.Items.Count,
+        CheckoutDate = cart.CheckoutDate,
+        CreatedAt = cart.CreatedAt,
 
 		Items = cart.Items.Select(item => new CartItemDto
 		{
@@ -66,6 +73,8 @@ namespace E_Commerce.Services.Cart
 			ProductId = item.ProductId,
 			Quantity = item.Quantity,
 			AddedAt = item.AddedAt,
+            
+            
             
 			Product = new DtoModels.ProductDtos.ProductForCartDto
 			{
@@ -98,19 +107,54 @@ namespace E_Commerce.Services.Cart
 					.Where(img => img.IsMain && img.DeletedAt == null)
 					.Select(img => img.Url)
 					.FirstOrDefault(),
-				IsActive = item.Product.IsActive
+				IsActive = item.Product.IsActive,
+
+				productVariantForCartDto = new DtoModels.ProductDtos.ProductVariantForCartDto
+				{
+					Color = item.ProductVariant.Color,
+					Size = item.ProductVariant.Size,
+					Waist = item.ProductVariant.Waist,
+					Length = item.ProductVariant.Length,
+					Quantity = item.ProductVariant.Quantity
+				}
 			},
             UnitPrice=item.UnitPrice,
-			ProductVariantDto = new DtoModels.ProductDtos.ProductVariantForCartDto
-			{
-				Color = item.ProductVariant.Color,
-				Size = item.ProductVariant.Size,
-				Waist = item.ProductVariant.Waist,
-				Length = item.ProductVariant.Length,
-				Quantity = item.ProductVariant.Quantity
-			}
+			
 		}).ToList()
 	};
+
+		public async Task<Result<bool>> UpdateCheckoutData(string userId)
+		{
+			_logger.LogInformation($"Checkout of cart for user: {userId}");
+
+			var cart = await _cartRepository.GetCartByUserIdAsync(userId);
+			if (cart == null)
+			{
+				var newCart = await CreateNewCartAsync(userId);
+				if (newCart == null)
+				{
+					_logger.LogError("Failed to create new cart during checkout.");
+					return Result<bool>.Fail("Unexpected error while creating a new cart");
+				}
+
+				return Result<bool>.Fail("Cart is empty. Add items before checkout.");
+			}
+
+			cart.CheckoutDate = DateTime.UtcNow;
+
+			_cartRepository.Update(cart);
+
+			try
+			{
+				await _unitOfWork.CommitAsync();
+				return Result<bool>.Ok(true, "Checkout successful");
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError($"Error while updating cart for checkout: {ex.Message}");
+				return Result<bool>.Fail("Error occurred during checkout. Try again later.");
+			}
+		}
 
 		public async Task<Result<CartDto>> GetCartAsync(string userId)
         {
@@ -146,10 +190,26 @@ namespace E_Commerce.Services.Cart
 						_logger.LogWarning($"Cart disappeared after existence check for user: {userId}");
 						return Result<CartDto>.Fail("Cart not found", 404);
 					}
+					cart.TotalPrice = cart.Items.Sum(i => i.Quantity * i.Product.FinalPrice);
+					var oldTotal = cart.Items.Sum(i => i.Quantity * i.UnitPrice);
 
-					cart.TotalPrice = cart.Items.Sum(i => i.Quantity * i.UnitPrice);
-                    
-                   
+					if (Math.Round(cart.TotalPrice, 2) != Math.Round(oldTotal, 2))
+					{
+						foreach (var item in cart.Items)
+						{
+							var finalPrice = item.Product.FinalPrice;
+
+							if (item.UnitPrice != finalPrice)
+							{
+								item.UnitPrice = finalPrice;
+								_backgroundJobClient.Enqueue(() => UpdateCartItemPriceAsync(item.Id, finalPrice));
+							}
+						}
+
+						_backgroundJobClient.Enqueue(() => RemoveCheckout(userId));
+					}
+
+
 					await _cacheManager.SetAsync(cacheKey, cart, tags: new[] { CACHE_TAG_CART });
 
                     return Result<CartDto>.Ok(cart, "Cart retrieved successfully", 200);
@@ -162,12 +222,42 @@ namespace E_Commerce.Services.Cart
                 return Result<CartDto>.Fail("An error occurred while retrieving cart", 500);
             }
         }
+        private async Task RemoveCheckout(string userid)
+        {
+            var cart= await _cartRepository.GetCartByUserIdAsync(userid);
+            if(cart != null&&cart.CheckoutDate!=null)
+            {
+                cart.CheckoutDate = null;
+                await _unitOfWork.CommitAsync();
+                _logger.LogInformation($"Checkout date removed for cart of user: {userid}");
+            }
+		}
 
-        /// <summary>
-        /// Updates the quantity of a cart item for a user, with full validation and transactional safety.
-        /// Skips update if the quantity is unchanged. Returns only success/failure.
-        /// </summary>
-        public async Task<Result<bool>> UpdateCartItemAsync(string userId, int productId, UpdateCartItemDto itemDto, int? productVariantId = null)
+		public async Task UpdateCartItemPriceAsync(int cartItemId, decimal newPrice)
+		{
+
+
+			var cartItem = await _unitOfWork.Repository<CartItem>()
+				.GetAll()
+				.FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.DeletedAt == null);
+
+
+
+			if (cartItem != null&&cartItem.UnitPrice!=newPrice)
+			{
+				cartItem.UnitPrice = newPrice;
+
+				_logger.LogInformation($"CartItem {cartItemId} price updated to {newPrice}");
+			}
+				await _unitOfWork.CommitAsync();
+		}
+
+
+		/// <summary>
+		/// Updates the quantity of a cart item for a user, with full validation and transactional safety.
+		/// Skips update if the quantity is unchanged. Returns only success/failure.
+		/// </summary>
+		public async Task<Result<bool>> UpdateCartItemAsync(string userId, int productId, UpdateCartItemDto itemDto, int? productVariantId = null)
         {
             // Parameter validation
             if (string.IsNullOrWhiteSpace(userId))

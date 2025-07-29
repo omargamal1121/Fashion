@@ -62,11 +62,13 @@ namespace E_Commerce.Repository
 
 			try
 			{
-				var item = await _context.CartItems
-					.FirstOrDefaultAsync(i => i.CartId == cartId &&
-											  i.ProductId == productId &&
-											  i.ProductVariantId == productVariantId);
+				var query =  _context.CartItems
+					.Where(i => i.CartId == cartId &&
+											  i.ProductId == productId);
 
+                if(productVariantId.HasValue )
+                    query= query.Where(q=>q.ProductVariantId==productVariantId.Value);
+                var item = await query.FirstOrDefaultAsync();
 				if (item == null)
 				{
 					_logger.LogWarning("Cart item not found for removal");
@@ -74,7 +76,7 @@ namespace E_Commerce.Repository
 				}
 
 				item.DeletedAt = DateTime.UtcNow;
-			var isdeleted=	_context.CartItems.Remove(item);
+			    var isdeleted=	_context.CartItems.Remove(item);
                 if(isdeleted == null)
                 {
                     _logger.LogError("Failed to update cart item for removal");

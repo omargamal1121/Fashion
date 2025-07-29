@@ -88,24 +88,7 @@ namespace E_Commerce.Services.SubCategoryServices
              
         }
 
-		private IQueryable<SubCategory> BasicFilter(IQueryable<SubCategory> query, bool? isActive, bool? DeletedOnly)
-		{
-			if (isActive.HasValue)
-			{
-				if (isActive.Value)
-					query = query.Where(p => p.IsActive);
-				else
-					query = query.Where(p => !p.IsActive);
-			}
-			if (DeletedOnly.HasValue)
-			{
-				if (DeletedOnly.Value)
-					query = query.Where(p => p.DeletedAt != null);
-				else
-					query = query.Where(p => p.DeletedAt == null);
-			}
-			return query;
-		}
+	
         public SubCategoryDto MaptoSubCategoryDto(SubCategory subCategory)=> new SubCategoryDto
         {
             Id = subCategory.Id,
@@ -213,7 +196,7 @@ namespace E_Commerce.Services.SubCategoryServices
                 return Result<SubCategoryDto>.Fail($"Category with id {subCategory.CategoryId} not found", 404);
             }
             
-            var isexsist =   _unitOfWork.SubCategory.IsExsistByName(subCategory.Name);
+            var isexsist =   await _unitOfWork.SubCategory.IsExsistByName(subCategory.Name);
             if (isexsist)
             {
                 return Result<SubCategoryDto>.Fail($"there's subcategory with this name:{subCategory.Name}", 409);
@@ -284,9 +267,10 @@ namespace E_Commerce.Services.SubCategoryServices
 				return Result<List<ImageDto>>.Fail("At least one image is required.", 400);
 			}
 
-			var subCategory = await _unitOfWork.SubCategory.GetSubCategoryWithImageById(subCategoryId, isActive: true, isDeleted: false);
-			if (subCategory == null)
+			var subCategory = await _unitOfWork.SubCategory.IsExsistAsync(subCategoryId);
+			if (!subCategory)
 			{
+                
 				return Result<List<ImageDto>>.Fail($"SubCategory with id {subCategoryId} not found", 404);
 			}
 
@@ -294,24 +278,14 @@ namespace E_Commerce.Services.SubCategoryServices
 
 			try
 			{
-				var imageResult = await _imagesServices.SaveSubCategoryImagesAsync(images, userId);
+				var imageResult = await _imagesServices.SaveSubCategoryImagesAsync(images,subCategoryId, userId);
 				if (imageResult == null || imageResult.Data == null)
 				{
 					await transaction.RollbackAsync();
 					return Result<List<ImageDto>>.Fail(imageResult?.Message ?? "Failed to save images", imageResult?.StatusCode ?? 500, imageResult?.Warnings);
 				}
 
-				foreach (var img in imageResult.Data)
-				{
-					subCategory.Images.Add(img);
-				}
-
-				var updateResult = _unitOfWork.SubCategory.Update(subCategory);
-				if (!updateResult)
-				{
-					await transaction.RollbackAsync();
-					return Result<List<ImageDto>>.Fail("Failed to update subcategory with new images", 500);
-				}
+			
 
 				var adminLog = await _adminopreationservices.AddAdminOpreationAsync(
 					$"Added {imageResult.Data.Count} images to SubCategory {subCategoryId}",
@@ -323,13 +297,15 @@ namespace E_Commerce.Services.SubCategoryServices
 				if (!adminLog.Success)
 				{
 					_logger.LogWarning($"Failed to log admin operation: {adminLog.Message}");
+                    await transaction.RollbackAsync();
+                    return Result<List<ImageDto>>.Fail("Failed to log admin operation", 500);
 				}
 
 				await _unitOfWork.CommitAsync();
 				await transaction.CommitAsync();
 				 RemoveSubCategoryCaches();
 
-				var mapped = _mapping.Map<List<ImageDto>>(subCategory.Images);
+				var mapped = _mapping.Map<List<ImageDto>>(imageResult.Data);
 				return Result<List<ImageDto>>.Ok(mapped, $"Added {imageResult.Data.Count} images to subcategory", 200, warnings: imageResult.Warnings);
 			}
 			catch (Exception ex)
@@ -386,7 +362,9 @@ namespace E_Commerce.Services.SubCategoryServices
                 if (!adminLog.Success)
                 {
                     _logger.LogWarning($"Failed to log admin operation: {adminLog.Message}");
-                }
+                    await transaction.RollbackAsync();
+                    return Result<bool>.Fail("Failed to log admin operation", 500);
+				}
                 
                 await _unitOfWork.CommitAsync();
                 await transaction.CommitAsync();
@@ -412,10 +390,8 @@ namespace E_Commerce.Services.SubCategoryServices
             )
         {
             _logger.LogInformation($"Executing {nameof(FilterAsync)} with filters");
-            var query = _unitOfWork.SubCategory.GetAll();
-            if (!string.IsNullOrWhiteSpace(search))
-                query = query.Where(sc => sc.Name.Contains(search));
-            query= BasicFilter(query, isActive, isDeleted);
+            
+           
    
             string cacheKey = $"{CACHE_TAG_SUBCATEGORY}_filtered_{isActive}_{isDeleted}_p{page}_ps{pageSize}_{search}";
           
@@ -424,89 +400,21 @@ namespace E_Commerce.Services.SubCategoryServices
                 if (cachedData != null)
                     return Result<List<SubCategoryDto>>.Ok(cachedData, "Subcategories from cache", 200);
             
-            var subCategories = await query
-                .OrderBy(sc => sc.Id)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(MapToDtoExpression)
-                .ToListAsync();
-            if (!subCategories.Any())
+           var subCategories= await _unitOfWork.SubCategory.FilterSubCategoryAsync(search??string.Empty, isActive, isDeleted, page, pageSize);
+
+
+			if (!subCategories.Any())
                 return Result<List<SubCategoryDto>>.Fail("No subcategories found", 404);
+            var subcategoriesdto = subCategories.Select(sc => MaptoSubCategoryDto(sc)).ToList();
+
+
+				BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, subcategoriesdto, null,new string[]{ SUBCATEGORY_DATA_TAG }));
            
-                BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, subCategories, null,new string[]{ SUBCATEGORY_DATA_TAG }));
-           
-            return Result<List<SubCategoryDto>>.Ok(subCategories, "Filtered subcategories retrieved", 200);
+            return Result<List<SubCategoryDto>>.Ok(subcategoriesdto, "Filtered subcategories retrieved", 200);
         }
 
-		public static Expression<Func<SubCategory, SubCategoryDto>> MapToDtoExpression =>
-	subCategory => new SubCategoryDto
-	{
-		Id = subCategory.Id,
-		Name = subCategory.Name,
-		IsActive = subCategory.IsActive,
-         CreatedAt=subCategory.CreatedAt,
-         ModifiedAt = subCategory.ModifiedAt,
-         DeletedAt = subCategory.DeletedAt,
-         Description    = subCategory.Description,
-		Images = subCategory.Images
-			.Where(img => img.DeletedAt==null)
-			.Select(img => new ImageDto
-			{
-				Id = img.Id,
-				Url = img.Url
-			}).ToList(),
-		  
-	};
-		public static Expression<Func<SubCategory, SubCategoryDtoWithData>> MapToDtoWithDataExpression =>
-		subCategory => new SubCategoryDtoWithData
-		{
-			Id = subCategory.Id,
-			Name = subCategory.Name,
-			IsActive = subCategory.IsActive,
-			CreatedAt = subCategory.CreatedAt,
-			ModifiedAt = subCategory.ModifiedAt,
-			DeletedAt = subCategory.DeletedAt,
-			Description = subCategory.Description,
-
-			Images = subCategory.Images
-				.Where(img => img.DeletedAt == null)
-				.Select(img => new ImageDto
-				{
-					Id = img.Id,
-					IsMain = img.IsMain,
-					Url = img.Url
-				}),
-
-			Products = subCategory.Products.Select(p => new ProductDto
-			{
-				AvailableQuantity = p.Quantity,
-				CreatedAt = p.CreatedAt,
-				DeletedAt = p.DeletedAt,
-				Description = p.Description,
-				FinalPrice = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && ( p.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(p.Price - (p.Discount.DiscountPercent * p.Price)) : p.Price,
-
-				DiscountName = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && ( p.Discount.EndDate > DateTime.UtcNow)) ?p.Discount.Name : null,
-				DiscountPrecentage = (p.Discount != null && p.Discount.IsActive && (p.Discount.DeletedAt == null) && (p.Discount.EndDate > DateTime.UtcNow)) ? p.Discount.DiscountPercent:null,
-				EndAt = p.Discount.EndDate,
-				Id = p.Id,
-				Name = p.Name,
-				IsActive = p.IsActive,
-				ModifiedAt = p.ModifiedAt,
-				fitType = p.fitType,
-				Gender = p.Gender,
-				Price = p.Price,
-				SubCategoryId = p.SubCategoryId,
-
-				images = p.Images
-					.Where(img => img.DeletedAt == null)
-					.Select(img => new ImageDto
-					{
-						Id = img.Id,
-						IsMain = img.IsMain,
-						Url = img.Url
-					})
-			})
-		};
+	
+	
 
 
 
@@ -542,7 +450,9 @@ namespace E_Commerce.Services.SubCategoryServices
                 if (!adminLog.Success)
                 {
                     _logger.LogWarning($"Failed to log admin operation: {adminLog.Message}");
-                }
+                    await transaction.RollbackAsync();
+                    return Result<SubCategoryDto>.Fail("Failed to log admin operation", 500);
+				}
                 
                 await _unitOfWork.CommitAsync();
                 await transaction.CommitAsync();
@@ -605,9 +515,8 @@ namespace E_Commerce.Services.SubCategoryServices
                     else
                     {
                         _logger.LogInformation($"Updating name from '{existingSubCategory.Name}' to '{trimmedName}'");
-                        var isexist = await _unitOfWork.SubCategory.GetAll()
-                            .Where(sc => sc.Name == trimmedName && sc.Id != subCategoryId && sc.DeletedAt == null)
-                            .AnyAsync();
+                        var isexist = await _unitOfWork.SubCategory.IsExsistByName(subCategory.Name);
+                            
                         
                         if (isexist)
                         {
@@ -683,7 +592,7 @@ namespace E_Commerce.Services.SubCategoryServices
                     _logger.LogInformation($"No changes detected for SubCategory {subCategoryId}");
                 }
 
-                _unitOfWork.SubCategory.Update(existingSubCategory);
+          
                 var adminLog = await _adminopreationservices.AddAdminOpreationAsync(
                     $"Updated SubCategory {subCategoryId}",
                     Opreations.UpdateOpreation,
@@ -694,7 +603,9 @@ namespace E_Commerce.Services.SubCategoryServices
                 if (!adminLog.Success)
                 {
                     _logger.LogWarning($"Failed to log admin operation: {adminLog.Message}");
-                }
+                    await transaction.RollbackAsync();
+                    return Result<SubCategoryDto>.Fail("Failed to log admin operation", 500);
+				}
                 await _unitOfWork.CommitAsync();
 				await transaction.CommitAsync();
 				RemoveSubCategoryCaches();
@@ -741,15 +652,14 @@ namespace E_Commerce.Services.SubCategoryServices
 					subCategory.Images.Remove(existingMainImage);
 				}
 				
-				var mainImageResult = await _imagesServices.SaveMainSubCategoryImageAsync(mainImage, userId);
+				var mainImageResult = await _imagesServices.SaveMainSubCategoryImageAsync(mainImage,subCategoryId, userId);
 				if (mainImageResult == null || !mainImageResult.Success || mainImageResult.Data == null)
 				{
 					await transaction.RollbackAsync();
 					return Result<ImageDto>.Fail(mainImageResult?.Message ?? "Failed to save main image", mainImageResult?.StatusCode ?? 500, mainImageResult?.Warnings);
 				}
 				
-				subCategory.Images.Add(mainImageResult.Data);
-                _unitOfWork.SubCategory.Update(subCategory);
+			
 				
 				var adminLog = await _adminopreationservices.AddAdminOpreationAsync(
 					$"Added main image to SubCategory {subCategoryId}",
@@ -761,6 +671,8 @@ namespace E_Commerce.Services.SubCategoryServices
 				if (!adminLog.Success)
 				{
 					_logger.LogWarning($"Failed to log admin operation: {adminLog.Message}");
+                    await transaction.RollbackAsync();
+                    return Result<ImageDto>.Fail("Failed to log admin operation", 500);
 				}
 				
 				await _unitOfWork.CommitAsync();
@@ -877,128 +789,158 @@ namespace E_Commerce.Services.SubCategoryServices
                 _logger.LogInformation($"Cache hit for GetAllSubCategoriesAsync with key: {cacheKey}");
                 return Result<List<SubCategoryDto>>.Ok(cached, "Subcategories fetched from cache", 200);
             }
-            var query = _unitOfWork.SubCategory.GetAll();
-            query = BasicFilter(query,isActive, isDeleted);
-            var result = await query
-                .OrderBy(sc => sc.Id)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(MapToDtoExpression).ToListAsync();
-            BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, result, null, new string[]{ CACHE_TAG_SUBCATEGORY }));
-            return Result<List<SubCategoryDto>>.Ok(result, "Subcategories fetched", 200);
+            var subcategorise = await _unitOfWork.SubCategory.FilterSubCategoryAsync(string.Empty, isActive, isDeleted, page, pageSize);
+            if (!subcategorise.Any())
+                return Result<List<SubCategoryDto>>.Fail("No SubCategories Found");
+            var subcaetgoriesdto = subcategorise.Select(sc => MaptoSubCategoryDto(sc)).ToList();
+            BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, subcaetgoriesdto, null, new string[]{ CACHE_TAG_SUBCATEGORY }));
+            return Result<List<SubCategoryDto>>.Ok(subcaetgoriesdto, "Subcategories fetched", 200);
         }
 
         public async Task<Result<bool>> ActivateSubCategoryAsync(int subCategoryId, string userId)
         {
-            _logger.LogInformation($"Activating subcategory {subCategoryId}");
-            var subCategory = await _unitOfWork.SubCategory.GetSubCategoryById(subCategoryId,false,false);
-            if (subCategory == null)
-                return Result<bool>.Fail($"SubCategory with id {subCategoryId} not found", 404);
-            if (subCategory.Images == null || !subCategory.Images.Any(i => i.DeletedAt == null))
-                return Result<bool>.Fail("Cannot activate subcategory without at least one image", 400);
-            if (subCategory.IsActive)
-                return Result<bool>.Fail("SubCategory is already active", 200);
-
-            if(!subCategory.Products.Any(p=>p.IsActive&&p.DeletedAt==null))
-            {
-                return Result<bool>.Fail("Cannot activate subcategory with Inactive products", 400);
-			}
-			subCategory.IsActive = true;
-            var updateResult = _unitOfWork.SubCategory.Update(subCategory);
-            if (!updateResult)
-                return Result<bool>.Fail("Failed to activate subcategory", 500);
-            await _unitOfWork.CommitAsync();
-           RemoveSubCategoryCaches();
-            return Result<bool>.Ok(true, "SubCategory activated successfully", 200);
-        }
-
-        public async Task<Result<bool>> DeactivateSubCategoryAsync(int subCategoryId, string userId)
-        {
+            using var transaction = await _unitOfWork.BeginTransactionAsync();
             try
             {
-                _logger.LogInformation($"Deactivating subcategory {subCategoryId}");
-                var subCategory = await _unitOfWork.SubCategory.GetByIdAsync(subCategoryId);
-                if (subCategory == null)
-                    return Result<bool>.Fail($"SubCategory with id {subCategoryId} not found", 404);
-                if (!subCategory.IsActive)
+				_logger.LogInformation($"Activating subcategory {subCategoryId}");
+				var subCategory = await _unitOfWork.SubCategory.IsExsistAndDeActive(subCategoryId);
+				if (!subCategory)
+					return Result<bool>.Fail($"SubCategory with id {subCategoryId} not found", 404);
+				var ishasimages = await _unitOfWork.SubCategory.HasImagesAsync(subCategoryId);
+				if (!ishasimages)
+					return Result<bool>.Fail("Cannot activate subcategory without at least one image", 400);
+				var hasproductactive = await _unitOfWork.SubCategory.IsHasActiveProduct(subCategoryId);
+				if (!hasproductactive)
+				{
+					return Result<bool>.Fail("Cannot activate subcategory with Inactive products", 400);
+				}
+
+				var updateResult = await _unitOfWork.SubCategory.ActiveSubCategoryAsync(subCategoryId);
+				if (!updateResult)
+                
                 {
-                    _logger.LogInformation($"SubCategory {subCategoryId} is already inactive. No action taken.");
-                    return Result<bool>.Fail("SubCategory is already inactive", 200);
+                    _logger.LogWarning("SubCategory Maybe Active Or Not found");
+                    await transaction.RollbackAsync();
+                    return Result<bool>.Fail(" subcategory is already Active", 400);
                 }
-                subCategory.IsActive = false;
-                var updateResult = _unitOfWork.SubCategory.Update(subCategory);
-                if (!updateResult)
-                    return Result<bool>.Fail("Failed to deactivate subcategory", 500);
-                await _unitOfWork.CommitAsync();
-                RemoveSubCategoryCaches();
-                // Deactivate parent category if needed
-                await DeactivateCategoryIfNoActiveSubcategories(subCategory.CategoryId, userId);
-                return Result<bool>.Ok(true, "SubCategory deactivated successfully", 200);
-            }
+				await _unitOfWork.CommitAsync();
+                await transaction.CommitAsync();
+				RemoveSubCategoryCaches();
+				return Result<bool>.Ok(true, "SubCategory activated successfully", 200);
+			}
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error in DeactivateSubCategoryAsync for subCategoryId: {subCategoryId}");
-                NotifyAdminOfError($"Exception in DeactivateSubCategoryAsync for subcategory {subCategoryId}: {ex.Message}", ex.StackTrace);
-                return Result<bool>.Fail("An error occurred while deactivating subcategory", 500);
-            }
+                _logger.LogError(ex.Message);
+                NotifyAdminOfError(ex.Message, ex.StackTrace);
+				return Result<bool>.Fail("Try Again Later", 500);
+
+			}
+            
         }
 
-        private async Task DeactivateCategoryIfNoActiveSubcategories(int categoryId, string userId = null)
+		public async Task<Result<bool>> DeactivateSubCategoryAsync(int subCategoryId, string userId)
+		{
+			using var transaction = await _unitOfWork.BeginTransactionAsync();
+			try
+			{
+				_logger.LogInformation($"Deactivating subcategory {subCategoryId}");
+
+				var isexist = await _unitOfWork.SubCategory.IsExsistAndActive(subCategoryId);
+				if (!isexist)
+					return Result<bool>.Fail($"SubCategory with id {subCategoryId} not found", 404);
+
+                var subCategory = await _unitOfWork.SubCategory.GetByIdAsync(subCategoryId);
+				if (subCategory == null)
+					return Result<bool>.Fail($"SubCategory with id {subCategoryId} not found", 404);
+
+				if (!subCategory.IsActive)
+				{
+					_logger.LogInformation($"SubCategory {subCategoryId} is already inactive. No action taken.");
+					return Result<bool>.Fail("SubCategory is already inactive", 200);
+				}
+
+				subCategory.IsActive = false;
+				var updateResult = _unitOfWork.SubCategory.Update(subCategory);
+				if (!updateResult)
+				{
+					await transaction.RollbackAsync();
+					_logger.LogWarning("Failed to deactivate subcategory. DB update returned false.");
+					return Result<bool>.Fail("Failed to deactivate subcategory", 500);
+				}
+
+				await _unitOfWork.CommitAsync();
+				await transaction.CommitAsync();
+
+				RemoveSubCategoryCaches();
+
+			
+				_backgroundJobClient.Enqueue(()=> DeactivateCategoryIfNoActiveSubcategories(subCategory.CategoryId, userId));
+
+				_logger.LogInformation($"✅ Subcategory {subCategoryId} deactivated successfully.");
+				return Result<bool>.Ok(true, "SubCategory deactivated successfully", 200);
+			}
+			catch (Exception ex)
+			{
+				await transaction.RollbackAsync();
+				_logger.LogError(ex, $"❌ Error in DeactivateSubCategoryAsync for subCategoryId: {subCategoryId}");
+				NotifyAdminOfError($"Exception in DeactivateSubCategoryAsync for subcategory {subCategoryId}: {ex.Message}", ex.StackTrace);
+				return Result<bool>.Fail("An error occurred while deactivating subcategory", 500);
+			}
+		}
+
+
+		private async Task DeactivateCategoryIfNoActiveSubcategories(int categoryId, string userId)
         {
-            var subCategories = await _unitOfWork.SubCategory.GetAll()
-                .Where(sc => sc.CategoryId == categoryId && sc.DeletedAt == null)
-                .ToListAsync();
-            if (subCategories.Count > 0 && subCategories.All(sc => !sc.IsActive))
+            var check = await _unitOfWork.Category.HasSubCategoriesActiveAsync(categoryId);
+                
+            if (!check)
             {
                 _logger.LogInformation($"All subcategories for category {categoryId} are inactive. Deactivating category.");
                 await _categoryServices.DeactivateCategoryAsync(categoryId, userId ?? "system");
             }
         }
-
 		public async Task DeactivateSubCategoryIfAllProductsAreInactiveAsync(int subCategoryId, string userId)
 		{
+
+
+            using var transaction =await _unitOfWork.BeginTransactionAsync();
 			try
 			{
 				_logger.LogInformation($"Checking if subcategory {subCategoryId} needs to be deactivated.");
-				var subCategory = await _unitOfWork.SubCategory.GetSubCategoryById(subCategoryId, isActive: true, isDeleted: false);
 
-				if (subCategory == null)
+				var hasActiveProduct = await _unitOfWork.SubCategory.IsHasActiveProduct(subCategoryId);
+				if (hasActiveProduct)
 				{
-					_logger.LogWarning($"Subcategory {subCategoryId} not found or not active.");
+					_logger.LogInformation($"Subcategory {subCategoryId} still has active products. No action taken.");
 					return;
 				}
 
-				if (!subCategory.IsActive)
+				var isDeactivated = await _unitOfWork.SubCategory.DeActiveSubCategoryAsync(subCategoryId);
+				if (!isDeactivated)
 				{
-					_logger.LogInformation($"Subcategory {subCategoryId} is already inactive. No action taken.");
+					_logger.LogWarning($"SubCategory {subCategoryId} is already inactive.");
+					await transaction.RollbackAsync();
 					return;
 				}
 
-				if (subCategory.Products.All(p => !p.IsActive))
-				{
-					_logger.LogInformation($"All products in subcategory {subCategoryId} are inactive. Deactivating subcategory.");
-					subCategory.IsActive = false;
-					_unitOfWork.SubCategory.Update(subCategory);
+				await _adminopreationservices.AddAdminOpreationAsync(
+					$"Deactivated SubCategory {subCategoryId} because all its products became inactive.",
+					Opreations.UpdateOpreation,
+					userId,
+					subCategoryId
+				);
 
-					await _adminopreationservices.AddAdminOpreationAsync(
-						$"Deactivated SubCategory {subCategoryId} because all its products became inactive.",
-						Opreations.UpdateOpreation,
-						userId,
-						subCategoryId
-					);
+				await _unitOfWork.CommitAsync();
+				await transaction.CommitAsync();
 
-					await _unitOfWork.CommitAsync();
-					RemoveSubCategoryCaches();
-					await DeactivateCategoryIfNoActiveSubcategories(subCategory.CategoryId, userId);
-				}
-				else
-				{
-					_logger.LogInformation($"Subcategory {subCategoryId} not deactivated: still has active products.");
-				}
+				RemoveSubCategoryCaches();
+
+				_backgroundJobClient.Enqueue(()=> DeactivateCategoryIfNoActiveSubcategories(subCategoryId, userId));
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in DeactivateSubCategoryIfAllProductsAreInactiveAsync for subCategoryId: {subCategoryId}");
+				await transaction.RollbackAsync(); 
 				NotifyAdminOfError($"Exception in DeactivateSubCategoryIfAllProductsAreInactiveAsync for subcategory {subCategoryId}: {ex.Message}", ex.StackTrace);
 				throw;
 			}

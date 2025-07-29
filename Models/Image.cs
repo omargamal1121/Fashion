@@ -19,6 +19,8 @@ namespace E_Commerce.Models
 
         public DateTime UploadDate { get; set; } = DateTime.UtcNow;
 
+		public string CustomerId { get; set; }
+
 		public string? Folder { get; set; }
 		public bool IsMain { get; set; } = false;
 		public string? FileType { get; set; }

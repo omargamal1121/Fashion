@@ -1,11 +1,16 @@
 using E_Commerce.Context;
+using E_Commerce.DtoModels.SubCategorydto;
 using E_Commerce.Interfaces;
 using E_Commerce.Models;
+using E_Commerce.UOW;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 public class SubCategoryRepository : MainRepository<SubCategory>, ISubCategoryRepository
 {
@@ -47,7 +52,128 @@ public class SubCategoryRepository : MainRepository<SubCategory>, ISubCategoryRe
 		return Subcategory;
 
 	}
+	public async Task<bool> IsExsistAndActive(int id)
+	{
+		return await _subCategories.AnyAsync(sc => sc.Id == id && sc.IsActive && sc.DeletedAt == null);
+	}
+	public async Task<bool> IsExsistAndDeActive(int id)
+	{
+		return await _subCategories.AnyAsync(sc => sc.Id == id && !sc.IsActive && sc.DeletedAt != null);
+	}
 
+	public async Task<bool> ActiveSubCategoryAsync(int id)
+	{
+		var subcategory=await GetByIdAsync(id);
+		if(subcategory==null||subcategory.IsActive) return false;
+		subcategory.IsActive = true;
+		return true;
+	}
+	public async Task<bool> DeActiveSubCategoryAsync(int id)
+	{
+		var subcategory=await GetByIdAsync(id);
+		if(subcategory==null||subcategory.IsActive) return false;
+		subcategory.IsActive = false;
+		return true;
+	}
+
+	public static Expression<Func<SubCategory, SubCategory>> MapToDtoWithDataExpression =>
+	subCategory => new SubCategory
+	{
+		Id = subCategory.Id,
+		Name = subCategory.Name,
+		IsActive = subCategory.IsActive,
+		CreatedAt = subCategory.CreatedAt,
+		ModifiedAt = subCategory.ModifiedAt,
+		DeletedAt = subCategory.DeletedAt,
+		Description = subCategory.Description,
+
+		Images = subCategory.Images
+			.Where(img => img.DeletedAt == null)
+			.Select(img => new Image
+			{
+				Id = img.Id,
+				IsMain = img.IsMain,
+				Url = img.Url
+			}).ToList(),
+
+		Products = subCategory.Products.Select(p => new Product
+		{
+			
+			CreatedAt = p.CreatedAt,
+			DeletedAt = p.DeletedAt,
+			Description = p.Description,
+			Discount= new Discount { 
+				Name=p.Discount.Name,
+				StartDate= p.Discount.StartDate,
+				EndDate= p.Discount.EndDate,
+				IsActive =p.IsActive,
+				DeletedAt=p.Discount.DeletedAt,
+				DiscountPercent=p.Discount.DiscountPercent,
+				Id= p.Discount.Id
+			},
+			
+			Id = p.Id,
+			Name = p.Name,
+			IsActive = p.IsActive,
+			ModifiedAt = p.ModifiedAt,
+			fitType = p.fitType,
+			Gender = p.Gender,
+			Price = p.Price,
+			SubCategoryId = p.SubCategoryId,
+
+			Images = p.Images
+				.Where(img => img.DeletedAt == null)
+				.Select(img => new Image
+				{
+					Id = img.Id,
+					IsMain = img.IsMain,
+					Url = img.Url
+				}).ToList()
+		}).ToList()
+	};
+
+	public static Expression<Func<SubCategory, SubCategory>> MapToDtoExpression =>
+subCategory => new SubCategory
+{
+Id = subCategory.Id,
+Name = subCategory.Name,
+IsActive = subCategory.IsActive,
+CreatedAt = subCategory.CreatedAt,
+ModifiedAt = subCategory.ModifiedAt,
+DeletedAt = subCategory.DeletedAt,
+Description = subCategory.Description,
+Images = subCategory.Images
+	.Where(img => img.DeletedAt == null)
+	.Select(img => new Image
+	{
+		Id = img.Id,
+		Url = img.Url
+	}).ToList(),
+
+};
+
+	public async Task<List<SubCategory>> FilterSubCategoryAsync(string search, bool? isActive = null, bool? isDeleted = null, int page = 1, int pagesize = 10)
+	{
+		var query = GetAll().AsNoTracking();
+		if (!string.IsNullOrWhiteSpace(search))
+			query = query.Where(sc => EF.Functions.Like(sc.Name, $"%{search}%") ||
+		EF.Functions.Like(sc.Description, $"%{search}%"));
+		query = BasicFilter(query, isActive, isDeleted);
+
+		var subCategories = await query
+			   .OrderBy(sc => sc.Id)
+			   .Skip((page - 1) * pagesize)
+			   .Take(pagesize)
+			   .Select(MapToDtoExpression)
+			   .ToListAsync();
+		return subCategories;
+	}
+	public async Task<bool> IsHasActiveProduct(int subCategoryId)
+	{
+		return await GetAll()
+			.AsNoTracking()
+			.AnyAsync(sc => sc.Id == subCategoryId && sc.Products.Any(p => p.IsActive && p.DeletedAt == null));
+	}
 
 
 	public async Task<SubCategory?> GetSubCategoryById(int id, bool? isActive = null,bool ? isDeleted = null)
@@ -75,12 +201,12 @@ public class SubCategoryRepository : MainRepository<SubCategory>, ISubCategoryRe
 	}
 
 
-	public bool IsExsistByName(string name)
+	public async Task<bool> IsExsistByName(string name)
 	{
 
 		_logger.LogInformation($"Executing {nameof(IsExsistByName)} for name: {name}");
 
-		var exists = _subCategories.Any(c => c.Name == name);
+		var exists = await _subCategories.AnyAsync(c => c.Name == name);
 
 		if (exists)
 			_logger.LogInformation($"Category with name: {name} already exists");
@@ -90,9 +216,12 @@ public class SubCategoryRepository : MainRepository<SubCategory>, ISubCategoryRe
 		return exists;
 
 	}
-	
 
-    public async Task<bool> HasProductsAsync(int subCategoryId)
+	public async Task<bool> HasImagesAsync(int subCategoryId)
+	{
+		return await _subCategories.AnyAsync(sc => sc.Id == subCategoryId && sc.Images.Any(i=>i.DeletedAt==null));
+	}
+	public async Task<bool> HasProductsAsync(int subCategoryId)
     {
         return await _subCategories.AnyAsync(sc => sc.Id == subCategoryId && sc.Products.Any());
     }
