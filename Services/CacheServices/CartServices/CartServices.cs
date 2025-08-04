@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 
-namespace E_Commerce.Services.Cart
+namespace E_Commerce.Services.CacheServices.CartServices
 {
     public class CartServices : ICartServices
     {
@@ -58,7 +58,7 @@ namespace E_Commerce.Services.Cart
         {
             BackgroundJob.Enqueue<IErrorNotificationService>(_ => _.SendErrorNotificationAsync(message, stackTrace));
         }
-		public static Expression<Func<E_Commerce.Models.Cart, CartDto>> CartDtoSelector =>
+		public static Expression<Func<Cart, CartDto>> CartDtoSelector =>
 	cart => new CartDto
 	{
 		Id = cart.Id,
@@ -83,24 +83,24 @@ namespace E_Commerce.Services.Cart
 				Price = item.Product.Price, 
                 
 				FinalPrice =
-					(item.Product.Discount != null
+					item.Product.Discount != null
 					 && item.Product.Discount.IsActive
 					 && item.Product.Discount.DeletedAt == null
-					 && item.Product.Discount.EndDate > DateTime.UtcNow)
-						? item.Product.Price - ((item.Product.Discount.DiscountPercent / 100) * item.Product.Price)
+					 && item.Product.Discount.EndDate > DateTime.UtcNow
+						? item.Product.Price - item.Product.Discount.DiscountPercent / 100 * item.Product.Price
 						: item.Product.Price,
 				DiscountName =
-					(item.Product.Discount != null
+					item.Product.Discount != null
 					 && item.Product.Discount.IsActive
 					 && item.Product.Discount.DeletedAt == null
-					 && item.Product.Discount.EndDate > DateTime.UtcNow)
+					 && item.Product.Discount.EndDate > DateTime.UtcNow
 						? item.Product.Discount.Name
 						: null,
 				DiscountPrecentage =
-					(item.Product.Discount != null
+					item.Product.Discount != null
 					 && item.Product.Discount.IsActive
 					 && item.Product.Discount.DeletedAt == null
-					 && item.Product.Discount.EndDate > DateTime.UtcNow)
+					 && item.Product.Discount.EndDate > DateTime.UtcNow
 						? item.Product.Discount.DiscountPercent
 						: 0,
 				MainImageUrl = item.Product.Images
@@ -442,8 +442,8 @@ namespace E_Commerce.Services.Cart
 					return Result<bool>.Fail("Not enough quantity in stock for this variant", 400);
 				}
 				var existingItem = cart.Items.FirstOrDefault(i => i.ProductVariantId == itemDto.ProductVariantId);
-                decimal finalPrice = (product.Discount != null && product.Discount.IsActive && product.Discount.DeletedAt == null && product.Discount.EndDate > DateTime.UtcNow)
-                    ? Math.Round(product.Price - ((product.Discount.DiscountPercent / 100m) * product.Price), 2)
+                decimal finalPrice = product.Discount != null && product.Discount.IsActive && product.Discount.DeletedAt == null && product.Discount.EndDate > DateTime.UtcNow
+                    ? Math.Round(product.Price - product.Discount.DiscountPercent / 100m * product.Price, 2)
                     : product.Price;
 
                 if (existingItem != null)
@@ -473,7 +473,7 @@ namespace E_Commerce.Services.Cart
 						  product.Discount.DeletedAt == null;
 
 					var unitPrice = hasValidDiscount
-						? Math.Round(product.Price - ((product.Discount.DiscountPercent / 100m) * product.Price), 2)
+						? Math.Round(product.Price - product.Discount.DiscountPercent / 100m * product.Price, 2)
 						: product.Price;
 
 					var cartItem = new CartItem
@@ -664,7 +664,7 @@ namespace E_Commerce.Services.Cart
             }
         }
 
-        private async Task<E_Commerce.Models.Cart?> CreateNewCartAsync(string userId)
+        private async Task<Cart?> CreateNewCartAsync(string userId)
         {
             try
             {
@@ -675,7 +675,7 @@ namespace E_Commerce.Services.Cart
                     return null;
                 }
 
-                var cart = new Models.Cart
+                var cart = new Cart
                 {
                     UserId = userId,
                     CustomerId = userId,

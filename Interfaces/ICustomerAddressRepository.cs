@@ -9,6 +9,7 @@ namespace E_Commerce.Interfaces
 		Task<CustomerAddress?> GetDefaultAddressAsync(string customerId);
 		Task<bool> SetDefaultAddressAsync(int addressId, string customerId);
 		Task<bool> RemoveDefaultFromOtherAddressesAsync(string customerId, int excludeAddressId);
+		public  Task<bool> IsExsistByIdAndUserIdAsync(int addressId, string customerId);
 		Task<int> GetAddressCountByCustomerAsync(string customerId);
 		Task<bool> AddressExistsAsync(int addressId, string customerId);
 		Task<List<CustomerAddress>> GetAddressesByTypeAsync(string customerId, string addressType);

@@ -4,16 +4,19 @@ using E_Commerce.Interfaces;
 using E_Commerce.Models;
 using Microsoft.EntityFrameworkCore;
 using E_Commerce.Enums;
+using Microsoft.IdentityModel.Tokens;
 
 namespace E_Commerce.Repository
 {
 	public class ProductVariantRepository : MainRepository<ProductVariant>, IProductVariantRepository
 	{
 		private readonly DbSet<ProductVariant> _entity;
+		private readonly DbSet<Product> _Product_entity;
 		private readonly ILogger<ProductVariantRepository> _logger;
 
 		public ProductVariantRepository(AppDbContext context, ILogger<ProductVariantRepository> logger) : base(context, logger)
 		{
+			_Product_entity = context.Products;
 			_logger = logger;
 			_entity = context.ProductVariants;
 		}
@@ -42,6 +45,20 @@ namespace E_Commerce.Repository
 				.Include(v => v.Product)
 				.AsNoTracking()
 				.ToListAsync();
+		}
+		public async Task<bool> IsExsistBySizeandColor(int productid,string? color,VariantSize?size,int? wist,int?length)
+		{
+			var query=_entity.AsNoTracking().Where(v => v.ProductId == productid);
+			if(color.IsNullOrEmpty())
+				query.Where(v => v.Color == color);
+			if (size.HasValue)
+				query.Where(v => v.Size == size.Value);
+			if (wist.HasValue)
+				query.Where(v => v.Waist == wist.Value);
+			if(length.HasValue)
+				query.Where(query => query.Length == length.Value);
+			return await query.AnyAsync();
+				
 		}
 
 		// Price Management
@@ -115,8 +132,21 @@ namespace E_Commerce.Repository
 				.ToListAsync();
 		}
 
-		
-
-
+		public async Task<bool> ActiveVaraintAsync(int id)
+		{
+			var varaint= await _entity.FirstOrDefaultAsync(v => v.Id == id && v.DeletedAt == null);
+			if (varaint == null)
+				return false;
+			varaint.IsActive=true;
+			return varaint.IsActive;
+		}
+		public async Task<bool> DeactiveVaraintAsync(int id)
+		{
+			var varaint= await _entity.FirstOrDefaultAsync(v => v.Id == id&&v.DeletedAt==null);
+			if (varaint == null)
+				return false;
+			varaint.IsActive=false;
+			return true;
+		}
 	}
 } 

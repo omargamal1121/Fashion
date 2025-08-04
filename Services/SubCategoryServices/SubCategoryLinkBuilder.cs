@@ -4,7 +4,7 @@ using E_Commerce.Interfaces;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
-using E_Commerce.Services.Category;
+using E_Commerce.Services.CategoryServcies;
 
 namespace E_Commerce.Services.SubCategoryServices
 {
@@ -23,7 +23,7 @@ namespace E_Commerce.Services.SubCategoryServices
             var links = new List<LinkDto>
             {
                 new LinkDto(
-                    GetUriByAction(nameof(SubCategoryController.CreateAsync)) ?? "",
+                    GetUriByAction(nameof(SubCategoryController.Create)) ?? "",
                     "create",
                     "POST"
                 ),
@@ -40,42 +40,42 @@ namespace E_Commerce.Services.SubCategoryServices
             {
                 links.Add(
                     new LinkDto(
-                        GetUriByAction(nameof(SubCategoryController.GetByIdAsync), new { id }) ?? "",
+                        GetUriByAction(nameof(SubCategoryController.GetAllForUser), new { id }) ?? "",
                         "get-by-id",
                         "GET"
                     )
                 );
                 links.Add(
                     new LinkDto(
-                        GetUriByAction(nameof(SubCategoryController.DeleteAsync), new { id }) ?? "",
+                        GetUriByAction(nameof(SubCategoryController.Delete), new { id }) ?? "",
                         "delete",
                         "DELETE"
                     )
                 );
                 links.Add(
                     new LinkDto(
-                        GetUriByAction(nameof(SubCategoryController.UpdateAsync), new { id }) ?? "",
+                        GetUriByAction(nameof(SubCategoryController.Update), new { id }) ?? "",
                         "update",
                         "PUT"
                     )
                 );
                 links.Add(
                     new LinkDto(
-                        GetUriByAction(nameof(SubCategoryController.ReturnRemovedSubCategoryAsync), new { id }) ?? "",
+                        GetUriByAction(nameof(SubCategoryController.Restore), new { id }) ?? "",
                         "restore",
                         "PATCH"
                     )
                 );
                 links.Add(
                     new LinkDto(
-                        GetUriByAction(nameof(SubCategoryController.AddMainImageAsync), new { id }) ?? "",
+                        GetUriByAction(nameof(SubCategoryController.AddMainImage), new { id }) ?? "",
                         "add-main-image",
                         "POST"
                     )
                 );
                 links.Add(
                     new LinkDto(
-                        GetUriByAction(nameof(SubCategoryController.AddExtraImagesAsync), new { id }) ?? "",
+                        GetUriByAction(nameof(SubCategoryController.AddImages), new { id }) ?? "",
                         "add-extra-images",
                         "POST"
                     )
@@ -96,7 +96,7 @@ namespace E_Commerce.Services.SubCategoryServices
                 );
                 links.Add(
                     new LinkDto(
-                        GetUriByAction(nameof(SubCategoryController.RemoveImageAsync), new { subCategoryId = id, imageId = 0 }) ?? "",
+                        GetUriByAction(nameof(SubCategoryController.RemoveImage), new { subCategoryId = id, imageId = 0 }) ?? "",
                         "remove-image",
                         "DELETE"
                     )

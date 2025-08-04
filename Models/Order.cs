@@ -9,7 +9,10 @@ namespace E_Commerce.Models
 		[ForeignKey("Customer")]
 		public string CustomerId { get; set; } = string.Empty;
 		public  Customer Customer { get; set; }
-		public int  Addressid { get; set; }
+		[ForeignKey("CustomerAddress")]
+		public int CustomerAddressId { get; set; }
+
+		public CustomerAddress  CustomerAddress { get; set; }
 
 		[Required]
 		[StringLength(50, MinimumLength = 3, ErrorMessage = "Order number must be between 3 and 50 characters")]
@@ -42,7 +45,7 @@ namespace E_Commerce.Models
 		public DateTime? CancelledAt { get; set; }
 
 		public IEnumerable<OrderItem> Items { get; set; } = new List<OrderItem>();
-		public  Payment Payment { get; set; }
+		public  Payment? Payment { get; set; }
 		public ICollection<ReturnRequest> ReturnRequests { get; set; } = new List<ReturnRequest>();
 
 		public bool IsCancelled => Status == OrderStatus.Cancelled;

@@ -11,7 +11,7 @@ namespace E_Commerce.Interfaces
 	{
 
 		Task<Result<bool>> IsExsistAsync(int id);
-		Task<Result<List<CategoryDto>>> GetAllCategoriesAsync(bool? isActive = null, bool? isDeleted = null, int page = 1, int pageSize = 10);
+		
 		Task<Result<CategoryDto>> CreateAsync(CreateCategotyDto categoty, string userid);
 		Task<Result<CategorywithdataDto>> GetCategoryByIdAsync(int id, bool? isActive = null, bool? includeDeleted = null);
 		Task<Result<bool>> DeleteAsync(int id, string userid);
@@ -20,7 +20,7 @@ namespace E_Commerce.Interfaces
 		Task<Result<CategoryDto>> ReturnRemovedCategoryAsync(int id, string userid);
 		Task<Result<List<ImageDto>>> AddImagesToCategoryAsync(int categoryId, List<IFormFile> images, string userId);
 		Task<Result<ImageDto>> AddMainImageToCategoryAsync(int categoryId, IFormFile mainImage, string userId);
-		Task<Result<CategoryDto>> RemoveImageFromCategoryAsync(int categoryId, int imageId, string userId);
+		Task<Result<bool>> RemoveImageFromCategoryAsync(int categoryId, int imageId, string userId);
 		Task<Result<bool>> ActivateCategoryAsync(int categoryId, string userId);
 		Task<Result<bool>> DeactivateCategoryAsync(int categoryId, string userId);
 	}

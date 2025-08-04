@@ -7,19 +7,25 @@ namespace E_Commerce.Interfaces
 {
 	public interface IOrderServices
 	{
-		Task<Result<OrderDto>> GetOrderByIdAsync(int orderId, string userId);
-		Task<Result<OrderDto>> GetOrderByNumberAsync(string orderNumber, string userId);
-		Task<Result<List<OrderDto>>> GetCustomerOrdersAsync(string userId, int page = 1, int pageSize = 10);
-		Task<Result<List<OrderDto>>> GetOrdersByStatusAsync(OrderStatus status, string userRole, int page = 1, int pageSize = 10);
+		public  Task<Result<List<OrderListDto>>> FilterOrdersAsync(
+		  string? userId = null,
+		  bool? deleted = null,
+		  int page = 1,
+		  int pageSize = 10,
+		  OrderStatus? status = null);
+		
+			Task<Result<OrderDto>> GetOrderByIdAsync(int orderId, string userId, bool isAdmin = false);
+		public  Task<Result<OrderDto>> GetOrderByNumberAsync(string orderNumber, string userId, bool isAdmin = false);
+		Task<Result<List<OrderListDto>>> GetCustomerOrdersAsync(string userId,bool isDeleted, int page = 1, int pageSize = 10);
 		Task<Result<OrderDto>> CreateOrderFromCartAsync(string userId, CreateOrderDto orderDto);
-		Task<Result<OrderDto>> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusDto statusDto, string userRole);
+		Task<Result<OrderDto>> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusDto statusDto);
 		Task<Result<string>> CancelOrderAsync(int orderId, CancelOrderDto cancelDto, string userId);
-		Task<Result<string>> ShipOrderAsync(int orderId, string userRole);
-		Task<Result<string>> DeliverOrderAsync(int orderId, string userRole);
+		Task<Result<string>> ShipOrderAsync(int orderId);
+		Task<Result<string>> DeliverOrderAsync(int orderId);
 		Task<Result<int?>> GetOrderCountByCustomerAsync(string userId);
 		Task<Result<decimal>> GetTotalRevenueByCustomerAsync(string userId);
-		Task<Result<decimal>> GetTotalRevenueByDateRangeAsync(DateTime startDate, DateTime endDate, string userRole);
-		Task<Result<List<OrderDto>>> GetOrdersWithPaginationAsync(int page, int pageSize, OrderStatus? status, string userRole);
+
+		
 		Task<Result<int?>> GetTotalOrderCountAsync(OrderStatus? status, string userRole);
 	}
 } 

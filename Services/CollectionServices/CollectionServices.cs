@@ -11,7 +11,7 @@ using E_Commerce.Models;
 using E_Commerce.Services.AdminOpreationServices;
 using E_Commerce.Services.Cache;
 using E_Commerce.Services.EmailServices;
-using E_Commerce.Services.Product;
+
 using E_Commerce.UOW;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
@@ -144,10 +144,7 @@ namespace E_Commerce.Services.Collection
 					return Result<List<ImageDto>>.Fail($"Failed to save images: {imageResult.Message}", 400);
 				}
 
-				foreach (var img in imageResult.Data)
-				{
-					img.CollectionId = collectionid;
-				}
+			
 
 			 _unitOfWork.Image.UpdateList(imageResult.Data);
 				
@@ -309,7 +306,7 @@ namespace E_Commerce.Services.Collection
             Images = c.Images.Select(c => new DtoModels.ImagesDtos.ImageDto { Id = c.Id, IsMain = c.IsMain, Url = c.Url }),
             Name = c.Name,
             TotalProducts = c.ProductCollections.Count(),
-            Products = c.ProductCollections.Select(p=> new DtoModels.ProductDtos.ProductDto {
+            Products = c.ProductCollections.Where(p=>p.Product.IsActive&&p.Product.DeletedAt==null).Select(p=> new DtoModels.ProductDtos.ProductDto {
 				Id = p.ProductId,
 				Name = p.Product.Name,
 				Description = p.Product.Description,
@@ -321,7 +318,6 @@ namespace E_Commerce.Services.Collection
 				ModifiedAt = p.ModifiedAt,
 				DeletedAt = p.DeletedAt,
 				FinalPrice = (p.Product.Discount != null && p.Product.Discount.IsActive && (p.Product.Discount.DeletedAt == null) && (p.Product.Discount.EndDate > DateTime.UtcNow)) ? Math.Round(p.Product.Price - (((p.Product.Discount.DiscountPercent)/100) * p.Product.Price)) : p.Product.Price,
-
 				fitType = p.Product.fitType,
 				images = p.Product.Images.Where(i => i.DeletedAt == null).Select(i => new ImageDto { Id = i.Id, Url = i.Url }),
 				EndAt = (p.Product.Discount != null && p.Product.Discount.IsActive && p.Product.Discount.EndDate > DateTime.UtcNow) && p.Product.Discount.IsActive ? p.Product.Discount.EndDate : null,
@@ -628,7 +624,7 @@ namespace E_Commerce.Services.Collection
 
 				foreach (var productId in productsDto.ProductIds)
 				{
-					var productExists = await _unitOfWork.Product.IsExsistAndActive(productId);
+					var productExists = await _unitOfWork.Product.IsExsistAndActiveAsync(productId);
 					if (!productExists)
 					{
 						warningMessage.Add($"Product with ID {productId} not found Or Not Acive");

@@ -1,15 +1,12 @@
 using E_Commerce.DtoModels.ImagesDtos;
-using E_Commerce.DtoModels.ProductDtos;
-using E_Commerce.DtoModels.Responses;
-using E_Commerce.Enums;
-using E_Commerce.ErrorHnadling;
 using E_Commerce.Interfaces;
-using E_Commerce.Models;
 using E_Commerce.Services.AdminOpreationServices;
 using E_Commerce.Services.Cache;
 using E_Commerce.Services.EmailServices;
 using E_Commerce.UOW;
 using Hangfire;
+
+
 using Microsoft.EntityFrameworkCore;
 
 namespace E_Commerce.Services.ProductServices
@@ -72,6 +69,12 @@ namespace E_Commerce.Services.ProductServices
 		{
 			try
 			{
+
+				if(!await _unitOfWork.Product.IsExsistAsync(productId))
+				{
+					_logger.LogWarning("GetProductImagesAsync: Product not found. productId: {ProductId}", productId);
+					return Result<List<ImageDto>>.Fail($"No Product with this id :{productId}");
+				}
 				var images = await _unitOfWork.Image.GetAll()
 					.Where(i => i.ProductId == productId && i.DeletedAt == null)
 					.Select(i => new ImageDto
@@ -83,8 +86,12 @@ namespace E_Commerce.Services.ProductServices
 					.ToListAsync();
 
 				if (!images.Any())
+				{
+					_logger.LogWarning("GetProductImagesAsync: No images found for productId: {ProductId}", productId);
 					return Result<List<ImageDto>>.Fail("No images found for this product", 404);
+				}
 
+				_logger.LogInformation("GetProductImagesAsync: Successfully retrieved {Count} images for productId: {ProductId}", images.Count, productId);
 				return Result<List<ImageDto>>.Ok(images, "Product images retrieved successfully", 200);
 			}
 			catch (Exception ex)
@@ -100,11 +107,17 @@ namespace E_Commerce.Services.ProductServices
 			_logger.LogInformation($"Adding images to product: {productId}");
 			
 			if (images == null || !images.Any())
-				return Result<List<ImageDto>>.Fail("No images provided", 400);
+				{
+					_logger.LogWarning("AddProductImagesAsync: No images provided for productId: {ProductId}", productId);
+					return Result<List<ImageDto>>.Fail("No images provided", 400);
+				}
 			
-			var product = await _unitOfWork.Product.GetByIdAsync(productId);
-			if (product == null)
-				return Result<List<ImageDto>>.Fail("Product not found", 404);
+			var product = await _unitOfWork.Product.IsExsistAsync(productId);
+			if (!product)
+				{
+					_logger.LogWarning("AddProductImagesAsync: Product not found. productId: {ProductId}", productId);
+					return Result<List<ImageDto>>.Fail("Product not found", 404);
+				}
 			
 			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
@@ -112,14 +125,14 @@ namespace E_Commerce.Services.ProductServices
 				var saveResult = await _imagesServices.SaveProductImagesAsync(images,productId, userId);
 				if (!saveResult.Success || saveResult.Data == null)
 				{
+					_logger.LogWarning("AddProductImagesAsync: Failed to save images for productId: {ProductId}", productId);
 					await transaction.RollbackAsync();
 					return Result<List<ImageDto>>.Fail("Failed to save images", 500, saveResult.Warnings);
 				}
 
-				foreach (var image in saveResult.Data)
-					image.ProductId = productId;
+			
 
-				_unitOfWork.Image.UpdateList(saveResult.Data);
+			
 
 				var addedImages = saveResult.Data.Select(i => new ImageDto
 				{
@@ -128,12 +141,18 @@ namespace E_Commerce.Services.ProductServices
 					IsMain = i.IsMain
 				}).ToList();
 
-				await _adminOpreationServices.AddAdminOpreationAsync(
+				var adminOpResult = await _adminOpreationServices.AddAdminOpreationAsync(
 					$"Add Images to Product {productId}",
-					Opreations.AddOpreation,
+					Enums.Opreations.AddOpreation,
 					userId,
 					productId
 				);
+				if (adminOpResult == null || !adminOpResult.Success)
+				{
+					_logger.LogError("Failed to log admin operation for AddProductImagesAsync on productId: {ProductId}, userId: {UserId}. Rolling back transaction.", productId, userId);
+					await transaction.RollbackAsync();
+					return Result<List<ImageDto>>.Fail("Failed to log admin operation. Image addition rolled back.", 500);
+				}
 
 				await _unitOfWork.CommitAsync();
 				await transaction.CommitAsync();
@@ -161,65 +180,74 @@ namespace E_Commerce.Services.ProductServices
 			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
-				var product = await _unitOfWork.Product.GetByIdAsync(productId);
-				if (product == null)
+				var productinfo = _unitOfWork.Product.GetAll().Where(p=>p.Id==productId).Select(p => new
 				{
-					await transaction.RollbackAsync();
+					image=p.Images.FirstOrDefault(i=>i.Id==imageId),
+					imagecount=p.Images.Count,
+					isactive= p.IsActive,
+					isdeleted=p.DeletedAt==null,
+					subcategoryid=p.SubCategoryId,
+					hasvaraint=p.ProductVariants.Any(v=>v.DeletedAt==null&&v.Quantity>0)
+				}).FirstOrDefault();
+			
+				if (productinfo==null||productinfo.isdeleted)
+				{
+					_logger.LogWarning("RemoveProductImageAsync: Product not found or deleted. productId: {ProductId}", productId);
 					return Result<bool>.Fail("Product not found", 404);
 				}
-
-				var productImages = await _unitOfWork.Image.GetAll()
-					.Where(i => i.ProductId == productId && i.DeletedAt == null)
-					.ToListAsync();
-
-				var imageToRemove = productImages.FirstOrDefault(i => i.Id == imageId);
-
-				if (imageToRemove == null)
+				if(productinfo.image==null)
 				{
+					_logger.LogWarning("RemoveProductImageAsync: Image not found. productId: {ProductId}, imageId: {ImageId}", productId, imageId);
+					return Result<bool>.Fail("Image not found", 404);
+
+				}
+
+				var isdeleted = await _unitOfWork.Image.SoftDeleteAsync(imageId);
+			
+				if (!isdeleted )
+				{
+					_logger.LogWarning("RemoveProductImageAsync: Image not found or already deleted. productId: {ProductId}, imageId: {ImageId}", productId, imageId);
 					await transaction.RollbackAsync();
 					return Result<bool>.Fail("Image not found on this product or already deleted", 404);
 				}
 
-				var deleteResult = await _imagesServices.DeleteImageAsync(imageToRemove);
-				if (!deleteResult.Success)
-				{
-					await transaction.RollbackAsync();
-					return Result<bool>.Fail(deleteResult.Message ?? "Failed to remove image", 400);
-				}
+				
 
-				if (imageToRemove.IsMain)
-				{
-					var nextMainImage = productImages.FirstOrDefault(i => i.Id != imageId);
-					if (nextMainImage != null)
-					{
-						nextMainImage.IsMain = true;
-						_unitOfWork.Image.Update(nextMainImage);
-					}
-				}
-
-				bool productShouldBeDeactivated = (productImages.Count == 1);
+			
+			
 				var warnings = new List<string>();
 
-				if (productShouldBeDeactivated && product.IsActive)
+				if (productinfo.isactive&&productinfo.imagecount<=1)
 				{
+					if( productinfo.hasvaraint)
+					{
+						_logger.LogWarning("RemoveProductImageAsync: Attempted to remove last image from active product with variants. productId: {ProductId}", productId);
+						await transaction.RollbackAsync();
+						return Result<bool>.Fail("Can't Remove all images of active product");
+					}
 					await _productCatalogService.DeactivateProductAsync(productId, userId);
+					_backgroundJobClient.Enqueue(()=> _subCategoryServices.DeactivateSubCategoryIfAllProductsAreInactiveAsync(productinfo.subcategoryid, userId));
+
 					warnings.Add("Product was deactivated because its last image was removed.");
 				}
 
-				await _adminOpreationServices.AddAdminOpreationAsync(
+			 var isadded=	await _adminOpreationServices.AddAdminOpreationAsync(
 					$"Remove Image {imageId} from Product {productId}",
-					Opreations.DeleteOpreation,
+					Enums.Opreations.DeleteOpreation,
 					userId,
 					productId
 				);
+				if(isadded==null)
+				{
+					_logger.LogError("Failed to log admin operation for RemoveProductImageAsync on productId: {ProductId}, imageId: {ImageId}, userId: {UserId}. Rolling back transaction.", productId, imageId, userId);
+					await transaction.RollbackAsync();
+					return Result<bool>.Fail("Unexpected error while removing image", 500);
+				}	
 
 				await _unitOfWork.CommitAsync();
 				await transaction.CommitAsync();
 
-				if (productShouldBeDeactivated)
-				{
-					await _subCategoryServices.DeactivateSubCategoryIfAllProductsAreInactiveAsync(product.SubCategoryId, userId);
-				}
+				
 
 				RemoveProductCaches();
 
@@ -241,27 +269,22 @@ namespace E_Commerce.Services.ProductServices
 		{
 			_logger.LogInformation($"Setting new main image for product: {productId}");
 			
-			var product = await _unitOfWork.Product.GetByIdAsync(productId);
-			if (product == null)
-				return Result<ImageDto>.Fail("Product not found", 404);
+			var product = await _unitOfWork.Product.IsExsistAndActiveAsync(productId);
+			if (!product)
+				{
+					_logger.LogWarning("UploadAndSetMainImageAsync: Product not found. productId: {ProductId}", productId);
+					return Result<ImageDto>.Fail("Product not found", 404);
+				}
 			
 			using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
-				// Unset previous main images
-				var existingMainImages = await _unitOfWork.Image.GetAll()
-					.Where(i => i.ProductId == productId && i.DeletedAt == null && i.IsMain)
-					.ToListAsync();
-
-				foreach (var existingImage in existingMainImages)
-					existingImage.IsMain = false;
-
-				_unitOfWork.Image.UpdateList(existingMainImages);
-
+				
 				// Save new image
 				var saveResult = await _imagesServices.SaveMainProductImageAsync(mainImage,productId, userId);
 				if (!saveResult.Success || saveResult.Data == null)
 				{
+					_logger.LogWarning("UploadAndSetMainImageAsync: Failed to save main image for productId: {ProductId}", productId);
 					await transaction.RollbackAsync();
 					var errorMsg = !string.IsNullOrWhiteSpace(saveResult.Message)
 						? saveResult.Message
@@ -269,16 +292,20 @@ namespace E_Commerce.Services.ProductServices
 					return Result<ImageDto>.Fail(errorMsg, 400);
 				}
 
-				saveResult.Data.ProductId = productId;
-				saveResult.Data.IsMain = true;
-				_unitOfWork.Image.Update(saveResult.Data);
+				
 
-				await _adminOpreationServices.AddAdminOpreationAsync(
+			var isadded =await _adminOpreationServices.AddAdminOpreationAsync(
 					$"Set Main Image for Product {productId}",
-					Opreations.UpdateOpreation,
+					Enums.Opreations.UpdateOpreation,
 					userId,
 					productId
 				);
+				if (isadded == null)
+				{
+					_logger.LogError("Failed to log admin operation for UploadAndSetMainImageAsync on productId: {ProductId}, userId: {UserId}. Rolling back transaction.", productId, userId);
+					await transaction.RollbackAsync();
+					return Result<ImageDto>.Fail("Unexpected error while removing image", 500);
+				}
 
 				await _unitOfWork.CommitAsync();
 				await transaction.CommitAsync();

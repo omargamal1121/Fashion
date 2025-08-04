@@ -10,4 +10,5 @@ namespace E_Commerce.Enums
         XXL,
         XXXL
     }
-} 
+
+}

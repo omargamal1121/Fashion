@@ -2,7 +2,7 @@
 using E_Commerce.DtoModels.Shared;
 using E_Commerce.Interfaces;
 
-namespace E_Commerce.Services.Category
+namespace E_Commerce.Services.CategoryServcies
 {
     public class CategoryLinkBuilder : BaseLinkBuilder, ICategoryLinkBuilder
     {
@@ -24,7 +24,7 @@ namespace E_Commerce.Services.Category
                     "POST"
                 ),
                 new LinkDto(
-                    GetUriByAction(nameof(CategoriesController.GetAllForUser)) ?? "",
+                    GetUriByAction(nameof(CategoriesController.GetCategories)) ?? "",
                     "get-all",
                     "GET"
                 ),
@@ -35,7 +35,7 @@ namespace E_Commerce.Services.Category
             {
                 links.Add(
                     new LinkDto(
-                        GetUriByAction(nameof(CategoriesController.GetByIdAsync), new { id }) ?? "",
+                        GetUriByAction(nameof(CategoriesController.GetCategoryById), new { id }) ?? "",
                         "get-by-id",
                         "GET"
                     )
@@ -58,7 +58,7 @@ namespace E_Commerce.Services.Category
                 );
                 links.Add(
                     new LinkDto(
-                        GetUriByAction(nameof(CategoriesController.ReturnRemovedCategoryAsync), new { id }) ?? "",
+                        GetUriByAction(nameof(CategoriesController.RestoreCategoryAsync), new { id }) ?? "",
                         "restore",
                         "PATCH"
                     )
@@ -72,21 +72,21 @@ namespace E_Commerce.Services.Category
                 );
                 links.Add(
                     new LinkDto(
-                        GetUriByAction(nameof(CategoriesController.AddExtraImagesAsync), new { id }) ?? "",
+                        GetUriByAction(nameof(CategoriesController.AddImagesToCategoryAsync), new { id }) ?? "",
                         "add-extra-images",
                         "POST"
                     )
                 );
                 links.Add(
                     new LinkDto(
-                        GetUriByAction(nameof(CategoriesController.ActivateCategory), new { categoryId = id }) ?? "",
+                        GetUriByAction(nameof(CategoriesController.ActivateCategoryAsync), new { categoryId = id }) ?? "",
                         "change-active-status",
                         "PATCH"
                     )
                 );
                 links.Add(
                     new LinkDto(
-                        GetUriByAction(nameof(CategoriesController.DeactivateCategory), new { categoryId = id }) ?? "",
+                        GetUriByAction(nameof(CategoriesController.DeactivateCategoryAsync), new { categoryId = id }) ?? "",
                         "change-active-status",
                         "PATCH"
                     )

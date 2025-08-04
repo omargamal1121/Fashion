@@ -1,7 +1,7 @@
 using E_Commerce.DtoModels.Shared;
 using E_Commerce.Interfaces;
 
-namespace E_Commerce.Services.Category
+namespace E_Commerce.Services.CategoryServcies
 {
     public abstract class BaseLinkBuilder 
     {

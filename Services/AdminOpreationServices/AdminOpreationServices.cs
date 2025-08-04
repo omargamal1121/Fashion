@@ -1,6 +1,6 @@
 ﻿using E_Commerce.Enums;
 using E_Commerce.Models;
-using E_Commerce.Services.Category;
+using E_Commerce.Services.CategoryServcies;
 using E_Commerce.UOW;
 
 namespace E_Commerce.Services.AdminOpreationServices
@@ -21,7 +21,25 @@ namespace E_Commerce.Services.AdminOpreationServices
 			{
 				Description = description,
 				AdminId = userid,
-				ItemId = itemid,
+				ItemId = new List<int> { itemid},
+				OperationType = opreation,
+			};
+			var created = await _unitOfWork.Repository<AdminOperationsLog>().CreateAsync(adminopreation);
+			if (created == null)
+			{
+				_logger.LogError("Failed to create AdminOperationsLog");
+				return Result<AdminOperationsLog>.Fail("Failed to create AdminOperationsLog");
+			}
+			return Result<AdminOperationsLog>.Ok(created);
+		}
+		public async Task<Result<AdminOperationsLog>> AddAdminOpreationAsync(string description, Opreations opreation, string userid, List<int>itemids)
+		{
+			_logger.LogInformation($"Execute {nameof(AddAdminOpreationAsync)}");
+			var adminopreation = new AdminOperationsLog
+			{
+				Description = description,
+				AdminId = userid,
+				ItemId = itemids,
 				OperationType = opreation,
 			};
 			var created = await _unitOfWork.Repository<AdminOperationsLog>().CreateAsync(adminopreation);

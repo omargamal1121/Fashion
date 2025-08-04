@@ -28,7 +28,7 @@ namespace E_Commerce.Interfaces
         Task<Result<SubCategoryDto>> ReturnRemovedSubCategoryAsync(int id, string userid);
         Task<Result<List<ImageDto>>> AddImagesToSubCategoryAsync(int subCategoryId, List<IFormFile> images, string userId);
         Task<Result<ImageDto>> AddMainImageToSubCategoryAsync(int subCategoryId, IFormFile mainImage, string userId);
-        Task<Result<SubCategoryDto>> RemoveImageFromSubCategoryAsync(int subCategoryId, int imageId, string userId);
+        Task<Result<bool>> RemoveImageFromSubCategoryAsync(int subCategoryId, int imageId, string userId);
       
         Task<Result<bool>> ActivateSubCategoryAsync(int subCategoryId, string userId);
         Task<Result<bool>> DeactivateSubCategoryAsync(int subCategoryId, string userId);

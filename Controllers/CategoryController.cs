@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using E_Commerce.DtoModels;
 using E_Commerce.DtoModels.CategoryDtos;
 using E_Commerce.DtoModels.ImagesDtos;
@@ -14,9 +14,8 @@ using System.Security.Claims;
 
 namespace E_Commerce.Controllers
 {
-	[Route("api/[controller]")]
+	[Route("api/categories")]
 	[ApiController]
-	[Authorize(Roles = "Admin")]
 	public class CategoriesController : ControllerBase
 	{
 		private readonly ICategoryServices _categoryServices;
@@ -60,186 +59,376 @@ namespace E_Commerce.Controllers
 			}
 		}
 
-		// Only keep unique, necessary endpoints for admin and user roles
-		// Admin endpoints
-		[HttpGet("{id}", Name = "GetCategoryByIdForAdmin")]
+		// RESTful endpoints
+		/// <summary>
+		/// Get category by ID - accessible to all users, admins can control visibility filters
+		/// </summary>
+		[HttpGet("{id}")]
+		[AllowAnonymous]
+		[ActionName(nameof(GetCategoryById))]
+		public async Task<ActionResult<ApiResponse<CategorywithdataDto>>> GetCategoryById(int id)
+		{
+			_logger.LogInformation($"Executing GetCategoryById for id: {id}");
+			
+			// Enhanced validation
+			if (id <= 0)
+			{
+				return BadRequest(ApiResponse<CategorywithdataDto>.CreateErrorResponse("Invalid category ID", new ErrorResponse("Validation", new List<string> { "Category ID must be greater than 0" }), 400));
+			}
+			
+			// Role-based filtering - only active, non-deleted for regular users
+			var result = await _categoryServices.GetCategoryByIdAsync(id, true, false);
+			return HandleResult(result, "GetCategoryById", id);
+		}
+		
+		/// <summary>
+		/// Get category by ID with admin filters - only accessible to admins
+		/// </summary>
+		[HttpGet("{id}/admin")]
 		[Authorize(Roles = "Admin")]
-		[ActionName(nameof(GetByIdAsync))]
-		public async Task<ActionResult<ApiResponse<CategorywithdataDto>>> GetByIdAsync(
+		[ActionName(nameof(GetCategoryByIdAdmin))]
+		public async Task<ActionResult<ApiResponse<CategorywithdataDto>>> GetCategoryByIdAdmin(
 			int id,
 			[FromQuery] bool? isActive = null,
 			[FromQuery] bool? includeDeleted = null)
 		{
-			_logger.LogInformation($"Executing {nameof(GetByIdAsync)} for id: {id}, isActive: {isActive}, includeDeleted: {includeDeleted}");
+			_logger.LogInformation($"Executing GetCategoryByIdAdmin for id: {id}, isActive: {isActive}, includeDeleted: {includeDeleted}");
+			
+			// Enhanced validation
+			if (id <= 0)
+			{
+				return BadRequest(ApiResponse<CategorywithdataDto>.CreateErrorResponse("Invalid category ID", new ErrorResponse("Validation", new List<string> { "Category ID must be greater than 0" }), 400));
+			}
+			
+			// Admins can use any filters
 			var result = await _categoryServices.GetCategoryByIdAsync(id, isActive, includeDeleted);
-			return HandleResult(result, nameof(GetByIdAsync), id);
+			return HandleResult(result, "GetCategoryByIdAdmin", id);
 		}
 
-		[HttpGet("all/admin")]
-		[Authorize(Roles = "Admin")]
-		public async Task<IActionResult> GetAllForAdmin([FromQuery] bool? isActive = null, [FromQuery] bool? isDeleted = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+		/// <summary>
+		/// Get all categories - accessible to all users (only active, non-deleted)
+		/// </summary>
+		[HttpGet]
+		[AllowAnonymous]
+		[ActionName(nameof(GetCategories))]
+		public async Task<ActionResult<ApiResponse<List<CategoryDto>>>> GetCategories(
+			[FromQuery] string? search = null,
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10)
 		{
-			var result = await _categoryServices.GetAllCategoriesAsync(isActive, isDeleted, page, pageSize);
+			_logger.LogInformation($"Executing GetCategories with search: {search}, page: {page}");
+			
+			// Fixed filtering for regular users - only active, non-deleted categories
+			var isActive = true;
+			var isDeleted = false;
+			
+			// Use FilterAsync for search functionality
+			if (!string.IsNullOrWhiteSpace(search))
+			{
+				var searchResult = await _categoryServices.FilterAsync(search, isActive, isDeleted, page, pageSize);
+				return HandleResult(searchResult, "GetCategories");
+			}
+			
+			// Use GetAllCategoriesAsync for listing
+			var result = await _categoryServices.FilterAsync(string.Empty,isActive, isDeleted, page, pageSize);
+			return StatusCode(result.StatusCode, result);
+		}
+		
+		/// <summary>
+		/// Get all categories with admin filters - only accessible to admins
+		/// </summary>
+		[HttpGet("admin")]
+		[Authorize(Roles = "Admin")]
+		[ActionName(nameof(GetCategoriesAdmin))]
+		public async Task<ActionResult<ApiResponse<List<CategoryDto>>>> GetCategoriesAdmin(
+			[FromQuery] string? search = null,
+			[FromQuery] bool? isActive = null,
+			[FromQuery] bool? isDeleted = null,
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10)
+		{
+			_logger.LogInformation($"Executing GetCategoriesAdmin with search: {search}, isActive: {isActive}, isDeleted: {isDeleted}, page: {page}");
+			
+			// Admins can use any filters
+			// Use FilterAsync for search functionality
+			if (!string.IsNullOrWhiteSpace(search))
+			{
+				var searchResult = await _categoryServices.FilterAsync(search, isActive, isDeleted, page, pageSize);
+				return HandleResult(searchResult, "GetCategoriesAdmin");
+			}
+			
+			// Use GetAllCategoriesAsync for listing
+			var result = await _categoryServices.FilterAsync(search,isActive, isDeleted, page, pageSize);
 			return StatusCode(result.StatusCode, result);
 		}
 
-		[HttpPatch("{id}/activate")]
-		[Authorize(Roles = "Admin")]
-		[ActionName(nameof(ActivateCategory))]
-		public async Task<ActionResult<ApiResponse<bool>>> ActivateCategory(int id)
-		{
-			_logger.LogInformation($"Executing {nameof(ActivateCategory)} for id: {id}");
-			var userId = HttpContext.Items["UserId"]?.ToString();
-			var result = await _categoryServices.ActivateCategoryAsync(id, userId);
-			return HandleResult(result, nameof(ActivateCategory), id);
-		}
 
-		[HttpPatch("{id}/deactivate")]
-		[Authorize(Roles = "Admin")]
-		[ActionName(nameof(DeactivateCategory))]
-		public async Task<ActionResult<ApiResponse<bool>>> DeactivateCategory(int id)
-		{
-			_logger.LogInformation($"Executing {nameof(DeactivateCategory)} for id: {id}");
-			var userId = HttpContext.Items["UserId"]?.ToString();
-			var result = await _categoryServices.DeactivateCategoryAsync(id, userId);
-			return HandleResult(result, nameof(DeactivateCategory), id);
-		}
-
+		/// <summary>
+		/// Create a new category
+		/// </summary>
 		[HttpPost]
 		[Authorize(Roles = "Admin")]
 		[ActionName(nameof(CreateAsync))]
 		public async Task<ActionResult<ApiResponse<CategoryDto>>> CreateAsync([FromForm] CreateCategotyDto categoryDto)
 		{
 			_logger.LogInformation($"Executing {nameof(CreateAsync)}");
+			
+			// Enhanced validation to match service improvements
+			if (categoryDto == null)
+			{
+				return BadRequest(ApiResponse<CategoryDto>.CreateErrorResponse("Category data is required", new ErrorResponse("Validation", new List<string> { "Category model cannot be null" }), 400));
+			}
+			
 			if (!ModelState.IsValid)
 			{
 				var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-				return BadRequest(ApiResponse<CategoryDto>.CreateErrorResponse("Check On Data", new ErrorResponse("Invalid Data", errors)));
+				return BadRequest(ApiResponse<CategoryDto>.CreateErrorResponse("Validation failed", new ErrorResponse("Invalid Data", errors)));
 			}
+			
 			var userId = HttpContext.Items["UserId"]?.ToString();
+			if (string.IsNullOrWhiteSpace(userId))
+			{
+				return Unauthorized(ApiResponse<CategoryDto>.CreateErrorResponse("User authentication required", new ErrorResponse("Authentication", new List<string> { "User ID is required" }), 401));
+			}
+			
 			var result = await _categoryServices.CreateAsync(categoryDto, userId);
 			return HandleResult(result, nameof(CreateAsync));
 		}
 
+		/// <summary>
+		/// Update a category
+		/// </summary>
 		[HttpPut("{id}")]
 		[Authorize(Roles = "Admin")]
 		[ActionName(nameof(UpdateAsync))]
 		public async Task<ActionResult<ApiResponse<CategoryDto>>> UpdateAsync(int id, [FromForm] UpdateCategoryDto categoryDto)
 		{
 			_logger.LogInformation($"Executing {nameof(UpdateAsync)} for id: {id}");
+			
+			// Enhanced validation to match service improvements
+			if (id <= 0)
+			{
+				return BadRequest(ApiResponse<CategoryDto>.CreateErrorResponse("Invalid category ID", new ErrorResponse("Validation", new List<string> { "Category ID must be greater than 0" }), 400));
+			}
+			
+			if (categoryDto == null)
+			{
+				return BadRequest(ApiResponse<CategoryDto>.CreateErrorResponse("Category data is required", new ErrorResponse("Validation", new List<string> { "Category model cannot be null" }), 400));
+			}
+			
 			if (!ModelState.IsValid)
 			{
 				var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-				return BadRequest(ApiResponse<CategoryDto>.CreateErrorResponse("Check on data", new ErrorResponse("Invalid Data", errors)));
+				return BadRequest(ApiResponse<CategoryDto>.CreateErrorResponse("Validation failed", new ErrorResponse("Invalid Data", errors)));
 			}
+			
 			var userId = HttpContext.Items["UserId"]?.ToString();
+			if (string.IsNullOrWhiteSpace(userId))
+			{
+				return Unauthorized(ApiResponse<CategoryDto>.CreateErrorResponse("User authentication required", new ErrorResponse("Authentication", new List<string> { "User ID is required" }), 401));
+			}
+			
 			var result = await _categoryServices.UpdateAsync(id, categoryDto, userId);
 			return HandleResult(result, nameof(UpdateAsync), id);
 		}
 
+		/// <summary>
+		/// Delete a category
+		/// </summary>
 		[HttpDelete("{id}")]
 		[Authorize(Roles = "Admin")]
 		[ActionName(nameof(DeleteAsync))]
 		public async Task<ActionResult<ApiResponse<bool>>> DeleteAsync(int id)
 		{
 			_logger.LogInformation($"Executing {nameof(DeleteAsync)} for id: {id}");
+			
+			// Enhanced validation to match service improvements
+			if (id <= 0)
+			{
+				return BadRequest(ApiResponse<bool>.CreateErrorResponse("Invalid category ID", new ErrorResponse("Validation", new List<string> { "Category ID must be greater than 0" }), 400));
+				
+			}
+			
 			var userId = HttpContext.Items["UserId"]?.ToString();
+			if (string.IsNullOrWhiteSpace(userId))
+			{
+				return Unauthorized(ApiResponse<bool>.CreateErrorResponse("User authentication required", new ErrorResponse("Authentication", new List<string> { "User ID is required" }), 401));
+			}
+			
 			var result = await _categoryServices.DeleteAsync(id, userId);
 			return HandleResult(result, nameof(DeleteAsync));
 		}
 
-		[HttpPatch("{id}/Restore")]
+		/// <summary>
+		/// Add images to a category (both main and additional images)
+		/// </summary>
+		[HttpPost("{id}/images")]
 		[Authorize(Roles = "Admin")]
-		[ActionName(nameof(ReturnRemovedCategoryAsync))]
-		public async Task<ActionResult<ApiResponse<CategoryDto>>> ReturnRemovedCategoryAsync(int id)
+		[ActionName(nameof(AddImagesToCategoryAsync))]
+		public async Task<ActionResult<ApiResponse<List<ImageDto>>>> AddImagesToCategoryAsync(int id, [FromForm] AddImagesDto images)
 		{
-			_logger.LogInformation($"Executing {nameof(ReturnRemovedCategoryAsync)} for id: {id}");
+			_logger.LogInformation($"Executing {nameof(AddImagesToCategoryAsync)} for id: {id}");
+			
+			// Enhanced validation
+			if (id <= 0)
+			{
+				return BadRequest(ApiResponse<List<ImageDto>>.CreateErrorResponse("Invalid category ID", new ErrorResponse("Validation", new List<string> { "Category ID must be greater than 0" }), 400));
+			}
+			
+			if (images == null || images.Images == null || !images.Images.Any())
+			{
+				return BadRequest(ApiResponse<List<ImageDto>>.CreateErrorResponse("Images are required", new ErrorResponse("Validation", new List<string> { "At least one image is required." }), 400));
+			}
+			
 			var userId = HttpContext.Items["UserId"]?.ToString();
-			var result = await _categoryServices.ReturnRemovedCategoryAsync(id, userId);
-			return HandleResult(result, nameof(ReturnRemovedCategoryAsync), id);
+			if (string.IsNullOrWhiteSpace(userId))
+			{
+				return Unauthorized(ApiResponse<List<ImageDto>>.CreateErrorResponse("User authentication required", new ErrorResponse("Authentication", new List<string> { "User ID is required" }), 401));
+			}
+			
+			var result = await _categoryServices.AddImagesToCategoryAsync(id, images.Images, userId);
+			return HandleResult(result, nameof(AddImagesToCategoryAsync), id);
 		}
 
-		[HttpPost("{id}/AddMainImage")]
+		/// <summary>
+		/// Add a main image to a category
+		/// </summary>
+		[HttpPost("{id}/images/main")]
 		[Authorize(Roles = "Admin")]
 		[ActionName(nameof(AddMainImageAsync))]
 		public async Task<ActionResult<ApiResponse<ImageDto>>> AddMainImageAsync(int id, [FromForm] AddMainImageDto mainImage)
 		{
 			_logger.LogInformation($"Executing {nameof(AddMainImageAsync)} for id: {id}");
-			if (mainImage.Image == null || mainImage.Image.Length == 0)
+			
+			// Enhanced validation
+			if (id <= 0)
 			{
-				return BadRequest(ApiResponse<ImageDto>.CreateErrorResponse("Image Can't Empty", new ErrorResponse("Validation", new List<string> { "Main image is required." }), 400));
+				return BadRequest(ApiResponse<ImageDto>.CreateErrorResponse("Invalid category ID", new ErrorResponse("Validation", new List<string> { "Category ID must be greater than 0" }), 400));
 			}
+			
+			if (mainImage == null || mainImage.Image == null || mainImage.Image.Length == 0)
+			{
+				return BadRequest(ApiResponse<ImageDto>.CreateErrorResponse("Image is required", new ErrorResponse("Validation", new List<string> { "Main image is required." }), 400));
+			}
+			
 			var userId = HttpContext.Items["UserId"]?.ToString();
+			if (string.IsNullOrWhiteSpace(userId))
+			{
+				return Unauthorized(ApiResponse<ImageDto>.CreateErrorResponse("User authentication required", new ErrorResponse("Authentication", new List<string> { "User ID is required" }), 401));
+			}
+			
 			var result = await _categoryServices.AddMainImageToCategoryAsync(id, mainImage.Image, userId);
 			return HandleResult(result, nameof(AddMainImageAsync), id);
 		}
 
-		[HttpPost("{id}/AddExtraImages")]
-		[Authorize(Roles = "Admin")]
-		[ActionName(nameof(AddExtraImagesAsync))]
-		public async Task<ActionResult<ApiResponse<List<ImageDto>>>> AddExtraImagesAsync(int id, [FromForm] AddImagesDto images)
-		{
-			_logger.LogInformation($"Executing {nameof(AddExtraImagesAsync)} for id: {id}");
-			if (images.Images == null || !images.Images.Any())
-			{
-				return BadRequest(ApiResponse<List<ImageDto>>.CreateErrorResponse("Image Can't Empty", new ErrorResponse("Validation", new List<string> { "At least one image is required." }), 400));
-			}
-			var userId = HttpContext.Items["UserId"]?.ToString();
-			var result = await _categoryServices.AddImagesToCategoryAsync(id, images.Images, userId);
-			return HandleResult(result, nameof(AddExtraImagesAsync), id);
-		}
-
-		[HttpDelete("{id}/RemoveImage/{imageId}")]
+		/// <summary>
+		/// Remove an image from a category
+		/// </summary>
+		[HttpDelete("{id}/images/{imageId}")]
 		[Authorize(Roles = "Admin")]
 		[ActionName(nameof(RemoveImageAsync))]
-		public async Task<ActionResult<ApiResponse<CategoryDto>>> RemoveImageAsync(int id, int imageId)
+		public async Task<ActionResult<ApiResponse<bool>>> RemoveImageAsync(int id, int imageId)
 		{
+			_logger.LogInformation($"Executing {nameof(RemoveImageAsync)} for categoryId: {id}, imageId: {imageId}");
+			
+			// Enhanced validation
+			if (id <= 0)
+			{
+				return BadRequest(ApiResponse<CategoryDto>.CreateErrorResponse("Invalid category ID", new ErrorResponse("Validation", new List<string> { "Category ID must be greater than 0" }), 400));
+			}
+			
+			if (imageId <= 0)
+			{
+				return BadRequest(ApiResponse<CategoryDto>.CreateErrorResponse("Invalid image ID", new ErrorResponse("Validation", new List<string> { "Image ID must be greater than 0" }), 400));
+			}
+			
 			var userId = HttpContext.Items["UserId"]?.ToString();
+			if (string.IsNullOrWhiteSpace(userId))
+			{
+				return Unauthorized(ApiResponse<CategoryDto>.CreateErrorResponse("User authentication required", new ErrorResponse("Authentication", new List<string> { "User ID is required" }), 401));
+			}
+			
 			var result = await _categoryServices.RemoveImageFromCategoryAsync(id, imageId, userId);
 			return HandleResult(result, nameof(RemoveImageAsync), id);
 		}
 
-		// User endpoints
-		[HttpGet("user/{id}", Name = "GetCategoryByIdForUser")]
-		[AllowAnonymous]
-		public async Task<ActionResult<ApiResponse<CategorywithdataDto>>> GetByIdAsyncForUsers(
-			int id)
-		{
-			_logger.LogInformation($"Executing {nameof(GetByIdAsyncForUsers)} for id: {id}, isActive: {true}, includeDeleted: {false}");
-			var result = await _categoryServices.GetCategoryByIdAsync(id, true, false);
-			return HandleResult(result, nameof(GetByIdAsyncForUsers), id);
-		}
-
-		[HttpGet("all/user")]
-		[AllowAnonymous]
-		public async Task<IActionResult> GetAllForUser([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-		{
-			// Only active and not deleted categories for users
-			var result = await _categoryServices.GetAllCategoriesAsync(true, false, page, pageSize);
-			return StatusCode(result.StatusCode, result);
-		}
-		[HttpGet("user-search")]
-		[AllowAnonymous]
-		public async Task<IActionResult> SearchForUsers([FromQuery] string keyword, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-		{
-			var result = await _categoryServices.FilterAsync(keyword, isActive: true,  false, page, pageSize);
-			return StatusCode(result.StatusCode, result);
-		}
-
-		[HttpGet("admin-search")]
+		/// <summary>
+		/// Activate a category
+		/// </summary>
+		[HttpPatch("{id}/activate")]
 		[Authorize(Roles = "Admin")]
-		public async Task<IActionResult> SearchForAdmin([FromQuery] string keyword, [FromQuery] bool? isActive = null, [FromQuery] bool? isDeleted = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+		[ActionName(nameof(ActivateCategoryAsync))]
+		public async Task<ActionResult<ApiResponse<bool>>> ActivateCategoryAsync(int id)
 		{
-			var result = await _categoryServices.FilterAsync(keyword, isActive, isDeleted, page, pageSize);
-			return StatusCode(result.StatusCode, result);
+			_logger.LogInformation($"Executing {nameof(ActivateCategoryAsync)} for id: {id}");
+			
+			// Enhanced validation
+			if (id <= 0)
+			{
+				return BadRequest(ApiResponse<bool>.CreateErrorResponse("Invalid category ID", new ErrorResponse("Validation", new List<string> { "Category ID must be greater than 0" }), 400));
+			}
+			
+			var userId = HttpContext.Items["UserId"]?.ToString();
+			if (string.IsNullOrWhiteSpace(userId))
+			{
+				return Unauthorized(ApiResponse<bool>.CreateErrorResponse("User authentication required", new ErrorResponse("Authentication", new List<string> { "User ID is required" }), 401));
+			}
+			
+			var result = await _categoryServices.ActivateCategoryAsync(id, userId);
+			return HandleResult(result, nameof(ActivateCategoryAsync), id);
 		}
 
-		[HttpGet("test-links")]
-		[ActionName(nameof(TestLinks))]
-		public ActionResult<ApiResponse<List<LinkDto>>> TestLinks()
+		/// <summary>
+		/// Deactivate a category
+		/// </summary>
+		[HttpPatch("{id}/deactivate")]
+		[Authorize(Roles = "Admin")]
+		[ActionName(nameof(DeactivateCategoryAsync))]
+		public async Task<ActionResult<ApiResponse<bool>>> DeactivateCategoryAsync(int id)
 		{
-			var links = _linkBuilder.GenerateLinks(1);
-			return Ok(ApiResponse<List<LinkDto>>.CreateSuccessResponse("Test Links", links, 200, links: links));
+			_logger.LogInformation($"Executing {nameof(DeactivateCategoryAsync)} for id: {id}");
+			
+			// Enhanced validation
+			if (id <= 0)
+			{
+				return BadRequest(ApiResponse<bool>.CreateErrorResponse("Invalid category ID", new ErrorResponse("Validation", new List<string> { "Category ID must be greater than 0" }), 400));
+			}
+			
+			var userId = HttpContext.Items["UserId"]?.ToString();
+			if (string.IsNullOrWhiteSpace(userId))
+			{
+				return Unauthorized(ApiResponse<bool>.CreateErrorResponse("User authentication required", new ErrorResponse("Authentication", new List<string> { "User ID is required" }), 401));
+			}
+			
+			var result = await _categoryServices.DeactivateCategoryAsync(id, userId);
+			return HandleResult(result, nameof(DeactivateCategoryAsync), id);
 		}
+
+		/// <summary>
+		/// Restore a deleted category
+		/// </summary>
+		[HttpPatch("{id}/restore")]
+		[Authorize(Roles = "Admin")]
+		[ActionName(nameof(RestoreCategoryAsync))]
+		public async Task<ActionResult<ApiResponse<CategoryDto>>> RestoreCategoryAsync(int id)
+		{
+			_logger.LogInformation($"Executing {nameof(RestoreCategoryAsync)} for id: {id}");
+			
+			// Enhanced validation
+			if (id <= 0)
+			{
+				return BadRequest(ApiResponse<CategoryDto>.CreateErrorResponse("Invalid category ID", new ErrorResponse("Validation", new List<string> { "Category ID must be greater than 0" }), 400));
+			}
+			
+			var userId = HttpContext.Items["UserId"]?.ToString();
+			if (string.IsNullOrWhiteSpace(userId))
+			{
+				return Unauthorized(ApiResponse<CategoryDto>.CreateErrorResponse("User authentication required", new ErrorResponse("Authentication", new List<string> { "User ID is required" }), 401));
+			}
+			
+			var result = await _categoryServices.ReturnRemovedCategoryAsync(id, userId);
+			return HandleResult(result, nameof(RestoreCategoryAsync), id);
+		}
+
 	}
 }

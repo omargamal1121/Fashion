@@ -1,7 +1,7 @@
 using E_Commerce.Controllers;
 using E_Commerce.DtoModels.Shared;
 using E_Commerce.Interfaces;
-using E_Commerce.Services.Category;
+using E_Commerce.Services.CategoryServcies;
 
 namespace E_Commerce.Services.ProductServices
 {
@@ -31,17 +31,17 @@ namespace E_Commerce.Services.ProductServices
                     "POST"
                 ),
                 new LinkDto(
-                    GetUriByAction(nameof(ProductController.GetBestSellers)) ?? "",
+                    GetUriByAction(nameof(ProductController.GetBestSellersPublic)) ?? "",
                     "bestsellers",
                     "GET"
                 ),
                 new LinkDto(
-                    GetUriByAction(nameof(ProductController.GetNewArrivals)) ?? "",
+                    GetUriByAction(nameof(ProductController.GetNewArrivalsPublic)) ?? "",
                     "newarrivals",
                     "GET"
                 ),
                 new LinkDto(
-                    GetUriByAction(nameof(ProductController.AdvancedSearch)) ?? "",
+                    GetUriByAction(nameof(ProductController.AdvancedSearchPublic)) ?? "",
                     "advanced-search",
                     "POST"
                 )
@@ -79,11 +79,7 @@ namespace E_Commerce.Services.ProductServices
                     "set-main-image",
                     "POST"
                 ));
-                links.Add(new LinkDto(
-                    GetUriByAction(nameof(ProductController.GetProductVariants), new { id }) ?? "",
-                    "get-variants",
-                    "GET"
-                ));
+              
                
                
             }

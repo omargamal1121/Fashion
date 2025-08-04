@@ -19,11 +19,11 @@ namespace E_Commerce.Services.ProductServices
 	public interface IProductDiscountService
 	{
 		Task<Result<DiscountDto>> GetProductDiscountAsync(int productId);
-		Task<Result<ProductDetailDto>> AddDiscountToProductAsync(int productId, int discountId, string userId);
-		Task<Result<ProductDetailDto>> UpdateProductDiscountAsync(int productId, int discountId, string userId);
-		Task<Result<ProductDetailDto>> RemoveDiscountFromProductAsync(int productId, string userId);
+		Task<Result<bool>> AddDiscountToProductAsync(int productId, int discountId, string userId);
+		Task<Result<bool>> UpdateProductDiscountAsync(int productId, int discountId, string userId);
+		Task<Result<bool>> RemoveDiscountFromProductAsync(int productId, string userId);
 		Task<Result<List<ProductDto>>> GetProductsWithActiveDiscountsAsync();
-		public Task<Result<List<ProductDto>>> ApplyDiscountToProductsAsync(ApplyDiscountToProductsDto dto);
+		Task<Result<List<ProductDto>>> ApplyDiscountToProductsAsync(ApplyDiscountToProductsDto dto, string userId);
 	}
 
 	public class ProductDiscountService : IProductDiscountService
@@ -57,54 +57,86 @@ namespace E_Commerce.Services.ProductServices
 			_errorNotificationService = errorNotificationService;
 		}
 
-		public async Task<Result<List<ProductDto>>> ApplyDiscountToProductsAsync(ApplyDiscountToProductsDto dto)
-		{
-			var discount = await _unitOfWork.Repository<Models.Discount>().GetByIdAsync(dto.Discountid);
+		public async Task<Result<List<ProductDto>>> ApplyDiscountToProductsAsync(ApplyDiscountToProductsDto dto, string userId)
+        {
+   
+            if (dto == null)
+                return Result<List<ProductDto>>.Fail("DTO cannot be null.", 400);
+            
+            if (dto.Discountid <= 0)
+                return Result<List<ProductDto>>.Fail("Invalid discount ID.", 400);
+            
+            if (dto.ProductsId == null || !dto.ProductsId.Any())
+                return Result<List<ProductDto>>.Fail("Product IDs cannot be null or empty.", 400);
+            
+            if (string.IsNullOrWhiteSpace(userId))
+                return Result<List<ProductDto>>.Fail("User ID cannot be null or empty.", 400);
 
-			if (discount == null||discount.DeletedAt!=null)
-				return Result<List<ProductDto>>.Fail("Discount not found or Deleted.");
+            using var transaction = await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var discountExists = await _unitOfWork.Repository<Models.Discount>().IsExsistAsync(dto.Discountid);
+                if (!discountExists)
+                    return Result<List<ProductDto>>.Fail("Discount not found or deleted.", 404);
+               
 
-			var products = await _unitOfWork.Product.GetAll()
-				.Where(p => dto.ProductsId.Contains(p.Id))
-				.ToListAsync();
+                var warnings = await _unitOfWork.Product.AddDiscountToProductsAsync(dto.ProductsId, dto.Discountid);
 
-			if (!products.Any())
-				return Result<List<ProductDto>>.Fail("No valid products found.");
+                await _unitOfWork.CommitAsync();
 
-			foreach (var product in products)
-				product.DiscountId = dto.Discountid;
+				var adminOpResult = await _adminOpreationServices.AddAdminOpreationAsync(
+					 $"Add Discount to Product {string.Join(",", dto.ProductsId)}",
+					 Opreations.AddOpreation,
+					 userId,
+					 dto.ProductsId.FirstOrDefault()
+				);
+				if (adminOpResult == null || !adminOpResult.Success)
+                {
+                    await transaction.RollbackAsync();
+                    return Result<List<ProductDto>>.Fail("Failed to log admin operation. Discount application rolled back.", 500);
+                }
 
-			await _unitOfWork.CommitAsync();
-			var productsdto = await _unitOfWork.Product.GetAll().AsNoTracking()
-				.Where(p => dto.ProductsId.Contains(p.Id)).Select(maptoProductDtoexpression)
-				.ToListAsync();
+                await _unitOfWork.CommitAsync();
+                await transaction.CommitAsync();
 
-			return Result<List<ProductDto>>.Ok(productsdto);
-		}
+                var updatedProducts = await _unitOfWork.Product
+                    .GetAll()
+                    .Where(p => dto.ProductsId.Contains(p.Id))
+                    .Select(maptoProductDtoexpression)
+                    .ToListAsync();
+
+                return Result<List<ProductDto>>.Ok(updatedProducts, warnings: warnings);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error in ApplyDiscountToProductsAsync");
+                _backgroundJobClient.Enqueue(() => _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
+                return Result<List<ProductDto>>.Fail("Error applying discount to products.", 500);
+            }
+        }
 
 
 		public async Task<Result<DiscountDto>> GetProductDiscountAsync(int productId)
 		{
 			try
 			{
-				var productInfo = await _unitOfWork.Product.GetAll()
-					.AsNoTracking()
-					.Where(p => p.Id == productId)
-					.Include(p=>p.Discount )
-					.FirstOrDefaultAsync();
 
-				if (productInfo == null)
-					return Result<DiscountDto>.Fail("Product not found", 404);
-
-				if (productInfo.Discount == null)
-					return Result<DiscountDto>.Fail("No discount found for this product", 404);
-
-				var discount = productInfo.Discount;
-
-				if (!discount.IsActive || discount.DeletedAt != null || !( discount.EndDate >= DateTime.UtcNow))
+				if(! await _unitOfWork.Product.IsExsistAndHasDiscountAsync(productId))
 				{
-					return Result<DiscountDto>.Fail("No active discount found for this product", 404);
+					  return Result<DiscountDto>.Fail("Product not found Or No discount found for this product", 404);
 				}
+
+				var discount = await _unitOfWork.Product.GetDiscountofProduct(productId);
+				if(discount==null)
+					return Result<DiscountDto>.Fail("Product not found Or No discount found for this product", 404);
+			
+
+
+
+
+
+
 
 				var discountDto = new DiscountDto
 				{
@@ -115,8 +147,6 @@ namespace E_Commerce.Services.ProductServices
 					StartDate = discount.StartDate,
 					EndDate = discount.EndDate,
 					IsActive = discount.IsActive,
-					
-					
 					CreatedAt = discount.CreatedAt,
 					ModifiedAt = discount.ModifiedAt,
 					DeletedAt = discount.DeletedAt,
@@ -183,163 +213,186 @@ namespace E_Commerce.Services.ProductServices
 
 
 
-		public async Task<Result<ProductDetailDto>> AddDiscountToProductAsync(int productId, int discountId, string userId)
+		public async Task<Result<bool>> AddDiscountToProductAsync(int productId, int discountId, string userId)
 		{
 			_logger.LogInformation($"Adding discount to product: {productId} with discount: {discountId}");
 				using var transaction = await _unitOfWork.BeginTransactionAsync();
 			try
 			{
-				var product = await _unitOfWork.Product.GetByIdAsync(productId);
-				if (product == null)
-					return Result<ProductDetailDto>.Fail("Product not found", 404);
+				var product = await _unitOfWork.Product.IsExsistAsync(productId);
+				if (!product )
+					return Result<bool>.Fail("Product not found", 404);
 
-				var discount = await _unitOfWork.Repository<Models.Discount>().GetByIdAsync(discountId);
-				if (discount == null||discount.DeletedAt!=null)
-					return Result<ProductDetailDto>.Fail("Discount not found", 404);
+				var discount = await _unitOfWork.Repository<Models.Discount>().IsExsistAsync(discountId);
+				if (!discount)
+					return Result<bool>.Fail("Discount not found", 404);
 
 
-				product.DiscountId = discount.Id;
-				
-				var productResult = _unitOfWork.Product.Update(product);
-				if (!productResult)
+				if( !await	 _unitOfWork.Product.AddDiscountToProductAsync(productId, discountId))
 				{
-					await transaction.RollbackAsync();
-					return Result<ProductDetailDto>.Fail("Failed to assign discount to product", 400);
+					return Result<bool>.Fail("Product not found", 404);
 				}
-
-				await _adminOpreationServices.AddAdminOpreationAsync(
-					$"Add Discount to Product {productId}",
-					Opreations.AddOpreation,
-					userId,
-					productId
-				);
-
+				
 			
-			
-				await _unitOfWork.CommitAsync();
-				await transaction.CommitAsync();
-				RemoveProductCachesAsync();
 
-				var updatedProduct = await _unitOfWork.Product.GetAll()
-					.Where(p => p.Id == productId)
-					.Select(maptoProductDetailDtoexpression)
-					
-					.FirstOrDefaultAsync();
+                var adminOpResult = await _adminOpreationServices.AddAdminOpreationAsync(
+                    $"Add Discount to Product {productId} , Discount id: {discountId}",
+                    Opreations.AddOpreation,
+                    userId,
+                    productId
+                );
+                if (adminOpResult == null || !adminOpResult.Success)
+                {
+                    await transaction.RollbackAsync();
+                    return Result<bool>.Fail(" log admin operation. Discount application rolled back.", 500);
+                }
 
-				return Result<ProductDetailDto>.Ok(updatedProduct, "Discount added successfully", 201);
+                await _unitOfWork.CommitAsync();
+                await transaction.CommitAsync();
+                RemoveProductCachesAsync();
+
+       
+
+                return Result<bool>.Ok(true, "Discount added successfully", 201);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in AddDiscountToProductAsync for productId: {productId}, discountId: {discountId}");
 			 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<ProductDetailDto>.Fail("Error adding discount", 500);
+				return Result<bool>.Fail("Error adding discount", 500);
 			}
 		}
 
-		public async Task<Result<ProductDetailDto>> UpdateProductDiscountAsync(int productId, int discountId, string userId)
+		public async Task<Result<bool>> UpdateProductDiscountAsync(int productId, int discountId, string userId)
 		{
-			_logger.LogInformation($"Updating discount for product: {productId} with discount: {discountId}");
+			_logger.LogInformation($"[UpdateProductDiscountAsync] Called with productId={productId}, discountId={discountId}, userId={userId}");
+			// Input validation
+			if (productId <= 0)
+			{
+				_logger.LogWarning("[UpdateProductDiscountAsync] Invalid product ID: {productId}", productId);
+				return Result<bool>.Fail("Invalid product ID.", 400);
+			}
+			if (discountId <= 0)
+			{
+				_logger.LogWarning("[UpdateProductDiscountAsync] Invalid discount ID: {discountId}", discountId);
+				return Result<bool>.Fail("Invalid discount ID.", 400);
+			}
+			if (string.IsNullOrWhiteSpace(userId))
+			{
+				_logger.LogWarning("[UpdateProductDiscountAsync] User ID is null or empty.");
+				return Result<bool>.Fail("User ID cannot be null or empty.", 400);
+			}
+
 			try
 			{
-				var product = await _unitOfWork.Product.GetAll()
-					.Where(p => p.Id == productId)
-					.FirstOrDefaultAsync();
-
-				if (product == null)
-					return Result<ProductDetailDto>.Fail("Product not found", 404);
-
-				var discount = await _unitOfWork.Repository<Models.Discount>().GetByIdAsync(discountId);
-				if (discount == null||discount.DeletedAt!=null)
-					return Result<ProductDetailDto>.Fail("Discount not found", 404);
-
-				using var transaction = await _unitOfWork.BeginTransactionAsync();
-
-				if (product.DiscountId != discountId)
-					product.DiscountId = discountId;
-
-				var productResult = _unitOfWork.Product.Update(product);
-				if (!productResult)
+				
+				if (await _unitOfWork.Product.IsExsistAsync(productId))
 				{
-					await transaction.RollbackAsync();
-					return Result<ProductDetailDto>.Fail("Failed to update product discount", 400);
+					_logger.LogWarning($"[UpdateProductDiscountAsync] Product not found: {productId}");
+					return Result<bool>.Fail("Product not found", 404);
+				}
+			
+				if (await _unitOfWork.Repository<Models.Discount>().IsExsistAsync(discountId))
+				{
+					_logger.LogWarning($"[UpdateProductDiscountAsync] Discount not found or deleted: {discountId}");
+					return Result<bool>.Fail("Discount not found", 404);
 				}
 
-				await _adminOpreationServices.AddAdminOpreationAsync(
+				using var transaction = await _unitOfWork.BeginTransactionAsync();
+				
+					if(!await _unitOfWork.Product.AddDiscountToProductAsync(productId,discountId))
+					{
+						return Result<bool>.Fail("Error updating discount", 500);
+
+					}
+
+			
+
+				var adminOpResult = await _adminOpreationServices.AddAdminOpreationAsync(
 					$"Update Discount for Product {productId}",
 					Opreations.UpdateOpreation,
 					userId,
 					productId
 				);
+				if (adminOpResult == null || !adminOpResult.Success)
+				{
+					await transaction.RollbackAsync();
+					_logger.LogWarning($"[UpdateProductDiscountAsync] Failed to log admin operation for productId={productId}");
+					return Result<bool>.Fail("Failed to log admin operation. Discount update rolled back.", 500);
+				}
 
 				await _unitOfWork.CommitAsync();
-				
+				await transaction.CommitAsync();
 				RemoveProductCachesAsync();
 
-				// Retrieve updated product
-				var updatedProduct = await _unitOfWork.Product.GetAll()
-					.Where(p => p.Id == productId)
-					.Select(maptoProductDetailDtoexpression)
-					.FirstOrDefaultAsync();
-
-				return Result<ProductDetailDto>.Ok(updatedProduct, "Discount updated successfully", 200);
+				_logger.LogInformation($"[UpdateProductDiscountAsync] Discount updated successfully for productId={productId}");
+				return Result<bool>.Ok(true, "Discount updated successfully", 200);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in UpdateProductDiscountAsync for productId: {productId}, discountId: {discountId}");
 			 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<ProductDetailDto>.Fail("Error updating discount", 500);
+				return Result<bool>.Fail("Error updating discount", 500);
 			}
 		}
 
-		public async Task<Result<ProductDetailDto>> RemoveDiscountFromProductAsync(int productId, string userId)
+		public async Task<Result<bool>> RemoveDiscountFromProductAsync(int productId, string userId)
 		{
-			_logger.LogInformation($"Removing discount from product: {productId}");
+			_logger.LogInformation($"[RemoveDiscountFromProductAsync] Called with productId={productId}, userId={userId}");
+			// Input validation
+			if (productId <= 0)
+			{
+				_logger.LogWarning("[RemoveDiscountFromProductAsync] Invalid product ID: {productId}", productId);
+				return Result<bool>.Fail("Invalid product ID.", 400);
+			}
+			if (string.IsNullOrWhiteSpace(userId))
+			{
+				_logger.LogWarning("[RemoveDiscountFromProductAsync] User ID is null or empty.");
+				return Result<bool>.Fail("User ID cannot be null or empty.", 400);
+			}
+
 			try
 			{
-				var product = await _unitOfWork.Product.GetAll()
-					.Where(p => p.Id == productId)
-					.FirstOrDefaultAsync();
-
-				if (product == null)
-					return Result<ProductDetailDto>.Fail("Product not found", 404);
-
-				if (product.DiscountId == null)
-					return Result<ProductDetailDto>.Fail("Product has no discount to remove", 404);
-
-				using var transaction = await _unitOfWork.BeginTransactionAsync();
-
-				product.DiscountId = null;
-				var productResult = _unitOfWork.Product.Update(product);
-				if (!productResult)
+				var productExists = await _unitOfWork.Product.IsExsistAndHasDiscountAsync(productId);
+				if (!productExists)
 				{
-					await transaction.RollbackAsync();
-					return Result<ProductDetailDto>.Fail("Failed to remove discount from product", 400);
+					_logger.LogWarning($"[RemoveDiscountFromProductAsync] Product not found or has no discount to remove: {productId}");
+					return Result<bool>.Fail("Product not found Or Product has no discount to remove", 404);
 				}
 
-				await _adminOpreationServices.AddAdminOpreationAsync(
+				using var transaction = await _unitOfWork.BeginTransactionAsync();
+				if (!await _unitOfWork.Product.RemoveDiscountFromProduct(productId))
+				{
+					await transaction.RollbackAsync();
+					_logger.LogWarning($"[RemoveDiscountFromProductAsync] Failed to remove discount for productId={productId}");
+					return Result<bool>.Fail("Product not found Or Product has no discount to remove", 404);
+				}
+
+				var adminOpResult = await _adminOpreationServices.AddAdminOpreationAsync(
 					$"Remove Discount from Product {productId}",
 					Opreations.DeleteOpreation,
 					userId,
 					productId
 				);
+				if (adminOpResult == null || !adminOpResult.Success)
+				{
+					await transaction.RollbackAsync();
+					_logger.LogWarning($"[RemoveDiscountFromProductAsync] Failed to log admin operation for productId={productId}");
+					return Result<bool>.Fail("Failed to log admin operation. Discount removal rolled back.", 500);
+				}
 
 				await _unitOfWork.CommitAsync();
-				
+				await transaction.CommitAsync();
 				RemoveProductCachesAsync();
 
-				// Retrieve updated product
-				var updatedProduct = await _unitOfWork.Product.GetAll()
-					.Where(p => p.Id == productId)
-					.Select(maptoProductDetailDtoexpression)
-					.FirstOrDefaultAsync();
-
-				return Result<ProductDetailDto>.Ok(updatedProduct, "Discount removed successfully", 200);
+				_logger.LogInformation($"[RemoveDiscountFromProductAsync] Discount removed successfully for productId={productId}");
+				return Result<bool>.Ok(true, "Discount removed successfully", 200);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, $"Error in RemoveDiscountFromProductAsync for productId: {productId}");
 			 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
-				return Result<ProductDetailDto>.Fail("Error removing discount", 500);
+				return Result<bool>.Fail("Error removing discount", 500);
 			}
 		}
 
@@ -369,7 +422,7 @@ namespace E_Commerce.Services.ProductServices
 								Id = i.Id,
 								Url = i.Url,
 								IsMain = i.IsMain
-							})
+							}).ToList()
 			};
 		public async Task<Result<List<ProductDto>>> GetProductsWithActiveDiscountsAsync()
 		{

@@ -1,4 +1,4 @@
-﻿using E_Commerce.DtoModels;
+using E_Commerce.DtoModels;
 using E_Commerce.DtoModels.CategoryDtos;
 using E_Commerce.DtoModels.DiscoutDtos;
 using E_Commerce.DtoModels.ProductDtos;
@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
-using E_Commerce.Services.Product;
 using E_Commerce.Interfaces;
 using E_Commerce.ErrorHnadling;
 using E_Commerce.DtoModels.Responses;
@@ -66,7 +65,7 @@ namespace E_Commerce.Controllers
 		}
 
 		[HttpPost("{id}/discount")]
-		public async Task<ActionResult<ApiResponse<ProductDetailDto>>> AddDiscountToProduct(int id, [FromBody] int discountId)
+		public async Task<ActionResult<ApiResponse<bool>>> AddDiscountToProduct(int id, [FromBody] int discountId)
 		{
 			if (!ModelState.IsValid || discountId <= 0)
 			{
@@ -83,7 +82,7 @@ namespace E_Commerce.Controllers
 		}
 
 		[HttpPut("{id}/discount")]
-		public async Task<ActionResult<ApiResponse<ProductDetailDto>>> UpdateProductDiscount(int id, [FromBody] int discountId)
+		public async Task<ActionResult<ApiResponse<bool>>> UpdateProductDiscount(int id, [FromBody] int discountId)
 		{
 			if (!ModelState.IsValid || discountId <= 0)
 			{
@@ -100,7 +99,7 @@ namespace E_Commerce.Controllers
 		}
 
 		[HttpDelete("{id}/discount")]
-		public async Task<ActionResult<ApiResponse<ProductDetailDto>>> RemoveDiscountFromProduct(int id)
+		public async Task<ActionResult<ApiResponse<bool>>> RemoveDiscountFromProduct(int id)
 		{
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var response = await _productsServices.RemoveDiscountFromProductAsync(id, userId);
@@ -172,20 +171,10 @@ namespace E_Commerce.Controllers
 			return HandleResult<bool>(response, nameof(DeleteProduct), id);
 		}
 
-		[HttpGet("subcategory/{subCategoryId}")]
-		[AllowAnonymous]
-		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetProductsBySubCategoryId(
-			int subCategoryId,
-			[FromQuery] bool? isActive,
-			[FromQuery] bool? deletedOnly)
-		{
-			var response = await _productsServices.GetProductsBySubCategoryId(subCategoryId, isActive, deletedOnly);
-
-			return HandleResult(response, nameof(GetProductsBySubCategoryId), subCategoryId);
-		}
+		
 
 		[HttpPatch("{id}/restore")]
-		public async Task<ActionResult<ApiResponse<ProductDto>>> RestoreProductAsync(int id)
+		public async Task<ActionResult<ApiResponse<bool>>> RestoreProductAsync(int id)
 		{
 			if (!ModelState.IsValid)
 			{
@@ -201,37 +190,6 @@ namespace E_Commerce.Controllers
 			return HandleResult(result, nameof(RestoreProductAsync), id);
 		}
 
-		[HttpGet("bestsellers")]
-		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetBestSellers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-		{
-			var response = await _productsServices.GetBestSellersAsync(page, pageSize);
-			return HandleResult(response, nameof(GetBestSellers));
-		}
-
-		[HttpGet("newarrivals")]
-		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetNewArrivals([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-		{
-			var response = await _productsServices.GetNewArrivalsAsync(page, pageSize);
-			return HandleResult(response, nameof(GetNewArrivals));
-		}
-
-		[HttpPost("advanced-search")]
-		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> AdvancedSearch([FromBody] AdvancedSearchDto searchDto, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-		{
-
-			if(!ModelState.IsValid)
-			{
-				var errors = string.Join(", ", ModelState.Values
-					.SelectMany(v => v.Errors)
-					.Select(e => e.ErrorMessage)
-					.ToList());
-				_logger.LogError($"Validation Errors: {errors}");
-				return BadRequest(ApiResponse<List<ProductDto>>.CreateErrorResponse("Invalid search criteria", new ErrorResponse("Invalid data", errors)));
-			}
-
-			var response = await _productsServices.AdvancedSearchAsync(searchDto, page, pageSize);
-			return HandleResult(response, nameof(AdvancedSearch));
-		}
 
 		[HttpGet("{id}/images")]
 		public async Task<ActionResult<ApiResponse<List<ImageDto>>>> GetProductImages(int id)
@@ -283,16 +241,7 @@ namespace E_Commerce.Controllers
 			return HandleResult(response, nameof(UploadAndSetMainImage), id);
 		}
 
-		[HttpGet("{id}/variants")]
-		public async Task<ActionResult<ApiResponse<List<ProductVariantDto>>>> GetProductVariants(int id)
-		{
-			var response = await _productsServices.GetProductVariantsAsync(id);
-			return HandleResult(response, nameof(GetProductVariants), id);
-		}
-
-		
-		
-
+		// Removed duplicate variants endpoint - now handled by ProductVariantController
 
 
 		[HttpGet("admin/list")]

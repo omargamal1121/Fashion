@@ -25,7 +25,7 @@ namespace E_Commerce.Services.ProductServices
 		Task<Result<ProductDto>> CreateProductAsync(CreateProductDto dto, string userId);
 		Task<Result<ProductDto>> UpdateProductAsync(int id, UpdateProductDto dto, string userId);
 		Task<Result<bool>> DeleteProductAsync(int id, string userId);
-		Task<Result<ProductDto>> RestoreProductAsync(int id, string userId);
+		Task<Result<bool>> RestoreProductAsync(int id, string userId);
 		Task<Result<List<ProductDto>>> GetProductsBySubCategoryId(int subCategoryId, bool? isActive, bool? deletedOnly);
 		// Search operations (delegated to ProductSearchService)
 		Task<Result<List<ProductDto>>> GetNewArrivalsAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
@@ -47,11 +47,11 @@ namespace E_Commerce.Services.ProductServices
 
 		// Discount operations (delegated to ProductDiscountService)
 		Task<Result<DiscountDto>> GetProductDiscountAsync(int productId);
-		Task<Result<ProductDetailDto>> AddDiscountToProductAsync(int productId, int discountId, string userId);
-		Task<Result<ProductDetailDto>> UpdateProductDiscountAsync(int productId, int discountId, string userId);
-		Task<Result<ProductDetailDto>> RemoveDiscountFromProductAsync(int productId, string userId);
+		Task<Result<bool>> AddDiscountToProductAsync(int productId, int discountId, string userId);
+		Task<Result<bool>> UpdateProductDiscountAsync(int productId, int discountId, string userId);
+		Task<Result<bool>> RemoveDiscountFromProductAsync(int productId, string userId);
 		Task<Result<List<ProductDto>>> GetProductsWithActiveDiscountsAsync();
-		public Task<Result<List<ProductDto>>> ApplyDiscountToProductsAsync(ApplyDiscountToProductsDto dto);
+		public Task<Result<List<ProductDto>>> ApplyDiscountToProductsAsync(ApplyDiscountToProductsDto dto, string userid);
 	}
 
 	public class ProductsServices : IProductsServices
@@ -96,7 +96,7 @@ namespace E_Commerce.Services.ProductServices
 		{
 			return await _productCatalogService.DeleteProductAsync(id, userId);
 		}
-		public async Task<Result<ProductDto>> RestoreProductAsync(int id, string userId)
+		public async Task<Result<bool>> RestoreProductAsync(int id, string userId)
 		{
 			return await _productCatalogService.RestoreProductAsync(id, userId);
 		}
@@ -161,15 +161,15 @@ namespace E_Commerce.Services.ProductServices
 		{
 			return await _productDiscountService.GetProductDiscountAsync(productId);
 		}
-		public async Task<Result<ProductDetailDto>> AddDiscountToProductAsync(int productId, int discountId, string userId)
+		public async Task<Result<bool>> AddDiscountToProductAsync(int productId, int discountId, string userId)
 		{
 			return await _productDiscountService.AddDiscountToProductAsync(productId, discountId, userId);
 		}
-		public async Task<Result<ProductDetailDto>> UpdateProductDiscountAsync(int productId, int discountId, string userId)
+		public async Task<Result<bool>> UpdateProductDiscountAsync(int productId, int discountId, string userId)
 		{
 			return await _productDiscountService.UpdateProductDiscountAsync(productId, discountId, userId);
 		}
-		public async Task<Result<ProductDetailDto>> RemoveDiscountFromProductAsync(int productId, string userId)
+		public async Task<Result<bool>> RemoveDiscountFromProductAsync(int productId, string userId)
 		{
 			return await _productDiscountService.RemoveDiscountFromProductAsync(productId, userId);
 		}
@@ -184,14 +184,14 @@ namespace E_Commerce.Services.ProductServices
 			return await _productCatalogService.DeactivateProductAsync(productId, userId);
 		}
 
-		public Task<Result<List<ProductDto>>> GetProductsWithActiveDiscountsAsync()
+		public async Task<Result<List<ProductDto>>> GetProductsWithActiveDiscountsAsync()
 		{
-			return _productDiscountService.GetProductsWithActiveDiscountsAsync();
+			return await _productDiscountService.GetProductsWithActiveDiscountsAsync();
 		}
 
-		public Task<Result<List<ProductDto>>> ApplyDiscountToProductsAsync(ApplyDiscountToProductsDto dto)
+		public async Task<Result<List<ProductDto>>> ApplyDiscountToProductsAsync(ApplyDiscountToProductsDto dto,string userid)
 		{
-			return _productDiscountService.ApplyDiscountToProductsAsync(dto);
+			return await _productDiscountService.ApplyDiscountToProductsAsync(dto,userid);
 		}
 	}
 }

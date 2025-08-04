@@ -17,6 +17,8 @@ namespace E_Commerce.DtoModels.ProductDtos
 		[Range(0, 200, ErrorMessage = "Length must be between 0 and 200.")]
 		public int? Length { get; set; }
 
+	
+
 
 
 	}

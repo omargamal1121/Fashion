@@ -1,7 +1,7 @@
 ﻿using E_Commerce.Controllers;
 using E_Commerce.DtoModels.Shared;
 using E_Commerce.Interfaces;
-using E_Commerce.Services.Category;
+using E_Commerce.Services.CategoryServcies;
 
 
 namespace E_Commerce.Services.AccountServices.Shared

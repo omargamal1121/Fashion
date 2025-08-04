@@ -27,7 +27,13 @@ namespace E_Commerce.Repository
 				.Include(a => a.Customer)
 				.FirstOrDefaultAsync();
 		}
-
+		public async Task<bool> IsExsistByIdAndUserIdAsync(int addressId, string customerId)
+		{
+			_logger.LogInformation($"Checking if address {addressId} exists for customer: {customerId}");
+			
+			return await _context.CustomerAddresses
+				.AnyAsync(a => a.Id == addressId && a.CustomerId == customerId && a.DeletedAt == null);
+		}
 		public async Task<List<CustomerAddress>> GetAddressesByCustomerAsync(string customerId)
 		{
 			_logger.LogInformation($"Getting addresses for customer: {customerId}");

@@ -1,15 +1,19 @@
+using E_Commerce.DtoModels.OrderDtos;
 using E_Commerce.Enums;
 using E_Commerce.Models;
+using StackExchange.Redis;
+using Order = E_Commerce.Models.Order;
 
 namespace E_Commerce.Interfaces
 {
     public interface IOrderRepository : IRepository<Order>
     {
-        Task<Order?> GetOrderByIdAsync(int orderId);
-        Task<Order?> GetOrderByNumberAsync(string orderNumber);
-        Task<List<Order>> GetOrdersByCustomerAsync(string customerId);
-        Task<List<Order>> GetOrdersByStatusAsync(OrderStatus status);
-        Task<List<Order>> GetOrdersByDateRangeAsync(DateTime startDate, DateTime endDate);
+        Task<OrderDto?> GetOrderByIdAsync(int orderId);
+        public  Task<bool> IsExistByIdAndUserId(int orderid, string userid);
+        public  Task<bool> IsExistByOrderNumberAndUserIdAsync(string ordernumber, string userid);
+        public  Task<bool> IsExistByOrderNumberAsync(string ordernumber);
+
+		Task<OrderDto?> GetOrderByNumberAsync(string orderNumber);
         Task<bool> UpdateOrderStatusAsync(int orderId, OrderStatus status, string? notes = null);
         Task<bool> CancelOrderAsync(int orderId, string cancellationReason);
         Task<bool> ShipOrderAsync(int orderId);
@@ -18,7 +22,8 @@ namespace E_Commerce.Interfaces
         Task<int> GetOrderCountByCustomerAsync(string customerId);
         Task<decimal> GetTotalRevenueByCustomerAsync(string customerId);
         Task<decimal> GetTotalRevenueByDateRangeAsync(DateTime startDate, DateTime endDate);
-        Task<List<Order>> GetOrdersWithPaginationAsync(int page, int pageSize, OrderStatus? status = null);
-        Task<int> GetTotalOrderCountAsync(OrderStatus? status = null);
+        public Task<List<OrderListDto>> FilterOrderAsync(string? userid = null, bool? Deleted = null, int page = 1, int pageSize = 10, OrderStatus? status = null);
+
+		Task<int> GetTotalOrderCountAsync(OrderStatus? status = null);
     }
 } 

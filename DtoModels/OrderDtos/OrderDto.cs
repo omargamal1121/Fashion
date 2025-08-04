@@ -9,7 +9,6 @@ namespace E_Commerce.DtoModels.OrderDtos
     public class OrderDto : BaseDto
     {
         public string OrderNumber { get; set; } = string.Empty;
- 
         public CustomerDto? Customer { get; set; }
         public OrderStatus Status { get; set; }
         public decimal Subtotal { get; set; }
@@ -65,7 +64,7 @@ namespace E_Commerce.DtoModels.OrderDtos
         public decimal Amount { get; set; }
         public DateTime PaymentDate { get; set; }
         public int OrderId { get; set; }
-        public string Status { get; set; } = string.Empty;
+        public OrderStatus Status { get; set; } 
     }
 
     public class PaymentMethodDto : BaseDto
@@ -83,7 +82,8 @@ namespace E_Commerce.DtoModels.OrderDtos
 
 
 
-   
 
-  
-} 
+
+
+
+}

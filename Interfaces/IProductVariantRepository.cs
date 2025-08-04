@@ -1,5 +1,6 @@
-using E_Commerce.Services;
+using E_Commerce.Enums;
 using E_Commerce.Models;
+using E_Commerce.Services;
 
 namespace E_Commerce.Interfaces
 {
@@ -10,20 +11,16 @@ namespace E_Commerce.Interfaces
 		public Task<ProductVariant?> GetVariantById(int id);
 		public  Task<bool> IsExsistAndActive(int id);
 		public Task<List<ProductVariant>> GetVariantsByProductId(int productId);
-		
-		// Price Management
-	//	public Task<bool> UpdateVariantPriceAsync(int variantId, decimal newPrice);
+		public Task<bool> IsExsistBySizeandColor(int productid, string? color, VariantSize? size, int? wist, int? length);
+
 		public Task<bool> UpdateVariantQuantityAsync(int variantId, int newQuantity);
-		
-		// Search and Filter
+		public Task<bool> ActiveVaraintAsync(int id);
+		public Task<bool> DeactiveVaraintAsync(int id);
+
 		public Task<List<ProductVariant>> GetVariantsByColorAsync(string color);
-	
-		//public Task<List<ProductVariant>> GetVariantsByPriceRangeAsync(decimal minPrice, decimal maxPrice);
+
 		public Task<List<ProductVariant>> GetVariantsInStockAsync();
 		
-		// Statistics
-		//public Task<decimal> GetAverageVariantPriceAsync();
-		//public Task<decimal> GetMinVariantPriceAsync();
-		//public Task<decimal> GetMaxVariantPriceAsync();
+	
 	}
 } 

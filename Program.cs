@@ -13,13 +13,12 @@ using E_Commerce.Services.AccountServices;
 using E_Commerce.Services.AccountServices.Shared;
 using E_Commerce.Services.AdminOpreationServices;
 using E_Commerce.Services.Cache;
-using E_Commerce.Services.Category;
+using E_Commerce.Services.CategoryServcies;
 using E_Commerce.Services.EmailServices;
-using E_Commerce.Services.Product;
+
 using E_Commerce.Services.ProductInventoryServices;
 using E_Commerce.Services.WareHouseServices;
 using E_Commerce.Services.CustomerAddress;
-using E_Commerce.Services.Cart;
 using E_Commerce.Services.Order;
 using E_Commerce.Services.Collection;
 using E_Commerce.UOW;
@@ -55,6 +54,7 @@ using E_Commerce.Services.ProductServices;
 using E_Commerce.Services.SubCategoryServices;
 using E_Commerce.Services.BackgroundServices;
 using E_Commerce.Services.UserOpreationServices;
+using E_Commerce.Services.CacheServices.CartServices;
 
 namespace E_Commerce
 {

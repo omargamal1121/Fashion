@@ -174,7 +174,7 @@ return false;
 			return false;
 		}
 		entity.DeletedAt = null;
-		_entities.Update(entity);
+		
 		_logger.LogInformation($"{typeof(T).Name} with ID: {id} restored.");
 		return true;
 	}
