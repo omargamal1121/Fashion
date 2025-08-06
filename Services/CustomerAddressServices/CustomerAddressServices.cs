@@ -176,13 +176,12 @@ namespace E_Commerce.Services.CustomerAddress
 					return Result<CustomerAddressDto>.Fail("Failed to create address", 500);
 				}
 
-				// If this is set as default, remove default from other addresses
+			
 				if (addressDto.IsDefault)
 				{
 					await _addressRepository.RemoveDefaultFromOtherAddressesAsync(userId, createdAddress.Id);
 				}
 
-				// Log admin operation
 				var adminLog = await _adminOperationServices.AddAdminOpreationAsync(
 					$"Created new address for customer {userId}",
 					Enums.Opreations.AddOpreation,
@@ -198,7 +197,6 @@ namespace E_Commerce.Services.CustomerAddress
 				await _unitOfWork.CommitAsync();
 				await transaction.CommitAsync();
 
-				// Clear cache
 				await _cacheManager.RemoveByTagAsync(CACHE_TAG_ADDRESS);
 
 				var resultDto = _mapper.Map<CustomerAddressDto>(createdAddress);

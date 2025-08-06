@@ -23,6 +23,7 @@ namespace E_Commerce.Services.ProductServices
 		// Core product operations (delegated to ProductCatalogService)
 		Task<Result<ProductDetailDto>> GetProductByIdAsync(int id, bool? isActive = null, bool? deletedOnly = null);
 		Task<Result<ProductDto>> CreateProductAsync(CreateProductDto dto, string userId);
+		public  Task<Result<List<BestSellingProductDto>>> GetBestSellersProductsWithCountAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
 		Task<Result<ProductDto>> UpdateProductAsync(int id, UpdateProductDto dto, string userId);
 		Task<Result<bool>> DeleteProductAsync(int id, string userId);
 		Task<Result<bool>> RestoreProductAsync(int id, string userId);
@@ -112,6 +113,10 @@ namespace E_Commerce.Services.ProductServices
 		public async Task<Result<List<ProductDto>>> GetBestSellersAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
 		{
 			return await _productSearchService.GetBestSellersAsync(page, pageSize, isActive, deletedOnly);
+		}
+		public async Task<Result<List<BestSellingProductDto>>> GetBestSellersProductsWithCountAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
+		{
+			return await _productSearchService.GetBestSellerProductsWithCountAsync(isActive,deletedOnly, page, pageSize);
 		}
 		public async Task<Result<List<ProductDto>>> AdvancedSearchAsync(AdvancedSearchDto searchCriteria, int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
 		{

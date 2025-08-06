@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 
-namespace E_Commerce.Services.CacheServices.CartServices
+namespace E_Commerce.Services.CartServices
 {
     public class CartServices : ICartServices
     {
@@ -112,6 +112,10 @@ namespace E_Commerce.Services.CacheServices.CartServices
 				productVariantForCartDto = new DtoModels.ProductDtos.ProductVariantForCartDto
 				{
 					Color = item.ProductVariant.Color,
+                    Id= item.Product.Id,
+                    CreatedAt = item.ProductVariant.CreatedAt,
+                    DeletedAt= item.ProductVariant.DeletedAt,
+                    ModifiedAt =item.ProductVariant.ModifiedAt,
 					Size = item.ProductVariant.Size,
 					Waist = item.ProductVariant.Waist,
 					Length = item.ProductVariant.Length,
@@ -119,6 +123,7 @@ namespace E_Commerce.Services.CacheServices.CartServices
 				}
 			},
             UnitPrice=item.UnitPrice,
+            
 			
 		}).ToList()
 	};
@@ -142,11 +147,14 @@ namespace E_Commerce.Services.CacheServices.CartServices
 
 			cart.CheckoutDate = DateTime.UtcNow;
 
-			_cartRepository.Update(cart);
-
+			
 			try
 			{
 				await _unitOfWork.CommitAsync();
+
+				// Clear cache
+				await _cacheManager.RemoveByTagAsync(CACHE_TAG_CART);
+
 				return Result<bool>.Ok(true, "Checkout successful");
 			}
 			catch (Exception ex)
@@ -653,9 +661,9 @@ namespace E_Commerce.Services.CacheServices.CartServices
         {
             try
             {
-                var cart = await _cartRepository.GetCartByUserIdAsync(userId);
-                var isEmpty = cart?.IsEmpty ?? true;
-                return Result<bool>.Ok(isEmpty, "Cart empty status retrieved", 200);
+                var cart = await _cartRepository.IsEmptyAsync(userId);
+                
+                return Result<bool>.Ok(cart, "Cart empty status retrieved", 200);
             }
             catch (Exception ex)
             {

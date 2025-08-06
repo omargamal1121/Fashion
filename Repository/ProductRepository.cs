@@ -50,7 +50,7 @@ namespace E_Commerce.Repository
 		}
 		public async Task<bool>ActiveProductAsync(int productid)
 		{
-			 var product= await _entity.FirstOrDefaultAsync(p => p.Id == productid && p.DeletedAt == null && !p.IsActive);
+			 var product= await _entity.FirstOrDefaultAsync(p => p.Id == productid && p.DeletedAt == null && p.IsActive==false);
 			if (product == null)
 				return false;
 			product.IsActive = true;

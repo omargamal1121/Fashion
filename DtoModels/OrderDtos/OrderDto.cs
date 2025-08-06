@@ -30,6 +30,11 @@ namespace E_Commerce.DtoModels.OrderDtos
         public bool CanBeReturned => Status == OrderStatus.Delivered;
         public string StatusDisplay => Status.ToString();
     }
+	public class OrderWithPaymentDto
+	{
+		public OrderDto Order { get; set; }
+		public string? PaymentUrl { get; set; } 
+	}
 
 	public class CustomerDto
 	{

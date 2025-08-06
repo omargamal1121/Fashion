@@ -13,5 +13,7 @@ namespace E_Commerce.Interfaces
         Task<Result<bool>> ClearCartAsync(string userId);
         Task<Result<int?>> GetCartItemCountAsync(string userId);
         Task<Result<bool>> IsCartEmptyAsync(string userId);
-    }
+        Task<Result<bool>> UpdateCheckoutData(string userId);
+
+	}
 } 

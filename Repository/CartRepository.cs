@@ -36,6 +36,15 @@ namespace E_Commerce.Repository
 		}
         public async Task<bool> IsExsistByUserId(string userid) => await _context.Cart.AnyAsync(c => c.UserId == userid && c.DeletedAt == null);
 
+		public async Task<bool> IsEmptyAsync(string userId)
+		{
+            var cart = !await _context.Cart
+                .Where(i => i.UserId == userId)
+                .Select(i => i.Items).AnyAsync();
+
+
+            return cart; 
+		}
 
 
 		public async Task<bool> AddItemToCartAsync(int cartId, CartItem item)
@@ -44,6 +53,7 @@ namespace E_Commerce.Repository
             
             try
             {
+               
                 item.CartId = cartId;
                 await _context.CartItems.AddAsync(item);
                 return true;

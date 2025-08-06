@@ -1,4 +1,4 @@
-using E_Commerce.DtoModels.CategoryDtos;
+﻿using E_Commerce.DtoModels.CategoryDtos;
 using E_Commerce.DtoModels.CollectionDtos;
 using E_Commerce.DtoModels.DiscoutDtos;
 using E_Commerce.DtoModels.ImagesDtos;
@@ -20,7 +20,7 @@ namespace E_Commerce.Services.ProductServices
 {
 	public interface IProductSearchService
 	{
-	
+		public  Task<Result<List<BestSellingProductDto>>> GetBestSellerProductsWithCountAsync(bool? isDeleted, bool? isActive, int page = 1, int pagesize = 10);
 		Task<Result<List<ProductDto>>> GetNewArrivalsAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
 		Task<Result<List<ProductDto>>> GetBestSellersAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
 		Task<Result<List<ProductDto>>> AdvancedSearchAsync(AdvancedSearchDto searchCriteria, int page, int pageSize, bool? isActive = null, bool? deletedOnly = null);
@@ -52,8 +52,8 @@ namespace E_Commerce.Services.ProductServices
 		}
 
 
-		
-		private IQueryable<E_Commerce.Models.Product> BasicFilter(IQueryable<E_Commerce.Models. Product> query,bool? isActive,bool? DeletedOnly)
+
+		private IQueryable<E_Commerce.Models.Product> BasicFilter(IQueryable<E_Commerce.Models.Product> query, bool? isActive, bool? DeletedOnly)
 		{
 			if (isActive.HasValue)
 			{
@@ -71,7 +71,7 @@ namespace E_Commerce.Services.ProductServices
 			}
 			return query;
 		}
-		
+
 
 		private Expression<Func<Product, ProductDto>> MapToProductdto => p => new ProductDto
 		{
@@ -96,7 +96,7 @@ namespace E_Commerce.Services.ProductServices
 						  ? p.Price - ((p.Discount.DiscountPercent / 100m) * p.Price)
 						  : p.Price,
 
-	
+
 			EndAt = (p.Discount != null &&
 					 p.Discount.IsActive &&
 					 p.Discount.DeletedAt == null &&
@@ -121,7 +121,7 @@ namespace E_Commerce.Services.ProductServices
 
 
 			images = p.Images
-				.Where(i => i.DeletedAt == null)
+
 				.Select(i => new ImageDto
 				{
 					Id = i.Id,
@@ -130,15 +130,15 @@ namespace E_Commerce.Services.ProductServices
 		};
 
 
-	
+
 
 
 
 		public async Task<Result<List<ProductDto>>> GetNewArrivalsAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
-        {
-            if (page <= 0 || pageSize <= 0)
-                return Result<List<ProductDto>>.Fail("Invalid page or pageSize. Must be greater than 0.", 400);
-            string cacheKey = $"newarrivals_{page}_{pageSize}_{isActive}_{deletedOnly}";
+		{
+			if (page <= 0 || pageSize <= 0)
+				return Result<List<ProductDto>>.Fail("Invalid page or pageSize. Must be greater than 0.", 400);
+			string cacheKey = $"newarrivals_{page}_{pageSize}_{isActive}_{deletedOnly}";
 			var cached = await _cacheManager.GetAsync<Result<List<ProductDto>>>(cacheKey);
 			if (cached != null)
 				return cached;
@@ -146,19 +146,19 @@ namespace E_Commerce.Services.ProductServices
 			{
 				var thirtyDaysAgo = DateTime.UtcNow.AddDays(-90);
 				var query = _unitOfWork.Product.GetAll().Where(p => p.CreatedAt >= thirtyDaysAgo);
-				
+
 
 				query = BasicFilter(query, isActive, deletedOnly);
 				// Only order by descending CreatedAt for new arrivals
-                var products = await query.Select(MapToProductdto)
-                    .OrderByDescending(p => p.CreatedAt)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
+				var products = await query.Select(MapToProductdto)
+					.OrderByDescending(p => p.CreatedAt)
+					.Skip((page - 1) * pageSize)
+					.Take(pageSize)
+					.ToListAsync();
 
 
 				if (!products.Any())
-                    return Result<List<ProductDto>>.Fail("No new arrivals found", 404);
+					return Result<List<ProductDto>>.Fail("No new arrivals found", 404);
 
 
 				BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, products, TimeSpan.FromMinutes(2), new[] { CACHE_TAG_PRODUCT_SEARCH }));
@@ -167,11 +167,10 @@ namespace E_Commerce.Services.ProductServices
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error in GetNewArrivalsAsync");
-				 	_backgroundJobClient.Enqueue(()=> _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
+				_backgroundJobClient.Enqueue(() => _errorNotificationService.SendErrorNotificationAsync(ex.Message, ex.StackTrace));
 				return Result<List<ProductDto>>.Fail("Error retrieving new arrivals", 500);
 			}
 		}
-
 
 		public async Task<Result<List<ProductDto>>> GetBestSellersAsync(int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
 		{
@@ -185,21 +184,26 @@ namespace E_Commerce.Services.ProductServices
 
 			try
 			{
-				var query = _unitOfWork.Repository<OrderItem>().GetAll()
+				var bestSellerQuery = _unitOfWork.Repository<OrderItem>().GetAll()
 					.Where(i => i.Order.Status != OrderStatus.Cancelled)
-					.GroupBy(i => i.Product)
+					.GroupBy(i => i.ProductId)
 					.Select(g => new
 					{
-						Product = g.Key,
+						ProductId = g.Key,
 						TotalQuantity = g.Sum(x => x.Quantity)
 					})
-					.OrderByDescending(g => g.TotalQuantity)
-					.Select(g => g.Product)
+					.OrderByDescending(g => g.TotalQuantity);
+
+				var productQuery = bestSellerQuery
+					.Join(_unitOfWork.Product.GetAll().Include(p => p.Images),
+						  g => g.ProductId,
+						  p => p.Id,
+						  (g, p) => p)
 					.AsQueryable();
 
-				query = BasicFilter(query, isActive, deletedOnly);
+				productQuery = BasicFilter(productQuery, isActive, deletedOnly);
 
-				var products = await query
+				var products = await productQuery
 					.Select(MapToProductdto)
 					.Skip((page - 1) * pageSize)
 					.Take(pageSize)
@@ -217,7 +221,6 @@ namespace E_Commerce.Services.ProductServices
 					return Result<List<ProductDto>>.Ok(fallbackProducts, "No best sellers found. Showing random products instead.", 200);
 				}
 
-
 				var result = Result<List<ProductDto>>.Ok(products, $"Found {products.Count} best sellers", 200);
 
 				BackgroundJob.Enqueue(() => _cacheManager.SetAsync(cacheKey, result, TimeSpan.FromMinutes(2), new[] { CACHE_TAG_PRODUCT_SEARCH }));
@@ -233,11 +236,11 @@ namespace E_Commerce.Services.ProductServices
 		}
 
 		public async Task<Result<List<ProductDto>>> AdvancedSearchAsync(AdvancedSearchDto searchCriteria, int page, int pageSize, bool? isActive = null, bool? deletedOnly = null)
-        {
-            if (page <= 0 || pageSize <= 0)
-                return Result<List<ProductDto>>.Fail("Invalid page or pageSize. Must be greater than 0.", 400);
-            try
-            {
+		{
+			if (page <= 0 || pageSize <= 0)
+				return Result<List<ProductDto>>.Fail("Invalid page or pageSize. Must be greater than 0.", 400);
+			try
+			{
 				string cacheKey = $"advsearch_{searchCriteria?.SearchTerm}_{searchCriteria?.Subcategoryid}_{searchCriteria?.Gender}_{searchCriteria?.FitType}_{searchCriteria?.MinPrice}_{searchCriteria?.MaxPrice}_{searchCriteria?.InStock}_{searchCriteria?.OnSale}_{searchCriteria?.SortBy}_{searchCriteria?.SortDescending}_{page}_{pageSize}_{isActive}_{deletedOnly}";
 
 
@@ -322,7 +325,7 @@ namespace E_Commerce.Services.ProductServices
 					.Select(MapToProductdto)
 					.ToListAsync();
 
-			
+
 
 				if (!products.Any())
 					return Result<List<ProductDto>>.Fail("No products found matching the search criteria", 404);
@@ -339,6 +342,65 @@ namespace E_Commerce.Services.ProductServices
 			}
 		}
 
+
+		public async Task<Result<List<BestSellingProductDto>>> GetBestSellerProductsWithCountAsync(bool? isDeleted, bool? isActive,int page=1,int pagesize=10)
+		{
+			var cacheKey = $"BestSellerProducts:isDeleted={isDeleted}_isActive={isActive}_page={page}_pagesize_{pagesize}";
+
+			var cachedResult = await _cacheManager.GetAsync<List<BestSellingProductDto>>(cacheKey);
+			if (cachedResult is not null)
+				return Result<List<BestSellingProductDto>>.Ok(cachedResult);
+
+			var productsQuery = _unitOfWork.Product.GetAll()
+				.Include(p => p.ProductVariants)
+					.ThenInclude(v => v.OrderItems)
+				.Include(p => p.Images)
+				.AsQueryable();
+
+			productsQuery = BasicFilter(productsQuery, isActive, isDeleted);
+
+			var productSales = await productsQuery
+				.Select(p => new
+				{
+					Product = p,
+					TotalSold = p.ProductVariants
+						.SelectMany(v => v.OrderItems)
+						.Where(oi => oi.Order.Status == OrderStatus.Confirmed)
+						.Sum(oi => (int?)oi.Quantity) ?? 0,
+					ImageUrl = p.Images
+						.Where(i => i.IsMain && i.DeletedAt == null)
+						.Select(i => i.Url)
+						.FirstOrDefault()
+				})
+				.Where(p => p.TotalSold > 0)
+				.OrderByDescending(p => p.TotalSold)
+				.Skip((page - 1) * pagesize)
+					.Take(pagesize)
+				.ToListAsync();
+
+			var bestSellers = productSales.Select(p => new BestSellingProductDto
+			{
+				ProductId = p.Product.Id,
+				ProductName = p.Product.Name,
+				Image = p.ImageUrl,
+				TotalSoldQuantity = p.TotalSold
+			}).ToList();
+
+			BackgroundJob.Enqueue(() =>
+				_cacheManager.SetAsync(cacheKey, bestSellers, TimeSpan.FromHours(1), new[] { CACHE_TAG_PRODUCT_SEARCH }));
+
+			return Result<List<BestSellingProductDto>>.Ok(bestSellers);
+		}
+
+
+
+	}
+	public class BestSellingProductDto
+	{
+		public int ProductId { get; set; }
+		public string ProductName { get; set; } = string.Empty;
+		public string? Image { get; set; }
+		public int TotalSoldQuantity { get; set; }
 	}
 
 	public class AdvancedSearchDto
@@ -346,7 +408,7 @@ namespace E_Commerce.Services.ProductServices
 		public string? SearchTerm { get; set; }
 		public int? Subcategoryid { get; set; }
 		public Gender? Gender { get; set; }
-		public  FitType? FitType { get; set; }
+		public FitType? FitType { get; set; }
 		public decimal? MinPrice { get; set; }
 		public decimal? MaxPrice { get; set; }
 		public bool? InStock { get; set; }
@@ -357,4 +419,4 @@ namespace E_Commerce.Services.ProductServices
 		public decimal? MinSize { get; set; } // Minimum variant size
 		public decimal? MaxSize { get; set; } // Maximum variant size
 	}
-} 
+}

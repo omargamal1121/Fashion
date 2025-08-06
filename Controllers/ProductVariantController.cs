@@ -10,7 +10,7 @@ using E_Commerce.Services.ProductServices;
 namespace E_Commerce.Controllers
 {
     [ApiController]
-    [Route("api/products/{productId}/variants")]
+    [Route("api/Products/{productId}/Variants")]
     public class ProductVariantController : ControllerBase
     {
         private readonly IProductVariantService _variantService;
@@ -50,17 +50,17 @@ namespace E_Commerce.Controllers
         // GET api/products/{productId}/variants
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<ApiResponse<List<ProductVariantDto>>>> GetProductVariants(int productId)
+        public async Task<ActionResult<ApiResponse<List<ProductVariantDto>>>> GetProductVariants(int productId, [FromQuery] bool? isActive = null, [FromQuery] bool? deletedOnly = null)
         {
-            var result = await _variantService.GetProductVariantsAsync(productId, true, false);
-            return HandleResult<List<ProductVariantDto>>(result);
-        }
-
-        // GET api/products/{productId}/variants/admin
-        [HttpGet("admin")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<List<ProductVariantDto>>>> GetProductVariantsAdmin(int productId, [FromQuery] bool? isActive = null, [FromQuery] bool? deletedOnly = null)
-        {
+            bool isAdmin = User?.IsInRole("Admin") == true;
+            
+            // For non-admin users, restrict to active and non-deleted variants
+            if (!isAdmin)
+            {
+                isActive = true;
+                deletedOnly = false;
+            }
+            
             var result = await _variantService.GetProductVariantsAsync(productId, isActive, deletedOnly);
             return HandleResult<List<ProductVariantDto>>(result);
         }
@@ -79,6 +79,16 @@ namespace E_Commerce.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<ProductVariantDto>>> CreateVariant(int productId, [FromBody] CreateProductVariantDto dto)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = string.Join(", ", ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList());
+                _logger.LogError($"Validation Errors: {errors}");
+                return BadRequest(ApiResponse<ProductVariantDto>.CreateErrorResponse("Invalid variant data", new ErrorResponse("Invalid data", errors)));
+            }
+            
             var userId = HttpContext.Items["UserId"]?.ToString();
             var result = await _variantService.AddVariantAsync(productId, dto, userId);
             return HandleResult<ProductVariantDto>(result, nameof(GetVariantById), result.Data?.Id, productId);
@@ -89,6 +99,16 @@ namespace E_Commerce.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<ProductVariantDto>>> UpdateVariant(int productId, int id, [FromBody] UpdateProductVariantDto dto)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = string.Join(", ", ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList());
+                _logger.LogError($"Validation Errors: {errors}");
+                return BadRequest(ApiResponse<ProductVariantDto>.CreateErrorResponse("Invalid variant data", new ErrorResponse("Invalid data", errors)));
+            }
+            
             var userId = HttpContext.Items["UserId"]?.ToString();
             var result = await _variantService.UpdateVariantAsync(id, dto, userId);
             return HandleResult<ProductVariantDto>(result);
@@ -109,6 +129,21 @@ namespace E_Commerce.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<bool>>> AddVariantQuantity(int productId, int id, [FromQuery] int quantity)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = string.Join(", ", ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList());
+                _logger.LogError($"Validation Errors: {errors}");
+                return BadRequest(ApiResponse<bool>.CreateErrorResponse("Invalid quantity data", new ErrorResponse("Invalid data", errors)));
+            }
+            
+            if (quantity <= 0)
+            {
+                return BadRequest(ApiResponse<bool>.CreateErrorResponse("Invalid quantity", new ErrorResponse("Invalid data", "Quantity must be greater than 0")));
+            }
+            
             var userId = HttpContext.Items["UserId"]?.ToString();
             var result = await _variantService.AddVariantQuantityAsync(id, quantity, userId);
             return HandleResult<bool>(result);
@@ -119,6 +154,21 @@ namespace E_Commerce.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<bool>>> RemoveVariantQuantity(int productId, int id, [FromQuery] int quantity)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = string.Join(", ", ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList());
+                _logger.LogError($"Validation Errors: {errors}");
+                return BadRequest(ApiResponse<bool>.CreateErrorResponse("Invalid quantity data", new ErrorResponse("Invalid data", errors)));
+            }
+            
+            if (quantity <= 0)
+            {
+                return BadRequest(ApiResponse<bool>.CreateErrorResponse("Invalid quantity", new ErrorResponse("Invalid data", "Quantity must be greater than 0")));
+            }
+            
             var userId = HttpContext.Items["UserId"]?.ToString();
             var result = await _variantService.RemoveVariantQuantityAsync(id, quantity, userId);
             return HandleResult<bool>(result);
@@ -157,17 +207,17 @@ namespace E_Commerce.Controllers
         // GET api/products/{productId}/variants/search
         [HttpGet("search")]
         [AllowAnonymous]
-        public async Task<ActionResult<ApiResponse<List<ProductVariantDto>>>> SearchVariants(int productId, [FromQuery] string? color = null, [FromQuery] int? length = null, [FromQuery] int? waist = null, [FromQuery] VariantSize? size = null)
+        public async Task<ActionResult<ApiResponse<List<ProductVariantDto>>>> SearchVariants(int productId, [FromQuery] string? color = null, [FromQuery] int? length = null, [FromQuery] int? waist = null, [FromQuery] VariantSize? size = null, [FromQuery] bool? isActive = null, [FromQuery] bool? deletedOnly = null)
         {
-            var result = await _variantService.GetVariantsBySearchAsync(productId, color, length, waist, size, true, false);
-            return HandleResult<List<ProductVariantDto>>(result);
-        }
-
-        // GET api/products/{productId}/variants/search/admin
-        [HttpGet("search/admin")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<List<ProductVariantDto>>>> SearchVariantsAdmin(int productId, [FromQuery] string? color = null, [FromQuery] int? length = null, [FromQuery] int? waist = null, [FromQuery] VariantSize? size = null, [FromQuery] bool? isActive = null, [FromQuery] bool? deletedOnly = null)
-        {
+            bool isAdmin = User?.IsInRole("Admin") == true;
+            
+            // For non-admin users, restrict to active and non-deleted variants
+            if (!isAdmin)
+            {
+                isActive = true;
+                deletedOnly = false;
+            }
+            
             var result = await _variantService.GetVariantsBySearchAsync(productId, color, length, waist, size, isActive, deletedOnly);
             return HandleResult<List<ProductVariantDto>>(result);
         }

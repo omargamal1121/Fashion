@@ -15,7 +15,7 @@ namespace E_Commerce.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // Secure all endpoints by default
+
     public class CollectionController : ControllerBase
     {
         private readonly ICollectionServices _collectionServices;
@@ -28,6 +28,7 @@ namespace E_Commerce.Controllers
         }
 
         private string GetUserId() => User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+        private string GetUserRole() => User.FindFirst(ClaimTypes.Role)?.Value ?? "User";
 
         private ActionResult<ApiResponse<T>> HandleResult<T>(Result<T> result, string? actionName = null, object? routeValues = null)
         {
@@ -49,236 +50,95 @@ namespace E_Commerce.Controllers
                 _ => StatusCode(result.StatusCode, apiResponse)
             };
         }
-          
-
-      
 
         /// <summary>
-        /// Get collection by ID for users (only active and not deleted)
-        /// </summary>
-        [HttpGet("public/{id}")]
-        [AllowAnonymous]
-        public async Task<ActionResult<ApiResponse<CollectionDto>>> GetCollectionByIdPublic(int id)
-        {
-            _logger.LogInformation($"Executing {nameof(GetCollectionByIdPublic)} for ID: {id}");
-            var result = await _collectionServices.GetCollectionByIdAsync(id, true, false);
-            return HandleResult(result);
-        }
-
-        /// <summary>
-        /// Get collection by ID for admin (with optional filters)
-        /// </summary>
-        [HttpGet("admin/{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<CollectionDto>>> GetCollectionByIdAdmin(
-            int id,
-            [FromQuery] bool? isActive = null,
-            [FromQuery] bool? isDeleted = null)
-        {
-            _logger.LogInformation($"Executing {nameof(GetCollectionByIdAdmin)} for ID: {id}");
-            var result = await _collectionServices.GetCollectionByIdAsync(id, isActive, isDeleted);
-            return HandleResult(result);
-        }
-
-        /// <summary>
-        /// Get all collections for users (only active and not deleted)
-        /// </summary>
-        [HttpGet("public")]
-        [AllowAnonymous]
-        public async Task<ActionResult<ApiResponse<List<CollectionSummaryDto>>>> GetCollectionsPublic(
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10)
-        {
-            _logger.LogInformation($"Executing {nameof(GetCollectionsPublic)} (user endpoint) with pagination: page {page}, size {pageSize}");
-            var result = await _collectionServices.SearchCollectionsAsync(null, true, false, page, pageSize);
-            return HandleResult(result);
-        }
-
-        /// <summary>
-        /// Search collections for users (only active and not deleted)
-        /// </summary>
-        [HttpGet("public/search")]
-        [AllowAnonymous]
-        public async Task<ActionResult<ApiResponse<List<CollectionSummaryDto>>>> SearchCollectionsPublic(
-            [FromQuery] string searchTerm,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10)
-        {
-            _logger.LogInformation($"Executing {nameof(SearchCollectionsPublic)} for term: {searchTerm} with pagination: page {page}, size {pageSize}");
-            var result = await _collectionServices.SearchCollectionsAsync(searchTerm, true, false, page, pageSize);
-            return HandleResult(result);
-        }
-
-        /// <summary>
-        /// Get all collections for admin (with optional filters)
-        /// </summary>
-        /// 
-        [HttpGet("admin/GetAll")]
-  
-        public async Task<ActionResult<ApiResponse<List<CollectionSummaryDto>>>> GetCollectionsAdmin(
-            [FromQuery] bool? isActive = null,
-            [FromQuery] bool? isDeleted = null,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10)
-        {
-            _logger.LogInformation($"Executing {nameof(GetCollectionsAdmin)} (admin endpoint) with pagination: page {page}, size {pageSize}");
-            var result = await _collectionServices.SearchCollectionsAsync(null, isActive, isDeleted, page, pageSize);
-            return HandleResult(result);
-        }
-
-        /// <summary>
-        /// Search collections for admin (with filters)
-        /// </summary>
-        [HttpGet("admin/search")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<List<CollectionSummaryDto>>>> SearchCollectionsAdmin(
-            [FromQuery] string searchTerm,
-            [FromQuery] bool? isActive = null,
-            [FromQuery] bool? isDeleted = null,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10)
-        {
-            _logger.LogInformation($"Executing {nameof(SearchCollectionsAdmin)} for term: {searchTerm} with pagination: page {page}, size {pageSize}");
-            var result = await _collectionServices.SearchCollectionsAsync(searchTerm, isActive, isDeleted, page, pageSize);
-            return HandleResult(result);
-        }
-
-  
-
-
-        /// <summary>
-        /// Activate a collection
-        /// </summary>
-        [HttpPatch("{id}/activate")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<bool>>> ActivateCollection(int id)
-        {
-            var userId = GetUserId();
-            var result = await _collectionServices.ActivateCollectionAsync(id, userId);
-            return HandleResult(result);
-        }
-
-        /// <summary>
-        /// Deactivate a collection
-        /// </summary>
-        [HttpPatch("{id}/deactivate")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<bool>>> DeactivateCollection(int id)
-        {
-            var userId = GetUserId();
-            var result = await _collectionServices.DeactivateCollectionAsync(id, userId);
-            return HandleResult(result);
-        }
-
-        /// <summary>
-        /// Add images to a collection
-        /// </summary>
-        [HttpPost("{id}/images")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<List<ImageDto>>>> AddImagesToCollection(
-            int id,
-         [FromForm]  AddImagesDto images)
-        {
-			if (!ModelState.IsValid)
-			{
-				var errors = GetModelErrors();
-				_logger.LogWarning($"ModelState errors: {string.Join(", ", errors)}");
-				return BadRequest(ApiResponse<CollectionDto>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
-			}
-			var userId = GetUserId();
-            var result = await _collectionServices.AddImagesToCollectionAsync(id, images.Images, userId);
-            return HandleResult(result);
-        }
-
-        /// <summary>
-        /// Add main image to a collection
-        /// </summary>
-        [HttpPost("{id}/main-image")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<ImageDto>>> AddMainImageToCollection(
-            int id,
-          AddMainImageDto image)
-        {
-			if (!ModelState.IsValid)
-			{
-				var errors = GetModelErrors();
-				_logger.LogWarning($"ModelState errors: {string.Join(", ", errors)}");
-				return BadRequest(ApiResponse<CollectionDto>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
-			}
-			var userId = GetUserId();
-            var result = await _collectionServices.AddMainImageToCollectionAsync(id, image.Image, userId);
-            return HandleResult(result);
-        }
-
-        /// <summary>
-        /// Remove image from a collection
-        /// </summary>
-        [HttpDelete("{id}/images/{imageId}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<bool>>> RemoveImageFromCollection(
-            int id,
-            int imageId)
-        {
-			if (!ModelState.IsValid)
-			{
-				var errors = GetModelErrors();
-				_logger.LogWarning($"ModelState errors: {string.Join(", ", errors)}");
-				return BadRequest(ApiResponse<CollectionDto>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
-			}
-			var userId = GetUserId();
-            var result = await _collectionServices.RemoveImageFromCollectionAsync(id, imageId, userId);
-            return HandleResult(result);
-        }
-
-
-
- 
-
-        /// <summary>
-        /// Get collection by ID
+        /// Get collection by ID (unified endpoint that checks user role)
         /// </summary>
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<ApiResponse<CollectionDto>>> GetCollectionById(int id)
         {
-            try
-            {
-                _logger.LogInformation($"Executing GetCollectionById for ID: {id}");
-                var result = await _collectionServices.GetCollectionByIdAsync(id);
-                return HandleResult(result, nameof(GetCollectionById), id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in GetCollectionById: {ex.Message}");
-                return StatusCode(500, ApiResponse<CollectionDto>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while retrieving the collection"), 500));
-            }
+            _logger.LogInformation($"Executing {nameof(GetCollectionById)} for ID: {id}");
+            
+            var role = GetUserRole();
+            var isAdmin = role == "Admin";
+            
+            // For non-admin users, only show active and non-deleted collections
+            var result = await _collectionServices.GetCollectionByIdAsync(
+                id, 
+                isAdmin ? null : true, 
+                isAdmin ? null : false);
+                
+            return HandleResult(result, nameof(GetCollectionById), id);
         }
 
-		[HttpGet("admin")]
-		[Authorize(Roles = "Admin")]
-		public async Task<ActionResult<ApiResponse<List<CollectionSummaryDto>>>> GetCollections(
+        /// <summary>
+        /// Get all collections (unified endpoint that checks user role)
+        /// </summary>
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<ActionResult<ApiResponse<List<CollectionSummaryDto>>>> GetCollections(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] bool? isActive = null,
-			[FromQuery] bool? isDeleted = null)
+            [FromQuery] bool? isDeleted = null)
         {
-            try
-            {
-                _logger.LogInformation($"Executing GetCollections with pagination: page {page}, size {pageSize}, active: {isActive}");
-                var result = await _collectionServices.SearchCollectionsAsync(null, isActive, isDeleted,page, pageSize);
-                return HandleResult(result, nameof(GetCollections));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in GetCollections: {ex.Message}");
-                return StatusCode(500, ApiResponse<List<CollectionSummaryDto>>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while retrieving collections"), 500));
-            }
+            _logger.LogInformation($"Executing {nameof(GetCollections)} with pagination: page {page}, size {pageSize}");
+            
+            var role = GetUserRole();
+            var isAdmin = role == "Admin";
+            
+            // For non-admin users, only show active and non-deleted collections
+            var activeFilter = isAdmin ? isActive : true;
+            var deletedFilter = isAdmin ? isDeleted : false;
+            
+            var result = await _collectionServices.SearchCollectionsAsync(
+                null, 
+                activeFilter, 
+                deletedFilter, 
+                page, 
+                pageSize);
+                
+            return HandleResult(result, nameof(GetCollections));
         }
 
-    
-     
-       
+        /// <summary>
+        /// Search collections (unified endpoint that checks user role)
+        /// </summary>
+        [HttpGet("search")]
+        [AllowAnonymous]
+        public async Task<ActionResult<ApiResponse<List<CollectionSummaryDto>>>> SearchCollections(
+            [FromQuery] string searchTerm,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] bool? isActive = null,
+            [FromQuery] bool? isDeleted = null)
+        {
+            _logger.LogInformation($"Executing {nameof(SearchCollections)} for term: {searchTerm} with pagination: page {page}, size {pageSize}");
+            
+            var role = GetUserRole();
+            var isAdmin = role == "Admin";
+            
+            // For non-admin users, only show active and non-deleted collections
+            var activeFilter = isAdmin ? isActive : true;
+            var deletedFilter = isAdmin ? isDeleted : false;
+            
+            var result = await _collectionServices.SearchCollectionsAsync(
+                searchTerm, 
+                activeFilter, 
+                deletedFilter, 
+                page, 
+                pageSize);
+                
+            return HandleResult(result, nameof(SearchCollections));
+        }
 
-        // Admin-only endpoints
+        private List<string> GetModelErrors()
+        {
+            return ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+        }
+
+        // Admin-only endpoints (kept as-is since they require admin role)
         /// <summary>
         /// Create collection (Admin only)
         /// </summary>
@@ -307,15 +167,10 @@ namespace E_Commerce.Controllers
             }
         }
 
-		private List<string> GetModelErrors()
-		{
-			return ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-		}
-
-		/// <summary>
-		/// Update collection (Admin only)
-		/// </summary>
-		[HttpPut("{id}")]
+        /// <summary>
+        /// Update collection (Admin only)
+        /// </summary>
+        [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<CollectionSummaryDto>>> UpdateCollection(
             int id,
@@ -332,7 +187,7 @@ namespace E_Commerce.Controllers
 
                 _logger.LogInformation($"Executing UpdateCollection for ID: {id}");
                 var userid = HttpContext.Items["UserId"].ToString();
-				var result = await _collectionServices.UpdateCollectionAsync(id, collectionDto, userid);
+                var result = await _collectionServices.UpdateCollectionAsync(id, collectionDto, userid);
                 return HandleResult(result, nameof(UpdateCollection), id);
             }
             catch (Exception ex)
@@ -349,18 +204,150 @@ namespace E_Commerce.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteCollection(int id)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResponse<bool>.CreateErrorResponse(
+                    "Invalid ID",
+                    new ErrorResponse("Validation", new List<string> { "ID must be greater than 0" }),
+                    400
+                ));
+            }
             try
             {
-                _logger.LogInformation($"Executing DeleteCollection for ID: {id}");
-               var userid = HttpContext.Items["UserId"].ToString();
+                _logger.LogInformation($"Executing {nameof(DeleteCollection)} for ID: {id}");
+                var userid = HttpContext.Items["UserId"].ToString();
                 var result = await _collectionServices.DeleteCollectionAsync(id, userid);
                 return HandleResult(result, nameof(DeleteCollection), id);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error in DeleteCollection: {ex.Message}");
+                _logger.LogError($"Error in {nameof(DeleteCollection)}: {ex.Message}");
                 return StatusCode(500, ApiResponse<string>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while deleting the collection"), 500));
             }
+        }
+
+        /// <summary>
+        /// Activate a collection (Admin only)
+        /// </summary>
+        [HttpPatch("{id}/activate")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<bool>>> ActivateCollection(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResponse<bool>.CreateErrorResponse(
+                    "Invalid ID",
+                    new ErrorResponse("Validation", new List<string> { "ID must be greater than 0" }),
+                    400
+                ));
+            }
+            var userId = GetUserId();
+            var result = await _collectionServices.ActivateCollectionAsync(id, userId);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Deactivate a collection (Admin only)
+        /// </summary>
+        [HttpPatch("{id}/deactivate")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<bool>>> DeactivateCollection(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResponse<bool>.CreateErrorResponse(
+                    "Invalid ID",
+                    new ErrorResponse("Validation", new List<string> { "ID must be greater than 0" }),
+                    400
+                ));
+            }
+            var userId = GetUserId();
+            var result = await _collectionServices.DeactivateCollectionAsync(id, userId);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Add images to a collection (Admin only)
+        /// </summary>
+        [HttpPost("{id}/images")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<List<ImageDto>>>> AddImagesToCollection(
+            int id,
+            [FromForm] AddImagesDto images)
+        {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResponse<List<ImageDto>>.CreateErrorResponse(
+                    "Invalid ID",
+                    new ErrorResponse("Validation", new List<string> { "ID must be greater than 0" }),
+                    400
+                ));
+            }
+            if (!ModelState.IsValid)
+            {
+                var errors = GetModelErrors();
+                _logger.LogWarning($"ModelState errors: {string.Join(", ", errors)}");
+                return BadRequest(ApiResponse<CollectionDto>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
+            }
+            var userId = GetUserId();
+            var result = await _collectionServices.AddImagesToCollectionAsync(id, images.Images, userId);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Add main image to a collection (Admin only)
+        /// </summary>
+        [HttpPost("{id}/main-image")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<ImageDto>>> AddMainImageToCollection(
+            int id,
+            AddMainImageDto image)
+        {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResponse<ImageDto>.CreateErrorResponse(
+                    "Invalid ID",
+                    new ErrorResponse("Validation", new List<string> { "ID must be greater than 0" }),
+                    400
+                ));
+            }
+            if (!ModelState.IsValid)
+            {
+                var errors = GetModelErrors();
+                _logger.LogWarning($"ModelState errors: {string.Join(", ", errors)}");
+                return BadRequest(ApiResponse<CollectionDto>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
+            }
+            var userId = GetUserId();
+            var result = await _collectionServices.AddMainImageToCollectionAsync(id, image.Image, userId);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Remove image from a collection (Admin only)
+        /// </summary>
+        [HttpDelete("{id}/images/{imageId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<bool>>> RemoveImageFromCollection(
+            int id,
+            int imageId)
+        {
+            if (id <= 0 || imageId <= 0)
+            {
+                return BadRequest(ApiResponse<bool>.CreateErrorResponse(
+                    "Invalid ID",
+                    new ErrorResponse("Validation", new List<string> { "ID must be greater than 0" }),
+                    400
+                ));
+            }
+            if (!ModelState.IsValid)
+            {
+                var errors = GetModelErrors();
+                _logger.LogWarning($"ModelState errors: {string.Join(", ", errors)}");
+                return BadRequest(ApiResponse<CollectionDto>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
+            }
+            var userId = GetUserId();
+            var result = await _collectionServices.RemoveImageFromCollectionAsync(id, imageId, userId);
+            return HandleResult(result);
         }
 
         /// <summary>
@@ -372,6 +359,14 @@ namespace E_Commerce.Controllers
             int id,
             [FromForm] AddProductsToCollectionDto productsDto)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResponse<bool>.CreateErrorResponse(
+                    "Invalid ID",
+                    new ErrorResponse("Validation", new List<string> { "ID must be greater than 0" }),
+                    400
+                ));
+            }
             try
             {
                 if (!ModelState.IsValid)
@@ -381,14 +376,14 @@ namespace E_Commerce.Controllers
                     return BadRequest(ApiResponse<bool>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
                 }
 
-                _logger.LogInformation($"Executing AddProductsToCollection for collection ID: {id}");
-               var userid = HttpContext.Items["UserId"].ToString();
+                _logger.LogInformation($"Executing {nameof(AddProductsToCollection)} for collection ID: {id}");
+                var userid = HttpContext.Items["UserId"].ToString();
                 var result = await _collectionServices.AddProductsToCollectionAsync(id, productsDto, userid);
                 return HandleResult(result, nameof(AddProductsToCollection), id);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error in AddProductsToCollection: {ex.Message}");
+                _logger.LogError($"Error in {nameof(AddProductsToCollection)}: {ex.Message}");
                 return StatusCode(500, ApiResponse<bool>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while adding products to collection"), 500));
             }
         }
@@ -402,6 +397,14 @@ namespace E_Commerce.Controllers
             int id,
             [FromBody] RemoveProductsFromCollectionDto productsDto)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResponse<bool>.CreateErrorResponse(
+                    "Invalid ID",
+                    new ErrorResponse("Validation", new List<string> { "ID must be greater than 0" }),
+                    400
+                ));
+            }
             try
             {
                 if (!ModelState.IsValid)
@@ -411,19 +414,18 @@ namespace E_Commerce.Controllers
                     return BadRequest(ApiResponse<string>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
                 }
 
-                _logger.LogInformation($"Executing RemoveProductsFromCollection for collection ID: {id}");
-               var userid = HttpContext.Items["UserId"].ToString();
+                _logger.LogInformation($"Executing {nameof(RemoveProductsFromCollection)} for collection ID: {id}");
+                var userid = HttpContext.Items["UserId"].ToString();
                 var result = await _collectionServices.RemoveProductsFromCollectionAsync(id, productsDto, userid);
                 return HandleResult(result, nameof(RemoveProductsFromCollection), id);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error in RemoveProductsFromCollection: {ex.Message}");
+                _logger.LogError($"Error in {nameof(RemoveProductsFromCollection)}: {ex.Message}");
                 return StatusCode(500, ApiResponse<string>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while removing products from collection"), 500));
             }
         }
 
-     
         /// <summary>
         /// Update collection display order (Admin only)
         /// </summary>
@@ -433,18 +435,26 @@ namespace E_Commerce.Controllers
             int id,
             [FromBody] int displayOrder)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResponse<bool>.CreateErrorResponse(
+                    "Invalid ID",
+                    new ErrorResponse("Validation", new List<string> { "ID must be greater than 0" }),
+                    400
+                ));
+            }
             try
             {
-                _logger.LogInformation($"Executing UpdateCollectionDisplayOrder for ID: {id}, order: {displayOrder}");
-               var userid = HttpContext.Items["UserId"].ToString();
+                _logger.LogInformation($"Executing {nameof(UpdateCollectionDisplayOrder)} for ID: {id}, order: {displayOrder}");
+                var userid = HttpContext.Items["UserId"].ToString();
                 var result = await _collectionServices.UpdateCollectionDisplayOrderAsync(id, displayOrder, userid);
                 return HandleResult(result, nameof(UpdateCollectionDisplayOrder), id);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error in UpdateCollectionDisplayOrder: {ex.Message}");
+                _logger.LogError($"Error in {nameof(UpdateCollectionDisplayOrder)}: {ex.Message}");
                 return StatusCode(500, ApiResponse<bool>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while updating collection display order"), 500));
             }
         }
     }
-} 
+}

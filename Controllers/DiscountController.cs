@@ -1,4 +1,4 @@
-﻿using E_Commerce.DtoModels;
+using E_Commerce.DtoModels;
 using E_Commerce.DtoModels.DiscoutDtos;
 using E_Commerce.DtoModels.ProductDtos;
 using E_Commerce.DtoModels.Responses;
@@ -50,15 +50,13 @@ namespace E_Commerce.Controllers
 			}
 		}
 
-
-
-
 		[HttpGet]
 		[ActionName(nameof(GetAllAsync))]
 		[ResponseCache(Duration = 120)]
 		public async Task<ActionResult<ApiResponse<List<DiscountDto>>>> GetAllAsync()
 		{
 			_logger.LogInformation($"Executing {nameof(GetAllAsync)}");
+
 			var response = await _discountService.GetAllAsync();
 			return HandleResult<List<DiscountDto>>(response, nameof(GetAllAsync));
 		}
@@ -71,7 +69,16 @@ namespace E_Commerce.Controllers
 			[FromQuery] bool? isActive = null,
 			[FromQuery] bool includeDeleted = false)
 		{
+			if (id <= 0)
+			{
+				return BadRequest(ApiResponse<DiscountDto>.CreateErrorResponse(
+					"Invalid ID",
+					new ErrorResponse("Validation", new List<string> { "ID must be greater than 0" }),
+					400
+				));
+			}
 			_logger.LogInformation($"Executing {nameof(GetByIdAsync)} for id: {id}, isActive: {isActive}, includeDeleted: {includeDeleted}");
+
 			var response = await _discountService.GetDiscountByIdAsync(id, isActive, includeDeleted);
 			return HandleResult<DiscountDto>(response, nameof(GetByIdAsync), id);
 		}
@@ -120,6 +127,14 @@ namespace E_Commerce.Controllers
 		[ActionName(nameof(DeleteAsync))]
 		public async Task<ActionResult<ApiResponse<bool>>> DeleteAsync(int id)
 		{
+			if (id <= 0)
+			{
+				return BadRequest(ApiResponse<bool>.CreateErrorResponse(
+					"Invalid ID",
+					new ErrorResponse("Validation", new List<string> { "ID must be greater than 0" }),
+					400
+				));
+			}
 			_logger.LogInformation($"Executing {nameof(DeleteAsync)} for ID: {id}");
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var response = await _discountService.DeleteDiscountAsync(id, userId);
@@ -130,6 +145,14 @@ namespace E_Commerce.Controllers
 		[ActionName(nameof(RestoreAsync))]
 		public async Task<ActionResult<ApiResponse<DiscountDto>>> RestoreAsync(int id)
 		{
+			if (id <= 0)
+			{
+				return BadRequest(ApiResponse<DiscountDto>.CreateErrorResponse(
+					"Invalid ID",
+					new ErrorResponse("Validation", new List<string> { "ID must be greater than 0" }),
+					400
+				));
+			}
 			_logger.LogInformation($"Executing {nameof(RestoreAsync)} for ID: {id}");
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var response = await _discountService.RestoreDiscountAsync(id, userId);
@@ -168,6 +191,7 @@ namespace E_Commerce.Controllers
 		public async Task<ActionResult<ApiResponse<List<DiscountDto>>>> GetActiveAsync()
 		{
 			_logger.LogInformation($"Executing {nameof(GetActiveAsync)}");
+		
 			var response = await _discountService.GetActiveDiscountsAsync();
 			return HandleResult<List<DiscountDto>>(response, nameof(GetActiveAsync));
 		}
@@ -178,6 +202,7 @@ namespace E_Commerce.Controllers
 		public async Task<ActionResult<ApiResponse<List<DiscountDto>>>> GetExpiredAsync()
 		{
 			_logger.LogInformation($"Executing {nameof(GetExpiredAsync)}");
+			
 			var response = await _discountService.GetExpiredDiscountsAsync();
 			return HandleResult<List<DiscountDto>>(response, nameof(GetExpiredAsync));
 		}
@@ -188,6 +213,7 @@ namespace E_Commerce.Controllers
 		public async Task<ActionResult<ApiResponse<List<DiscountDto>>>> GetUpcomingAsync()
 		{
 			_logger.LogInformation($"Executing {nameof(GetUpcomingAsync)}");
+
 			var response = await _discountService.GetUpcomingDiscountsAsync();
 			return HandleResult<List<DiscountDto>>(response, nameof(GetUpcomingAsync));
 		}
@@ -197,7 +223,16 @@ namespace E_Commerce.Controllers
 		[ResponseCache(Duration = 60, VaryByQueryKeys = new string[] { "categoryId" })]
 		public async Task<ActionResult<ApiResponse<List<DiscountDto>>>> GetByCategoryAsync(int categoryId)
 		{
+			if (categoryId <= 0)
+			{
+				return BadRequest(ApiResponse<List<DiscountDto>>.CreateErrorResponse(
+					"Invalid Category ID",
+					new ErrorResponse("Validation", new List<string> { "Category ID must be greater than 0" }),
+					400
+				));
+			}
 			_logger.LogInformation($"Executing {nameof(GetByCategoryAsync)} for categoryId: {categoryId}");
+
 			var response = await _discountService.GetDiscountsByCategoryAsync(categoryId);
 			return HandleResult<List<DiscountDto>>(response, nameof(GetByCategoryAsync), categoryId);
 		}
@@ -206,6 +241,14 @@ namespace E_Commerce.Controllers
 		[ActionName(nameof(ActivateAsync))]
 		public async Task<ActionResult<ApiResponse<bool>>> ActivateAsync(int id)
 		{
+			if (id <= 0)
+			{
+				return BadRequest(ApiResponse<bool>.CreateErrorResponse(
+					"Invalid ID",
+					new ErrorResponse("Validation", new List<string> { "ID must be greater than 0" }),
+					400
+				));
+			}
 			_logger.LogInformation($"Executing {nameof(ActivateAsync)} for ID: {id}");
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var response = await _discountService.ActivateDiscountAsync(id, userId);
@@ -216,6 +259,14 @@ namespace E_Commerce.Controllers
 		[ActionName(nameof(DeactivateAsync))]
 		public async Task<ActionResult<ApiResponse<bool>>> DeactivateAsync(int id)
 		{
+			if (id <= 0)
+			{
+				return BadRequest(ApiResponse<bool>.CreateErrorResponse(
+					"Invalid ID",
+					new ErrorResponse("Validation", new List<string> { "ID must be greater than 0" }),
+					400
+				));
+			}
 			_logger.LogInformation($"Executing {nameof(DeactivateAsync)} for ID: {id}");
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var response = await _discountService.DeactivateDiscountAsync(id, userId);
@@ -228,6 +279,7 @@ namespace E_Commerce.Controllers
 		public async Task<ActionResult<ApiResponse<bool>>> ValidateAsync(int id)
 		{
 			_logger.LogInformation($"Executing {nameof(ValidateAsync)} for ID: {id}");
+
 			var response = await _discountService.IsDiscountValidAsync(id);
 			return HandleResult<bool>(response, nameof(ValidateAsync), id);
 		}

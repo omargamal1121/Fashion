@@ -217,7 +217,7 @@ namespace E_Commerce.Mappings
 				.ForMember(dest => dest.City, opt => opt.MapFrom(src => src.City.Trim()))
 				.ForMember(dest => dest.StreetAddress, opt => opt.MapFrom(src => src.StreetAddress.Trim()))
 				.ForMember(dest => dest.PostalCode, opt => opt.MapFrom(src => src.PostalCode.Trim()))
-				.ForMember(dest => dest.AddressType, opt => opt.MapFrom(src => src.AddressType.Trim()))
+			
 				.ForMember(dest => dest.IsDefault, opt => opt.MapFrom(src => src.IsDefault))
 				.ForMember(dest => dest.AdditionalNotes, opt => opt.MapFrom(src => src.AdditionalNotes))
 				.ForMember(dest => dest.CustomerId, opt => opt.Ignore())

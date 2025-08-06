@@ -30,30 +30,12 @@ namespace E_Commerce.Services.ProductServices
                     "create",
                     "POST"
                 ),
-                new LinkDto(
-                    GetUriByAction(nameof(ProductController.GetBestSellersPublic)) ?? "",
-                    "bestsellers",
-                    "GET"
-                ),
-                new LinkDto(
-                    GetUriByAction(nameof(ProductController.GetNewArrivalsPublic)) ?? "",
-                    "newarrivals",
-                    "GET"
-                ),
-                new LinkDto(
-                    GetUriByAction(nameof(ProductController.AdvancedSearchPublic)) ?? "",
-                    "advanced-search",
-                    "POST"
-                )
+              
             };
 
             if (id != null)
             {
-                links.Add(new LinkDto(
-                    GetUriByAction(nameof(ProductController.GetProductPublic), new { id }) ?? "",
-                    "get-by-id",
-                    "GET"
-                ));
+               
                 links.Add(new LinkDto(
                     GetUriByAction(nameof(ProductController.UpdateProduct), new { id }) ?? "",
                     "update",

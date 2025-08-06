@@ -481,6 +481,7 @@ namespace E_Commerce.Services.ProductServices
 				await transacrion.CommitAsync();
 				RemoveProductCaches();
 				DeactiveCollectionMethod(id);
+
 				DeActiveSubcategory(product.SubCategoryId, userId);
 				RemoveCartItem(userId, null, product.Id);
 
@@ -589,6 +590,7 @@ namespace E_Commerce.Services.ProductServices
 					.Where(p => p.Id == productId)
 					.Select(p => new {
 						IsActive = p.IsActive,
+						isdeleted= p.DeletedAt!=null,
 						HasImages = p.Images.Any(i => i.DeletedAt == null),
 						HasActiveVariants = p.ProductVariants.Any(v => v.IsActive && v.DeletedAt == null)
 					}).FirstOrDefaultAsync();
@@ -604,6 +606,8 @@ namespace E_Commerce.Services.ProductServices
 
 				if (!productInfo.HasActiveVariants)
 					return Result<bool>.Fail("Product has no active variants", 400);
+				if (productInfo.isdeleted)
+					return Result<bool>.Fail("Product is Deleted Restore it first", 400);
 
 				var result = await _unitOfWork.Product.ActiveProductAsync(productId);
 				if (!result)

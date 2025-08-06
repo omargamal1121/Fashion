@@ -27,24 +27,14 @@ namespace E_Commerce.Services.SubCategoryServices
                     "create",
                     "POST"
                 ),
-                new LinkDto(
-                    GetUriByAction(nameof(SubCategoryController.GetAllForUser)) ?? "",
-                    "get-all",
-                    "GET"
-                ),
+               
               
                
             };
 
             if (id != null)
             {
-                links.Add(
-                    new LinkDto(
-                        GetUriByAction(nameof(SubCategoryController.GetAllForUser), new { id }) ?? "",
-                        "get-by-id",
-                        "GET"
-                    )
-                );
+               
                 links.Add(
                     new LinkDto(
                         GetUriByAction(nameof(SubCategoryController.Delete), new { id }) ?? "",

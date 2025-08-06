@@ -66,33 +66,12 @@ namespace E_Commerce.Controllers
 		[HttpGet("{id}")]
 		[AllowAnonymous]
 		[ActionName(nameof(GetCategoryById))]
-		public async Task<ActionResult<ApiResponse<CategorywithdataDto>>> GetCategoryById(int id)
-		{
-			_logger.LogInformation($"Executing GetCategoryById for id: {id}");
-			
-			// Enhanced validation
-			if (id <= 0)
-			{
-				return BadRequest(ApiResponse<CategorywithdataDto>.CreateErrorResponse("Invalid category ID", new ErrorResponse("Validation", new List<string> { "Category ID must be greater than 0" }), 400));
-			}
-			
-			// Role-based filtering - only active, non-deleted for regular users
-			var result = await _categoryServices.GetCategoryByIdAsync(id, true, false);
-			return HandleResult(result, "GetCategoryById", id);
-		}
-		
-		/// <summary>
-		/// Get category by ID with admin filters - only accessible to admins
-		/// </summary>
-		[HttpGet("{id}/admin")]
-		[Authorize(Roles = "Admin")]
-		[ActionName(nameof(GetCategoryByIdAdmin))]
-		public async Task<ActionResult<ApiResponse<CategorywithdataDto>>> GetCategoryByIdAdmin(
+		public async Task<ActionResult<ApiResponse<CategorywithdataDto>>> GetCategoryById(
 			int id,
 			[FromQuery] bool? isActive = null,
 			[FromQuery] bool? includeDeleted = null)
 		{
-			_logger.LogInformation($"Executing GetCategoryByIdAdmin for id: {id}, isActive: {isActive}, includeDeleted: {includeDeleted}");
+			_logger.LogInformation($"Executing {nameof(GetCategoryById)} for id: {id}, isActive: {isActive}, includeDeleted: {includeDeleted}");
 			
 			// Enhanced validation
 			if (id <= 0)
@@ -100,67 +79,52 @@ namespace E_Commerce.Controllers
 				return BadRequest(ApiResponse<CategorywithdataDto>.CreateErrorResponse("Invalid category ID", new ErrorResponse("Validation", new List<string> { "Category ID must be greater than 0" }), 400));
 			}
 			
-			// Admins can use any filters
+			// Role-based filtering
+			bool isAdmin = User?.IsInRole("Admin") ?? false;
+			
+			// Regular users can only see active, non-deleted categories
+			if (!isAdmin)
+			{
+				isActive = true;
+				includeDeleted = false;
+			}
+			
+			// Admins can use any filters, regular users get fixed filters
 			var result = await _categoryServices.GetCategoryByIdAsync(id, isActive, includeDeleted);
-			return HandleResult(result, "GetCategoryByIdAdmin", id);
+			return HandleResult(result, "GetCategoryById", id);
 		}
 
 		/// <summary>
 		/// Get all categories - accessible to all users (only active, non-deleted)
 		/// </summary>
-		[HttpGet]
 		[AllowAnonymous]
+		[HttpGet]
 		[ActionName(nameof(GetCategories))]
 		public async Task<ActionResult<ApiResponse<List<CategoryDto>>>> GetCategories(
-			[FromQuery] string? search = null,
-			[FromQuery] int page = 1,
-			[FromQuery] int pageSize = 10)
-		{
-			_logger.LogInformation($"Executing GetCategories with search: {search}, page: {page}");
-			
-			// Fixed filtering for regular users - only active, non-deleted categories
-			var isActive = true;
-			var isDeleted = false;
-			
-			// Use FilterAsync for search functionality
-			if (!string.IsNullOrWhiteSpace(search))
-			{
-				var searchResult = await _categoryServices.FilterAsync(search, isActive, isDeleted, page, pageSize);
-				return HandleResult(searchResult, "GetCategories");
-			}
-			
-			// Use GetAllCategoriesAsync for listing
-			var result = await _categoryServices.FilterAsync(string.Empty,isActive, isDeleted, page, pageSize);
-			return StatusCode(result.StatusCode, result);
-		}
-		
-		/// <summary>
-		/// Get all categories with admin filters - only accessible to admins
-		/// </summary>
-		[HttpGet("admin")]
-		[Authorize(Roles = "Admin")]
-		[ActionName(nameof(GetCategoriesAdmin))]
-		public async Task<ActionResult<ApiResponse<List<CategoryDto>>>> GetCategoriesAdmin(
 			[FromQuery] string? search = null,
 			[FromQuery] bool? isActive = null,
 			[FromQuery] bool? isDeleted = null,
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10)
 		{
-			_logger.LogInformation($"Executing GetCategoriesAdmin with search: {search}, isActive: {isActive}, isDeleted: {isDeleted}, page: {page}");
+			_logger.LogInformation($"Executing {nameof(GetCategories)} with search: {search}, isActive: {isActive}, isDeleted: {isDeleted}, page: {page}");
 			
-			// Admins can use any filters
-			// Use FilterAsync for search functionality
-			if (!string.IsNullOrWhiteSpace(search))
+			// Role-based filtering
+			bool isAdmin = User?.IsInRole("Admin") ?? false;
+			
+			// Regular users can only see active, non-deleted categories
+			if (!isAdmin)
 			{
-				var searchResult = await _categoryServices.FilterAsync(search, isActive, isDeleted, page, pageSize);
-				return HandleResult(searchResult, "GetCategoriesAdmin");
+				isActive = true;
+				isDeleted = false;
 			}
 			
-			// Use GetAllCategoriesAsync for listing
-			var result = await _categoryServices.FilterAsync(search,isActive, isDeleted, page, pageSize);
-			return StatusCode(result.StatusCode, result);
+			// Admins can use any filters, regular users get fixed filters
+			var searchResult = await _categoryServices.FilterAsync(search, isActive, isDeleted, page, pageSize);
+			return HandleResult(searchResult, "GetCategories");
 		}
+
+		// Remove GetCategoriesAdmin method - functionality merged into GetCategories
 
 
 		/// <summary>

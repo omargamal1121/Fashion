@@ -9,6 +9,7 @@ namespace E_Commerce.Interfaces
         Task<bool> AddItemToCartAsync(int cartId, CartItem item);
         public  Task<Cart?> GetCartByUserIdAsync(string userId);
         public  Task<bool> IsExsistByUserId(string userid);
+        public  Task<bool> IsEmptyAsync(string userid);
 
 
 

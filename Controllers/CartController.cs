@@ -88,7 +88,7 @@ namespace E_Commerce.Controllers
         /// </summary>
         /// <param name="itemDto">Item details to add</param>
         /// <returns>Success/failure</returns>
-        [HttpPost("add-item")]
+        [HttpPost("items")]
         public async Task<ActionResult<ApiResponse<bool>>> AddItemToCart([FromBody] CreateCartItemDto itemDto)
         {
             try
@@ -124,11 +124,11 @@ namespace E_Commerce.Controllers
         /// <param name="itemDto">Updated item details</param>
         /// <param name="productVariantId">Product variant ID (optional)</param>
         /// <returns>Success/failure</returns>
-        [HttpPut("update-item/{productId}")]
+        [HttpPut("items/{productId}/{variantId}")]
         public async Task<ActionResult<ApiResponse<bool>>> UpdateCartItem(
             int productId, 
             [FromBody] UpdateCartItemDto itemDto,
-            [FromQuery] int? productVariantId = null)
+            [FromRoute] int productVariantId)
         {
             try
             {
@@ -161,7 +161,7 @@ namespace E_Commerce.Controllers
         /// </summary>
         /// <param name="itemDto">Item details to remove</param>
         /// <returns>Success/failure</returns>
-        [HttpDelete("remove-item")]
+        [HttpDelete("items")]
         public async Task<ActionResult<ApiResponse<bool>>> RemoveItemFromCart([FromBody] RemoveCartItemDto itemDto)
         {
             try
@@ -220,7 +220,7 @@ namespace E_Commerce.Controllers
         /// Get the total number of items in the cart
         /// </summary>
         /// <returns>Item count</returns>
-        [HttpGet("item-count")]
+        [HttpGet("items-count")]
         public async Task<ActionResult<ApiResponse<int?>>> GetCartItemCount()
         {
             try
@@ -267,6 +267,28 @@ namespace E_Commerce.Controllers
             {
                 _logger.LogError($"Error in IsCartEmpty: {ex.Message}");
                 return StatusCode(500, ApiResponse<bool>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while checking if cart is empty"), 500));
+            }
+        }
+        [HttpPatch("CheckOut")]
+       
+        public async Task<ActionResult<ApiResponse<bool>>> CheckOut()
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(ApiResponse<bool>.CreateErrorResponse("Unauthorized", new ErrorResponse("Unauthorized", "User not authenticated"), 401));
+                }
+
+                _logger.LogInformation("Executing CheckOut");
+                var result = await _cartServices.UpdateCheckoutData(userId);
+                return HandleResult(result, nameof(IsCartEmpty));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error in CheckOut: {ex.Message}");
+                return StatusCode(500, ApiResponse<bool>.CreateErrorResponse("Server Error", new ErrorResponse("Server Error", "An error occurred while checking if cart is CheckOut"), 500));
             }
         }
     }

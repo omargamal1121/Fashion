@@ -54,7 +54,8 @@ using E_Commerce.Services.ProductServices;
 using E_Commerce.Services.SubCategoryServices;
 using E_Commerce.Services.BackgroundServices;
 using E_Commerce.Services.UserOpreationServices;
-using E_Commerce.Services.CacheServices.CartServices;
+using E_Commerce.Services.CartServices;
+using E_Commerce.Services.PayMobServices;
 
 namespace E_Commerce
 {
@@ -123,7 +124,9 @@ namespace E_Commerce
             builder.Services.AddScoped<IWareHouseServices, WareHouseServices>();
             builder.Services.AddScoped<ICartRepository, CartRepository>();
             builder.Services.AddScoped<ICartServices, CartServices>();
-            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+			builder.Services.AddScoped<IPayMobServices, PayMobServices>();
+
+			builder.Services.AddScoped<IOrderRepository, OrderRepository>();
             builder.Services.AddScoped<IOrderServices, OrderServices>();
             builder.Services.AddScoped<ICollectionRepository, CollectionRepository>();
             builder.Services.AddScoped<ICollectionServices, CollectionServices>();

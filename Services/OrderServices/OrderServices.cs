@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using E_Commerce.DtoModels.OrderDtos;
 using E_Commerce.DtoModels.ProductDtos;
 using E_Commerce.DtoModels.Responses;
@@ -9,6 +9,7 @@ using E_Commerce.Models;
 using E_Commerce.Services.AdminOpreationServices;
 using E_Commerce.Services.Cache;
 using E_Commerce.Services.EmailServices;
+using E_Commerce.Services.PayMobServices;
 using E_Commerce.Services.UserOpreationServices;
 using E_Commerce.UOW;
 using Hangfire;
@@ -16,8 +17,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 using System.Linq.Expressions;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+using static E_Commerce.Services.PayMobServices.PayMobServices;
 
 namespace E_Commerce.Services.Order
 {
@@ -25,16 +31,23 @@ namespace E_Commerce.Services.Order
     {
         private readonly ILogger<OrderServices> _logger;
         private readonly IMapper _mapper;
+        private readonly IPayMobServices _payMobServices;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserOpreationServices _userOpreationServices;
         private readonly IOrderRepository _orderRepository;
         private readonly ICartServices _cartServices;
-        private readonly IAdminOpreationServices _adminOperationServices;
+		private readonly IBackgroundJobClient _backgroundJobClient;
+		private readonly IErrorNotificationService _errorNotificationService;
+		private readonly IAdminOpreationServices _adminOperationServices;
         private readonly ICacheManager _cacheManager;
         private readonly UserManager<Customer> _userManager;
 		private const string CACHE_TAG_ORDER = "order";
+		private const string CACHE_TAG_CART = "cart";
 
-        public OrderServices(
+		public OrderServices(
+            IPayMobServices payMobServices,
+            IBackgroundJobClient backgroundJobClient,
+            IErrorNotificationService errorNotificationService,
             
             UserManager<Customer> userManager,
 			IUserOpreationServices userOpreationServices,
@@ -46,6 +59,9 @@ namespace E_Commerce.Services.Order
             IAdminOpreationServices adminOperationServices,
             ICacheManager cacheManager)
         {
+            _payMobServices = payMobServices;
+            _backgroundJobClient = backgroundJobClient;
+            _errorNotificationService = errorNotificationService;
             _userManager = userManager;
 			_userOpreationServices = userOpreationServices;
 			_logger = logger;
@@ -223,8 +239,7 @@ namespace E_Commerce.Services.Order
                 return Result<List<OrderListDto>>.Fail("An error occurred while retrieving orders", 500);
             }
         }
-
-		public async Task<Result<OrderDto>> CreateOrderFromCartAsync(string userId, CreateOrderDto orderDto)
+		public async Task<Result<OrderWithPaymentDto>> CreateOrderFromCartAsync(string userId, CreateOrderDto orderDto)
 		{
 			_logger.LogInformation("Creating order from cart for user: {UserId}", userId);
 
@@ -232,51 +247,42 @@ namespace E_Commerce.Services.Order
 
 			try
 			{
-				// Check if cart is empty
-				var cartCheck = await _cartServices.IsCartEmptyAsync(userId);
-				if (!cartCheck.Success || !cartCheck.Data)
-				{
-					_logger.LogWarning("Cart is empty for user {UserId}", userId);
-					return Result<OrderDto>.Fail("Cart is empty", 400);
-				}
+				#region 🔹 Validate User and Cart
+				var user = await _userManager.FindByIdAsync(userId);
+				if (user == null)
+					return Result<OrderWithPaymentDto>.Fail("UnAuthorized", 401);
 
+				if (await _unitOfWork.Cart.IsEmptyAsync(userId))
+					return Result<OrderWithPaymentDto>.Fail("Cart is empty", 400);
 
-				var isexist = await _unitOfWork.CustomerAddress.IsExsistByIdAndUserIdAsync(orderDto.AddressId, userId);
-				if (!isexist)
-				{
-					_logger.LogWarning("Address with ID {AddressId} not found for user {UserId}", orderDto.AddressId, userId);
-					return Result<OrderDto>.Fail("Address not found", 404);
-				}
+				var address = await _unitOfWork.CustomerAddress.GetAddressByIdAsync(orderDto.AddressId);
+				if (address == null)
+					return Result<OrderWithPaymentDto>.Fail("Address not found", 404);
 
-				// Retrieve cart
 				var cartResult = await _cartServices.GetCartAsync(userId);
 				if (!cartResult.Success || cartResult.Data == null)
-				{
-					_logger.LogWarning("Failed to retrieve cart for user {UserId}", userId);
-					return Result<OrderDto>.Fail("Failed to retrieve cart", 400);
-				}
+					return Result<OrderWithPaymentDto>.Fail("Failed to retrieve cart", 400);
 
 				var cart = cartResult.Data;
 
-				// Check if cart is checked out and not expired
 				if (cart.CheckoutDate == null || cart.CheckoutDate.Value.AddDays(7) < DateTime.UtcNow)
-				{
-					_logger.LogWarning("Cart for user {UserId} has expired or not checked out properly", userId);
-					return Result<OrderDto>.Fail("Please Make Checkout on Cart", 400);
-				}
+					return Result<OrderWithPaymentDto>.Fail("Please Make Checkout on Cart", 400);
+				#endregion
 
-				// Calculate totals
+				#region 🧾 Calculate Order Totals
 				var subtotal = cart.Items.Sum(i => i.Quantity * i.UnitPrice);
-				var total = subtotal ;
+				var total = subtotal;
+				int amountInCents = (int)(total * 100);
+				#endregion
 
+				#region 📝 Create Order and Items
 				var orderNumber = await _orderRepository.GenerateOrderNumberAsync();
 
-				// Create order
 				var order = new E_Commerce.Models.Order
 				{
 					CustomerId = userId,
 					OrderNumber = orderNumber,
-                    CustomerAddressId= orderDto.AddressId,
+					CustomerAddressId = orderDto.AddressId,
 					Status = OrderStatus.Pending,
 					Subtotal = subtotal,
 					Total = total,
@@ -287,10 +293,10 @@ namespace E_Commerce.Services.Order
 				var createdOrder = await _orderRepository.CreateAsync(order);
 				if (createdOrder == null)
 				{
-					_logger.LogError("Failed to create order for user {UserId}", userId);
 					await transaction.RollbackAsync();
-					return Result<OrderDto>.Fail("Failed to create order", 500);
+					return Result<OrderWithPaymentDto>.Fail("Failed to create order", 500);
 				}
+				await _unitOfWork.CommitAsync();
 
 				var orderItems = cart.Items.Select(item => new OrderItem
 				{
@@ -305,9 +311,14 @@ namespace E_Commerce.Services.Order
 				}).ToArray();
 
 				await _unitOfWork.Repository<OrderItem>().CreateRangeAsync(orderItems);
+				await _unitOfWork.Cart.ClearCartAsync(cart.Id);
 
-				await _cartServices.ClearCartAsync(userId);
+				// Clear cache
+				await _cacheManager.RemoveByTagAsync(CACHE_TAG_CART);
+                #endregion
 
+                await _unitOfWork.CommitAsync();
+				#region 🧠 Log User Operation
 				var logResult = await _userOpreationServices.AddUserOpreationAsync(
 					$"Created order {orderNumber} from cart",
 					Opreations.AddOpreation,
@@ -317,36 +328,107 @@ namespace E_Commerce.Services.Order
 
 				if (!logResult.Success)
 				{
-					_logger.LogWarning("Failed to log admin operation for user {UserId}", userId);
 					await transaction.RollbackAsync();
-					return Result<OrderDto>.Fail("An error occurred while creating the order", 500);
+					return Result<OrderWithPaymentDto>.Fail("An error occurred while creating the order", 500);
 				}
+				#endregion
+				string paymentUrl = string.Empty;
 
-				// Commit transaction
+				#region 💳 PayMob Integration (If Payment Method != Cash)
+
+				if (orderDto.paymentMethod != Enums.PaymentMethod.Cash)
+				{
+					_logger.LogInformation("Initiating Paymob payment for order: {OrderId}", createdOrder.Id);
+
+					var token = await _payMobServices.GetTokenAsync();
+					if (string.IsNullOrEmpty(token))
+					{
+						_logger.LogError("Paymob Token is null");
+						await transaction.RollbackAsync();
+						return Result<OrderWithPaymentDto>.Fail("Failed to initiate payment", 500);
+					}
+
+					var paymobOrderRequest = new CreateOrderRequest
+					{
+						auth_token = token,
+						amount_cents = amountInCents,
+						currency = "EGP",
+						delivery_needed = true
+					};
+
+					var paymobOrderId = await _payMobServices.CreateOrderInPaymobAsync(paymobOrderRequest);
+					if (paymobOrderId == 0)
+					{
+						_logger.LogError("Failed to create order in Paymob");
+						await transaction.RollbackAsync();
+						return Result<OrderWithPaymentDto>.Fail("Failed to initiate payment", 500);
+					}
+
+					var paymentKeyRequest = new PaymentKeyContent
+					{
+						amount_cents = amountInCents,
+						auth_token = token,
+						order_id = paymobOrderId,
+                        integration_id= 5221967,
+
+
+						billing_data = new billing_data
+						{
+							city = address.City ?? "NA",
+							country = address.Country ?? "EG",
+							state = address.State ?? "NA",
+							postal_code = address.PostalCode ?? "NA",
+							street = address.StreetAddress ?? "NA",
+							first_name = user.Name?.Split(" ").FirstOrDefault() ?? "NA",
+							last_name = user.Name?.Split(" ").Skip(1).FirstOrDefault() ?? "NA",
+							email = user.Email ?? "noemail@email.com",
+							phone_number = user.PhoneNumber ?? "0000000000"
+						}
+					};
+
+					var paymentKey = await _payMobServices.GeneratePaymentKeyAsync(paymentKeyRequest);
+					if (string.IsNullOrEmpty(paymentKey))
+					{
+						_logger.LogError("Failed to generate payment key from Paymob");
+						await transaction.RollbackAsync();
+						return Result<OrderWithPaymentDto>.Fail("Failed to initiate payment", 500);
+					}
+
+					_logger.LogInformation("Payment Key generated successfully for Paymob order: {PaymobOrderId}", paymobOrderId);
+					 paymentUrl = $"https://accept.paymob.com/api/acceptance/iframes/945070?payment_token={paymentKey}";
+
+
+				}
+				#endregion
+
+				#region ✅ Finalize and Return
 				await _unitOfWork.CommitAsync();
 				await transaction.CommitAsync();
 
-				// Retrieve full order DTO
 				var mappedOrderDto = await _unitOfWork.Order.GetOrderByIdAsync(createdOrder.Id);
 				if (mappedOrderDto == null)
 				{
 					_logger.LogError("Failed to retrieve created order DTO for order {OrderId}", createdOrder.Id);
-					return Result<OrderDto>.Fail("Failed to retrieve created order", 500);
+					return Result<OrderWithPaymentDto>.Fail("Failed to retrieve created order", 500);
 				}
 
-				// Invalidate cache
 				await _cacheManager.RemoveByTagAsync(CACHE_TAG_ORDER);
+                var response = new OrderWithPaymentDto { Order = mappedOrderDto, PaymentUrl = paymentUrl };
 
-				return Result<OrderDto>.Ok(mappedOrderDto, "Order created successfully", 201);
+				return Result<OrderWithPaymentDto>.Ok(response, "Order created successfully", 201);
+				#endregion
 			}
 			catch (Exception ex)
 			{
 				await transaction.RollbackAsync();
-				_logger.LogError(ex, "Error creating order for user {UserId}", userId);
-				NotifyAdminOfError($"Error creating order for user {userId}: {ex.Message}", ex.StackTrace);
-				return Result<OrderDto>.Fail("An error occurred while creating the order", 500);
+				_logger.LogError(ex, "Exception while creating order for user {UserId}", userId);
+				NotifyAdminOfError($"Exception creating order for user {userId}: {ex.Message}", ex.StackTrace);
+				return Result<OrderWithPaymentDto>.Fail("An error occurred while creating the order", 500);
 			}
 		}
+
+
+
 
 		public async Task<Result<OrderDto>> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusDto statusDto)
         {

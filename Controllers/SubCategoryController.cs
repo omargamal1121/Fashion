@@ -64,27 +64,24 @@ namespace E_Commerce.Controllers
         // User: Get active, non-deleted subcategory by ID
         [HttpGet("{id}")]
         [AllowAnonymous]
-        [ActionName(nameof(GetByIdForUser))]
-        public async Task<ActionResult<ApiResponse<SubCategoryDtoWithData>>> GetByIdForUser(int id)
+        [ActionName(nameof(GetById))]
+        public async Task<ActionResult<ApiResponse<SubCategoryDtoWithData>>> GetById(int id, [FromQuery] bool? isActive = null, [FromQuery] bool? isDeleted = null)
         {
-            _logger.LogInformation($"Executing {nameof(GetByIdForUser)} for id: {id}");
+            _logger.LogInformation($"Executing {nameof(GetById)} for id: {id}");
             if (id <= 0)
                 return BadRequest(ApiResponse<SubCategoryDtoWithData>.CreateErrorResponse("Invalid subcategory ID", new ErrorResponse("Validation", new List<string> { "ID must be greater than 0" }), 400));
-            var result = await _subCategoryServices.GetSubCategoryByIdAsync(id, true, false);
-            return HandleResult(result, nameof(GetByIdForUser), id);
-        }
 
-        // Admin: Get subcategory by ID with filters
-        [HttpGet("{id}/admin")]
-        [Authorize(Roles = "Admin")]
-        [ActionName(nameof(GetByIdForAdmin))]
-        public async Task<ActionResult<ApiResponse<SubCategoryDtoWithData>>> GetByIdForAdmin(int id, [FromQuery] bool? isActive = null, [FromQuery] bool? isDeleted = null)
-        {
-            _logger.LogInformation($"Executing {nameof(GetByIdForAdmin)} for id: {id}");
-            if (id <= 0)
-                return BadRequest(ApiResponse<SubCategoryDtoWithData>.CreateErrorResponse("Invalid subcategory ID", new ErrorResponse("Validation", new List<string> { "ID must be greater than 0" }), 400));
-            var result = await _subCategoryServices.GetSubCategoryByIdAsync(id, isActive, isDeleted);
-            return HandleResult(result, nameof(GetByIdForAdmin), id);
+            bool? effectiveIsActive = isActive;
+            bool? effectiveIsDeleted = isDeleted;
+
+            if (!User?.IsInRole("Admin") ?? true)
+            {
+                effectiveIsActive = true;
+                effectiveIsDeleted = false;
+            }
+
+            var result = await _subCategoryServices.GetSubCategoryByIdAsync(id, effectiveIsActive, effectiveIsDeleted);
+            return HandleResult(result, nameof(GetById), id);
         }
 
         [HttpPost]
@@ -184,21 +181,20 @@ namespace E_Commerce.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        [ActionName(nameof(GetAllForUser))]
-        public async Task<IActionResult> GetAllForUser([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        [ActionName(nameof(GetAll))]
+        public async Task<IActionResult> GetAll([FromQuery] bool? isActive = null, [FromQuery] bool? isDeleted = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            _logger.LogInformation($"Executing {nameof(GetAllForUser)} with page={page}, pageSize={pageSize}");
-            var result = await _subCategoryServices.GetAllSubCategoriesAsync(true, false, page, pageSize);
-            return StatusCode(result.StatusCode, result);
-        }
+            bool? effectiveIsActive = isActive;
+            bool? effectiveIsDeleted = isDeleted;
 
-        [HttpGet("admin")]
-        [Authorize(Roles = "Admin")]
-        [ActionName(nameof(GetAllForAdmin))]
-        public async Task<IActionResult> GetAllForAdmin([FromQuery] bool? isActive = null, [FromQuery] bool? isDeleted = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-        {
-            _logger.LogInformation($"Executing {nameof(GetAllForAdmin)} with isActive={isActive}, isDeleted={isDeleted}, page={page}, pageSize={pageSize}");
-            var result = await _subCategoryServices.GetAllSubCategoriesAsync(isActive, isDeleted, page, pageSize);
+            if (!User?.IsInRole("Admin") ?? true)
+            {
+                effectiveIsActive = true;
+                effectiveIsDeleted = false;
+            }
+
+            _logger.LogInformation($"Executing {nameof(GetAll)} with isActive={effectiveIsActive}, isDeleted={effectiveIsDeleted}, page={page}, pageSize={pageSize}");
+            var result = await _subCategoryServices.GetAllSubCategoriesAsync(effectiveIsActive, effectiveIsDeleted, page, pageSize);
             return StatusCode(result.StatusCode, result);
         }
 
@@ -224,27 +220,27 @@ namespace E_Commerce.Controllers
             return HandleResult(result, nameof(Deactivate));
         }
 
-        [HttpGet("search/user")]
+        [HttpGet("search")]
         [AllowAnonymous]
-        public async Task<ActionResult<ApiResponse<List<SubCategoryDto>>>> SearchForUser([FromQuery] string key, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-        {
-            _logger.LogInformation($"Executing {nameof(SearchForUser)} with key={key}, page={page}, pageSize={pageSize}");
-            var result = await _subCategoryServices.FilterAsync(key, true, false, page, pageSize);
-            return HandleResult(result, nameof(SearchForUser));
-        }
-
-        [HttpGet("search/admin")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<List<SubCategoryDto>>>> SearchForAdmin(
+        public async Task<ActionResult<ApiResponse<List<SubCategoryDto>>>> Search(
             [FromQuery] string key,
-            [FromQuery] bool isActive = true,
-            [FromQuery] bool includeDeleted = false,
+            [FromQuery] bool? isActive = null,
+            [FromQuery] bool? includeDeleted = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
-            _logger.LogInformation($"Executing {nameof(SearchForAdmin)} with key={key}, isActive={isActive}, includeDeleted={includeDeleted}, page={page}, pageSize={pageSize}");
-            var result = await _subCategoryServices.FilterAsync(key, isActive, includeDeleted, page, pageSize);
-            return HandleResult(result, nameof(SearchForAdmin));
+            bool effectiveIsActive = isActive ?? true;
+            bool effectiveIncludeDeleted = includeDeleted ?? false;
+
+            if (!User?.IsInRole("Admin") ?? true)
+            {
+                effectiveIsActive = true;
+                effectiveIncludeDeleted = false;
+            }
+
+            _logger.LogInformation($"Executing {nameof(Search)} with key={key}, isActive={effectiveIsActive}, includeDeleted={effectiveIncludeDeleted}, page={page}, pageSize={pageSize}");
+            var result = await _subCategoryServices.FilterAsync(key, effectiveIsActive, effectiveIncludeDeleted, page, pageSize);
+            return HandleResult(result, nameof(Search));
         }
 
 	}

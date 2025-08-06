@@ -121,6 +121,18 @@ namespace E_Commerce.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    var errors = GetModelErrors();
+                    _logger.LogWarning($"ModelState errors: {string.Join(", ", errors)}");
+                    return BadRequest(ApiResponse<List<OrderListDto>>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
+                }
+
+                if (page <= 0 || pageSize <= 0)
+                {
+                    return BadRequest(ApiResponse<List<OrderListDto>>.CreateErrorResponse("Invalid pagination", new ErrorResponse("Invalid Data", "Page and pageSize must be greater than 0"), 400));
+                }
+
                 _logger.LogInformation($"Executing GetCustomerOrders with pagination: page {page}, size {pageSize}");
                 var userId = GetUserId();
                 var result = await _orderServices.GetCustomerOrdersAsync(userId, false, page, pageSize);
@@ -137,8 +149,8 @@ namespace E_Commerce.Controllers
         /// Create order from cart (Customer access)
         /// </summary>
         [HttpPost("create-from-cart")]
-        [Authorize(Roles = "Customer,Admin")]
-        public async Task<ActionResult<ApiResponse<OrderDto>>> CreateOrderFromCart([FromBody] CreateOrderDto orderDto)
+        [Authorize()]
+        public async Task<ActionResult<ApiResponse<OrderWithPaymentDto>>> CreateOrderFromCart([FromBody] CreateOrderDto orderDto)
         {
             try
             {
@@ -247,6 +259,18 @@ namespace E_Commerce.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    var errors = GetModelErrors();
+                    _logger.LogWarning($"ModelState errors: {string.Join(", ", errors)}");
+                    return BadRequest(ApiResponse<List<OrderListDto>>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
+                }
+
+                if (page <= 0 || pageSize <= 0)
+                {
+                    return BadRequest(ApiResponse<List<OrderListDto>>.CreateErrorResponse("Invalid pagination", new ErrorResponse("Invalid Data", "Page and pageSize must be greater than 0"), 400));
+                }
+
                 _logger.LogInformation($"Executing GetOrdersByStatus for status: {status}, page: {page}, size: {pageSize}");
                 var result = await _orderServices.FilterOrdersAsync(status: status, page: page, pageSize: pageSize);
                 return HandleResult(result, nameof(GetOrdersByStatus));
@@ -364,6 +388,18 @@ namespace E_Commerce.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    var errors = GetModelErrors();
+                    _logger.LogWarning($"ModelState errors: {string.Join(", ", errors)}");
+                    return BadRequest(ApiResponse<List<OrderListDto>>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
+                }
+
+                if (page <= 0 || pageSize <= 0)
+                {
+                    return BadRequest(ApiResponse<List<OrderListDto>>.CreateErrorResponse("Invalid pagination", new ErrorResponse("Invalid Data", "Page and pageSize must be greater than 0"), 400));
+                }
+
                 _logger.LogInformation($"Executing FilterOrders: userId: {userId}, deleted: {deleted}, page: {page}, size: {pageSize}, status: {status}");
                 var result = await _orderServices.FilterOrdersAsync(userId, deleted, page, pageSize, status);
                 return HandleResult(result, nameof(FilterOrders));
@@ -387,6 +423,18 @@ namespace E_Commerce.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    var errors = GetModelErrors();
+                    _logger.LogWarning($"ModelState errors: {string.Join(", ", errors)}");
+                    return BadRequest(ApiResponse<List<OrderListDto>>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
+                }
+
+                if (page <= 0 || pageSize <= 0)
+                {
+                    return BadRequest(ApiResponse<List<OrderListDto>>.CreateErrorResponse("Invalid pagination", new ErrorResponse("Invalid Data", "Page and pageSize must be greater than 0"), 400));
+                }
+
                 _logger.LogInformation($"Executing GetOrdersWithPagination (legacy): page {page}, size {pageSize}, status: {status}");
                 // Use the new FilterOrdersAsync method internally
                 var result = await _orderServices.FilterOrdersAsync(null, false, page, pageSize, status);
@@ -409,6 +457,13 @@ namespace E_Commerce.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    var errors = GetModelErrors();
+                    _logger.LogWarning($"ModelState errors: {string.Join(", ", errors)}");
+                    return BadRequest(ApiResponse<int?>.CreateErrorResponse("Invalid Data", new ErrorResponse("Invalid Data", errors), 400));
+                }
+
                 _logger.LogInformation($"Executing GetTotalOrderCount, status: {status}");
                 var userRole = GetUserRole();
                 var result = await _orderServices.GetTotalOrderCountAsync(status, userRole);
@@ -423,4 +478,4 @@ namespace E_Commerce.Controllers
 
         #endregion
     }
-} 
+}

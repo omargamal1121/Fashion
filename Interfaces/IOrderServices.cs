@@ -17,7 +17,7 @@ namespace E_Commerce.Interfaces
 			Task<Result<OrderDto>> GetOrderByIdAsync(int orderId, string userId, bool isAdmin = false);
 		public  Task<Result<OrderDto>> GetOrderByNumberAsync(string orderNumber, string userId, bool isAdmin = false);
 		Task<Result<List<OrderListDto>>> GetCustomerOrdersAsync(string userId,bool isDeleted, int page = 1, int pageSize = 10);
-		Task<Result<OrderDto>> CreateOrderFromCartAsync(string userId, CreateOrderDto orderDto);
+		public Task<Result<OrderWithPaymentDto>> CreateOrderFromCartAsync(string userId, CreateOrderDto orderDto);
 		Task<Result<OrderDto>> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusDto statusDto);
 		Task<Result<string>> CancelOrderAsync(int orderId, CancelOrderDto cancelDto, string userId);
 		Task<Result<string>> ShipOrderAsync(int orderId);

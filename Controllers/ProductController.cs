@@ -18,9 +18,8 @@ using E_Commerce.DtoModels.ImagesDtos;
 
 namespace E_Commerce.Controllers
 {
-	[Route("api/[controller]")]
+	[Route("api/[controller]s")]
 	[ApiController]
-	[Authorize(Roles = "Admin")]
 	public class ProductController : ControllerBase
 	{
 		private readonly IProductsServices _productsServices;
@@ -56,6 +55,19 @@ namespace E_Commerce.Controllers
 			}
 		}
 
+		[HttpGet("best-selling")]
+		[Authorize(Roles ="Admin")]
+		public async Task<ActionResult<ApiResponse<List< BestSellingProductDto>>>> GetBestSellingProducts(
+	[FromQuery] int page = 1,
+	[FromQuery] int pageSize = 10,
+	[FromQuery] bool? isDeleted = null,
+	[FromQuery] bool? isActive = null)
+		{
+			var result = await _productsServices.GetBestSellersProductsWithCountAsync(page,pageSize, isActive,isDeleted);
+			return HandleResult<List<BestSellingProductDto>>(result, nameof(GetBestSellingProducts));
+			
+		}
+
 
 		[HttpGet("{id}/discount")]
 		public async Task<ActionResult<ApiResponse<DiscountDto>>> GetProductDiscount(int id)
@@ -65,6 +77,7 @@ namespace E_Commerce.Controllers
 		}
 
 		[HttpPost("{id}/discount")]
+		[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<ApiResponse<bool>>> AddDiscountToProduct(int id, [FromBody] int discountId)
 		{
 			if (!ModelState.IsValid || discountId <= 0)
@@ -82,6 +95,7 @@ namespace E_Commerce.Controllers
 		}
 
 		[HttpPut("{id}/discount")]
+		[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<ApiResponse<bool>>> UpdateProductDiscount(int id, [FromBody] int discountId)
 		{
 			if (!ModelState.IsValid || discountId <= 0)
@@ -99,34 +113,37 @@ namespace E_Commerce.Controllers
 		}
 
 		[HttpDelete("{id}/discount")]
+		[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<ApiResponse<bool>>> RemoveDiscountFromProduct(int id)
 		{
 			var userId = HttpContext.Items["UserId"]?.ToString();
 			var response = await _productsServices.RemoveDiscountFromProductAsync(id, userId);
 			return HandleResult(response, nameof(RemoveDiscountFromProduct), id);
 		}
-		[HttpGet("admin/{id}")]
-		[Authorize(Roles = "Admin")]
-		public async Task<ActionResult<ApiResponse<ProductDetailDto>>> GetProductAdmin(
+		[HttpGet("{id}")]
+		[AllowAnonymous]
+		public async Task<ActionResult<ApiResponse<ProductDetailDto>>> GetProduct(
 			int id,
 			[FromQuery] bool? isActive = null,
 			[FromQuery] bool? includeDeleted = null)
 		{
-			_logger.LogInformation($"Executing {nameof(GetProductAdmin)} for ID: {id}");
+			_logger.LogInformation($"Executing {nameof(GetProduct)} for ID: {id}");
+			
+			bool isAdmin = User?.IsInRole("Admin") == true;
+			
+			// For non-admin users, restrict to active and non-deleted products
+			if (!isAdmin)
+			{
+				isActive = true;
+				includeDeleted = false;
+			}
+			
 			var response = await _productsServices.GetProductByIdAsync(id, isActive, includeDeleted);
-			return HandleResult<ProductDetailDto>(response, nameof(GetProductAdmin), id);
-		}
-
-		[HttpGet("public/{id}")]
-		[AllowAnonymous]
-		public async Task<ActionResult<ApiResponse<ProductDetailDto>>> GetProductPublic(int id)
-		{
-			_logger.LogInformation($"Executing {nameof(GetProductPublic)} for ID: {id}");
-			var response = await _productsServices.GetProductByIdAsync(id, isActive: true, deletedOnly: false);
-			return HandleResult<ProductDetailDto>(response, nameof(GetProductPublic), id);
+			return HandleResult<ProductDetailDto>(response, nameof(GetProduct), id);
 		}
 
 		[HttpPost]
+		[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<ApiResponse<ProductDto>>> CreateProduct(CreateProductDto model)
 		{
 			_logger.LogInformation($"Executing {nameof(CreateProduct)}");
@@ -144,6 +161,7 @@ namespace E_Commerce.Controllers
 			return HandleResult<ProductDto>(response, nameof(CreateProduct), response.Data?.Id);
 		}
 		[HttpPut("{id}")]
+		[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<ApiResponse<ProductDto>>> UpdateProduct(int id, UpdateProductDto model)
 		{
 			_logger.LogInformation($"Executing {nameof(UpdateProduct)} for ID: {id}");
@@ -163,6 +181,7 @@ namespace E_Commerce.Controllers
 
 		[HttpDelete("{id}")]
 		[ActionName(nameof(DeleteProduct))]
+		[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<ApiResponse<bool>>> DeleteProduct(int id)
 		{
 			_logger.LogInformation($"Executing {nameof(DeleteProduct)} for ID: {id}");
@@ -174,6 +193,7 @@ namespace E_Commerce.Controllers
 		
 
 		[HttpPatch("{id}/restore")]
+		[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<ApiResponse<bool>>> RestoreProductAsync(int id)
 		{
 			if (!ModelState.IsValid)
@@ -199,6 +219,7 @@ namespace E_Commerce.Controllers
 		}
 
 		[HttpPost("{id}/images")]
+		[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<ApiResponse<List<ImageDto>>>> AddProductImages(int id, [FromForm] List<IFormFile> images)
 		{
 			if (!ModelState.IsValid || images == null || !images.Any())
@@ -216,6 +237,7 @@ namespace E_Commerce.Controllers
 		}
 
 		[HttpDelete("{id}/images/{imageId}")]
+		[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<ApiResponse<bool>>> RemoveProductImage(int id, int imageId)
 		{
 			var userId = HttpContext.Items["UserId"]?.ToString();
@@ -224,6 +246,7 @@ namespace E_Commerce.Controllers
 		}
 
 		[HttpPost("{id}/main-image")]
+		[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<ApiResponse<ImageDto>>> UploadAndSetMainImage(int id, [FromForm] CreateImageDto mainImage)
 		{
 			if (!ModelState.IsValid || mainImage?.Files == null || !mainImage.Files.Any())
@@ -244,101 +267,94 @@ namespace E_Commerce.Controllers
 		// Removed duplicate variants endpoint - now handled by ProductVariantController
 
 
-		[HttpGet("admin/list")]
-		[Authorize(Roles = "Admin")]
-		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetProductsForAdmin(
+		[HttpGet]
+		[AllowAnonymous]
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetProducts(
 			[FromQuery] bool? isActive = null,
 			[FromQuery] bool? includeDeleted = null,
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10)
 		{
+			bool isAdmin = User?.IsInRole("Admin") == true;
+			
+			// For non-admin users, restrict to active and non-deleted products
+			if (!isAdmin)
+			{
+				isActive = true;
+				includeDeleted = false;
+			}
+			
 			var response = await _productsServices.AdvancedSearchAsync(
 				new AdvancedSearchDto(), page, pageSize, isActive, includeDeleted);
-			return HandleResult(response, nameof(GetProductsForAdmin));
+			return HandleResult(response, nameof(GetProducts));
 		}
 
-		[HttpGet("public/list")]
+		[HttpGet("subcategory/{subCategoryId}")]
 		[AllowAnonymous]
-		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetProductsForPublic(
-			[FromQuery] int page = 1,
-			[FromQuery] int pageSize = 10)
-		{
-			var response = await _productsServices.AdvancedSearchAsync(
-				new AdvancedSearchDto(), page, pageSize, isActive: true, deletedOnly: false);
-			return HandleResult(response, nameof(GetProductsForPublic));
-		}
-
-		[HttpGet("admin/subcategory/{subCategoryId}")]
-		[Authorize(Roles = "Admin")]
-		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetProductsBySubCategoryAdmin(
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetProductsBySubCategory(
 			int subCategoryId,
 			[FromQuery] bool? isActive = null,
 			[FromQuery] bool? includeDeleted = null,
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10)
 		{
-			// If your service supports filtering by isActive/includeDeleted for subcategory, pass them; otherwise, just call as is
+			bool isAdmin = User?.IsInRole("Admin") == true;
+			
+			// For non-admin users, restrict to active and non-deleted products
+			if (!isAdmin)
+			{
+				isActive = true;
+				includeDeleted = false;
+			}
+			
 			var response = await _productsServices.AdvancedSearchAsync(
 				new AdvancedSearchDto { Subcategoryid = subCategoryId }, page, pageSize, isActive, includeDeleted);
-			return HandleResult(response, nameof(GetProductsBySubCategoryAdmin), subCategoryId);
+			return HandleResult(response, nameof(GetProductsBySubCategory), subCategoryId);
 		}
 
-		[HttpGet("public/subcategory/{subCategoryId}")]
+		[HttpGet("bestsellers")]
 		[AllowAnonymous]
-		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetProductsBySubCategoryPublic(
-			int subCategoryId,
-			[FromQuery] int page = 1,
-			[FromQuery] int pageSize = 10)
-		{
-			var response = await _productsServices.AdvancedSearchAsync(
-				new AdvancedSearchDto { Subcategoryid = subCategoryId }, page, pageSize, isActive: true, deletedOnly: false);
-			return HandleResult(response, nameof(GetProductsBySubCategoryPublic), subCategoryId);
-		}
-
-		[HttpGet("admin/bestsellers")]
-		[Authorize(Roles = "Admin")]
-		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetBestSellersAdmin(
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetBestSellers(
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10,
 			[FromQuery] bool? isActive = null,
 			[FromQuery] bool? includeDeleted = null)
 		{
+			bool isAdmin = User?.IsInRole("Admin") == true;
+			
+			// For non-admin users, restrict to active and non-deleted products
+			if (!isAdmin)
+			{
+				isActive = true;
+				includeDeleted = false;
+			}
+			
 			var response = await _productsServices.GetBestSellersAsync(page, pageSize, isActive, includeDeleted);
-			return HandleResult(response, nameof(GetBestSellersAdmin));
+			return HandleResult(response, nameof(GetBestSellers));
 		}
 
-		[HttpGet("public/bestsellers")]
+		[HttpGet("newarrivals")]
 		[AllowAnonymous]
-		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetBestSellersPublic(
-			[FromQuery] int page = 1,
-			[FromQuery] int pageSize = 10)
-		{
-			var response = await _productsServices.GetBestSellersAsync(page, pageSize, isActive: true, deletedOnly: false);
-			return HandleResult(response, nameof(GetBestSellersPublic));
-		}
-
-		[HttpGet("admin/newarrivals")]
-		[Authorize(Roles = "Admin")]
-		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetNewArrivalsAdmin(
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetNewArrivals(
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10,
 			[FromQuery] bool? isActive = null,
 			[FromQuery] bool? includeDeleted = null)
 		{
+			bool isAdmin = User?.IsInRole("Admin") == true;
+			
+			// For non-admin users, restrict to active and non-deleted products
+			if (!isAdmin)
+			{
+				isActive = true;
+				includeDeleted = false;
+			}
+			
 			var response = await _productsServices.GetNewArrivalsAsync(page, pageSize, isActive, includeDeleted);
-			return HandleResult(response, nameof(GetNewArrivalsAdmin));
-		}
-
-		[HttpGet("public/newarrivals")]
-		[AllowAnonymous]
-		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> GetNewArrivalsPublic(
-			[FromQuery] int page = 1,
-			[FromQuery] int pageSize = 10)
-		{
-			var response = await _productsServices.GetNewArrivalsAsync(page, pageSize, isActive: true, deletedOnly: false);
-			return HandleResult(response, nameof(GetNewArrivalsPublic));
+			return HandleResult(response, nameof(GetNewArrivals));
 		}
 		[HttpPatch("{id}/activate")]
+		[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<ApiResponse<bool>>> ActiveProduct(int id)
 		{
 			string userId = HttpContext.Items["UserId"]?.ToString();
@@ -347,6 +363,7 @@ namespace E_Commerce.Controllers
 		}
 
 		[HttpPatch("{id}/deactivate")]
+		[Authorize(Roles = "Admin")]
 		public async Task<ActionResult<ApiResponse<bool>>> DeActiveProduct(int id)
 		{
 			string userId = HttpContext.Items["UserId"]?.ToString();
@@ -356,17 +373,15 @@ namespace E_Commerce.Controllers
 
 
 
-		[HttpPost("admin/advanced-search")]
-		[Authorize(Roles = "Admin")]
-		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> AdvancedSearchAdmin(
+		[HttpPost("advanced-search")]
+		[AllowAnonymous]
+		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> AdvancedSearch(
 			[FromBody] AdvancedSearchDto searchDto,
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10,
 			[FromQuery] bool? isActive = null,
 			[FromQuery] bool? includeDeleted = null)
 		{
-
-
 			if (!ModelState.IsValid)
 			{
 				var errors = string.Join(", ", ModelState.Values
@@ -376,28 +391,18 @@ namespace E_Commerce.Controllers
 				_logger.LogError($"Validation Errors: {errors}");
 				return BadRequest(ApiResponse<List<ProductDto>>.CreateErrorResponse("Invalid search criteria", new ErrorResponse("Invalid data", errors)));
 			}
+			
+			bool isAdmin = User?.IsInRole("Admin") == true;
+			
+			// For non-admin users, restrict to active and non-deleted products
+			if (!isAdmin)
+			{
+				isActive = true;
+				includeDeleted = false;
+			}
+			
 			var response = await _productsServices.AdvancedSearchAsync(searchDto, page, pageSize, isActive, includeDeleted);
-			return HandleResult(response, nameof(AdvancedSearchAdmin));
-		}
-
-		[HttpPost("public/advanced-search")]
-		[AllowAnonymous]
-		public async Task<ActionResult<ApiResponse<List<ProductDto>>>> AdvancedSearchPublic(
-			[FromBody] AdvancedSearchDto searchDto,
-			[FromQuery] int page = 1,
-			[FromQuery] int pageSize = 10)
-		{
-			if (!ModelState.IsValid)
-			{
-				var errors = string.Join(", ", ModelState.Values
-					.SelectMany(v => v.Errors)
-					.Select(e => e.ErrorMessage)
-					.ToList());
-				_logger.LogError($"Validation Errors: {errors}");
-				return BadRequest(ApiResponse<List<ProductDto>>.CreateErrorResponse("Invalid search criteria", new ErrorResponse("Invalid data", errors)));
-			}
-			var response = await _productsServices.AdvancedSearchAsync(searchDto, page, pageSize, isActive: true, deletedOnly: false);
-			return HandleResult(response, nameof(AdvancedSearchPublic));
+			return HandleResult(response, nameof(AdvancedSearch));
 		}
 	}
 }
