@@ -19,15 +19,12 @@ namespace E_Commerce.Models
 
         public DateTime UploadDate { get; set; } = DateTime.UtcNow;
 
-		public string CustomerId { get; set; }
+		public string? CustomerId { get; set; }
 
 		public string? Folder { get; set; }
 		public bool IsMain { get; set; } = false;
 		public string? FileType { get; set; }
-		public ICollection<Product>? Products { get; set; }
-        public ICollection<Category>? Categories { get; set; }
-        public ICollection<SubCategory>? subCategories { get; set; }
-		public ICollection<Customer>? Customers { get; set; }
+	
         public int? CategoryId { get; set; }
         public Category? Category { get; set; }
         public int? SubCategoryId { get; set; }

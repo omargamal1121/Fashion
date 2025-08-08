@@ -152,8 +152,7 @@ namespace E_Commerce.Mappings
 				.ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.OrderId))
 				.ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
 
-			CreateMap<PaymentMethod, PaymentMethodDto>();
-			CreateMap<PaymentProvider, PaymentProviderDto>();
+		
 
 
 			CreateMap<Collection, CollectionDto>()

@@ -168,9 +168,6 @@ namespace E_Commerce.Migrations
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ImageId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
 
@@ -183,8 +180,6 @@ namespace E_Commerce.Migrations
                         .HasColumnType("varchar(20)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ImageId");
 
                     b.ToTable("Categories");
                 });
@@ -365,7 +360,6 @@ namespace E_Commerce.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CustomerId")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -648,6 +642,15 @@ namespace E_Commerce.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("IntegrationId")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("Method")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("datetime(6)");
 
@@ -656,7 +659,12 @@ namespace E_Commerce.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
 
+                    b.Property<int>("PaymentProviderId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("PaymentProviderId");
 
                     b.ToTable("PaymentMethods");
                 });
@@ -680,8 +688,11 @@ namespace E_Commerce.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
+                    b.Property<string>("Hmac")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("IframeId")
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("datetime(6)");
@@ -691,22 +702,146 @@ namespace E_Commerce.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
-                    b.Property<int>("PaymentMethodId")
-                        .HasColumnType("int");
-
                     b.Property<string>("PrivateKey")
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
+                    b.Property<int>("Provider")
+                        .HasColumnType("int");
+
                     b.Property<string>("PublicKey")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PaymentMethodId");
-
                     b.ToTable("PaymentProviders");
+                });
+
+            modelBuilder.Entity("E_Commerce.Models.PaymentWebhook", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AmountCents")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("AuthorizationCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("CardLast4")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<bool>("HmacVerified")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("IntegrationId")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool?>("Is3DSecure")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool?>("IsCapture")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool?>("IsRefunded")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool?>("IsVoided")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PaymentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("PaymentProvider")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ProfileId")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("ProviderOrderId")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("RawData")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("ReceiptNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<int>("RetryCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SourceIssuer")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("SourceSubType")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool>("Success")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<long>("TransactionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("WebhookUniqueKey")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("PaymentId");
+
+                    b.ToTable("PaymentWebhooks");
                 });
 
             modelBuilder.Entity("E_Commerce.Models.Product", b =>
@@ -732,9 +867,6 @@ namespace E_Commerce.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Gender")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ImageId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
@@ -764,8 +896,6 @@ namespace E_Commerce.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DiscountId");
-
-                    b.HasIndex("ImageId");
 
                     b.HasIndex("SubCategoryId");
 
@@ -993,9 +1123,6 @@ namespace E_Commerce.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
-                    b.Property<int?>("ImageId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
 
@@ -1009,8 +1136,6 @@ namespace E_Commerce.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
-
-                    b.HasIndex("ImageId");
 
                     b.ToTable("SubCategories");
                 });
@@ -1355,6 +1480,9 @@ namespace E_Commerce.Migrations
                     b.Property<int?>("ImageId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ImageId1")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("LastVisit")
                         .HasColumnType("datetime(6)");
 
@@ -1365,7 +1493,7 @@ namespace E_Commerce.Migrations
                     b.Property<string>("ProfilePicture")
                         .HasColumnType("longtext");
 
-                    b.HasIndex("ImageId");
+                    b.HasIndex("ImageId1");
 
                     b.HasDiscriminator().HasValue("Customer");
                 });
@@ -1416,13 +1544,6 @@ namespace E_Commerce.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("ProductVariant");
-                });
-
-            modelBuilder.Entity("E_Commerce.Models.Category", b =>
-                {
-                    b.HasOne("E_Commerce.Models.Image", null)
-                        .WithMany("Categories")
-                        .HasForeignKey("ImageId");
                 });
 
             modelBuilder.Entity("E_Commerce.Models.CustomerAddress", b =>
@@ -1576,15 +1697,33 @@ namespace E_Commerce.Migrations
                     b.Navigation("PaymentProvider");
                 });
 
-            modelBuilder.Entity("E_Commerce.Models.PaymentProvider", b =>
+            modelBuilder.Entity("E_Commerce.Models.PaymentMethod", b =>
                 {
-                    b.HasOne("E_Commerce.Models.PaymentMethod", "PaymentMethod")
-                        .WithMany("PaymentProviders")
-                        .HasForeignKey("PaymentMethodId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.HasOne("E_Commerce.Models.PaymentProvider", "PaymentProviders")
+                        .WithMany("PaymentMethods")
+                        .HasForeignKey("PaymentProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("PaymentMethod");
+                    b.Navigation("PaymentProviders");
+                });
+
+            modelBuilder.Entity("E_Commerce.Models.PaymentWebhook", b =>
+                {
+                    b.HasOne("E_Commerce.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("E_Commerce.Models.Payment", "Payment")
+                        .WithMany("Webhooks")
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("E_Commerce.Models.Product", b =>
@@ -1593,10 +1732,6 @@ namespace E_Commerce.Migrations
                         .WithMany("products")
                         .HasForeignKey("DiscountId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("E_Commerce.Models.Image", null)
-                        .WithMany("Products")
-                        .HasForeignKey("ImageId");
 
                     b.HasOne("E_Commerce.Models.SubCategory", "SubCategory")
                         .WithMany("Products")
@@ -1723,10 +1858,6 @@ namespace E_Commerce.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("E_Commerce.Models.Image", null)
-                        .WithMany("subCategories")
-                        .HasForeignKey("ImageId");
-
                     b.Navigation("Category");
                 });
 
@@ -1814,9 +1945,8 @@ namespace E_Commerce.Migrations
             modelBuilder.Entity("E_Commerce.Models.Customer", b =>
                 {
                     b.HasOne("E_Commerce.Models.Image", "Image")
-                        .WithMany("Customers")
-                        .HasForeignKey("ImageId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .WithMany()
+                        .HasForeignKey("ImageId1");
 
                     b.Navigation("Image");
                 });
@@ -1845,17 +1975,6 @@ namespace E_Commerce.Migrations
                     b.Navigation("products");
                 });
 
-            modelBuilder.Entity("E_Commerce.Models.Image", b =>
-                {
-                    b.Navigation("Categories");
-
-                    b.Navigation("Customers");
-
-                    b.Navigation("Products");
-
-                    b.Navigation("subCategories");
-                });
-
             modelBuilder.Entity("E_Commerce.Models.Order", b =>
                 {
                     b.Navigation("Items");
@@ -1865,15 +1984,20 @@ namespace E_Commerce.Migrations
                     b.Navigation("ReturnRequests");
                 });
 
+            modelBuilder.Entity("E_Commerce.Models.Payment", b =>
+                {
+                    b.Navigation("Webhooks");
+                });
+
             modelBuilder.Entity("E_Commerce.Models.PaymentMethod", b =>
                 {
-                    b.Navigation("PaymentProviders");
-
                     b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("E_Commerce.Models.PaymentProvider", b =>
                 {
+                    b.Navigation("PaymentMethods");
+
                     b.Navigation("Payments");
                 });
 

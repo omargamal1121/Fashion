@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using E_Commerce.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E_Commerce.Models
@@ -15,17 +16,22 @@ namespace E_Commerce.Models
 		[StringLength(100, MinimumLength = 3, ErrorMessage = "API must be between 3 and 100 characters.")]
 		public string ApiEndpoint { get; set; } = string.Empty;
 
-		[StringLength(200, ErrorMessage = "Public Key is too long.")]
+		[StringLength(500, ErrorMessage = "Public Key is too long.")]
 		public string? PublicKey { get; set; }
 
 		[StringLength(200, ErrorMessage = "Private Key is too long.")]
 		public string? PrivateKey { get; set; }
 
-		[ForeignKey("PaymentMethod")]
-		public int PaymentMethodId { get; set; }
-		public PaymentMethod PaymentMethod { get; set; }
 
-		public bool IsActive { get; set; }
+
+		public ICollection<PaymentMethod> PaymentMethods { get; set; } = new List<PaymentMethod>();
+		public PaymentProviderEnums Provider { get; set; }
+
+		public string? Hmac { get; set; }
+
+		public string? IframeId { get; set; }
+
+
 		public ICollection<Payment> Payments { get; set; } = new List<Payment>();
 	}
 }

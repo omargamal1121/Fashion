@@ -56,6 +56,7 @@ using E_Commerce.Services.BackgroundServices;
 using E_Commerce.Services.UserOpreationServices;
 using E_Commerce.Services.CartServices;
 using E_Commerce.Services.PayMobServices;
+using E_Commerce.Services.PaymentProccessor;
 
 namespace E_Commerce
 {
@@ -124,7 +125,8 @@ namespace E_Commerce
             builder.Services.AddScoped<IWareHouseServices, WareHouseServices>();
             builder.Services.AddScoped<ICartRepository, CartRepository>();
             builder.Services.AddScoped<ICartServices, CartServices>();
-			builder.Services.AddScoped<IPayMobServices, PayMobServices>();
+			builder.Services.AddScoped<IPaymentMethodsServices, PaymentMethodsServices>();
+			builder.Services.AddScoped<IPaymentProcessor, PayMobServices>();
 
 			builder.Services.AddScoped<IOrderRepository, OrderRepository>();
             builder.Services.AddScoped<IOrderServices, OrderServices>();
@@ -133,6 +135,9 @@ namespace E_Commerce
             builder.Services.AddScoped<ICustomerAddressRepository, CustomerAddressRepository>();
             builder.Services.AddScoped<ICustomerAddressServices, CustomerAddressServices>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IPaymentProvidersServices, PaymentProvidersServices>();
+            builder.Services.AddScoped<IPaymentServices, PaymentServices>();
+
             builder.Services.AddScoped(typeof(IRepository<>), typeof(MainRepository<>));
             builder.Services.AddScoped<IAccountServices, AccountServices>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -148,6 +153,7 @@ namespace E_Commerce
             builder.Services.AddScoped<IProductInventoryService, Services.ProductInventoryServices.ProductInventoryService>();
             builder.Services.AddScoped<IProductsServices, ProductsServices>();
             builder.Services.AddScoped<IDiscountService, DiscountService>();
+            builder.Services.AddScoped<IPaymentWebhookService, PaymentWebhookService>();
             builder.Services.AddAutoMapper(typeof(MappingProfile));
 			builder.Services.AddTransient<IEmailSender, EmailSender>();
 			builder.Services.AddScoped<IAccountEmailService, AccountEmailService>();

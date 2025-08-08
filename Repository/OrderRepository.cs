@@ -4,6 +4,7 @@ using E_Commerce.DtoModels.ProductDtos;
 using E_Commerce.Enums;
 using E_Commerce.Interfaces;
 using E_Commerce.Models;
+using E_Commerce.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
@@ -103,14 +104,12 @@ namespace E_Commerce.Repository
 				PaymentProvider = order.Payment.PaymentProvider == null ? null : new PaymentProviderDto
 				{
 					Id = order.Payment.PaymentProvider.Id,
-					CreatedAt = order.Payment.PaymentProvider.CreatedAt,
-					ModifiedAt = order.Payment.PaymentProvider.ModifiedAt,
+					CreatedAt = order.Payment.PaymentProvider.CreatedAt.Value,
+					UpdatedAt = order.Payment.PaymentProvider.ModifiedAt,
 					Name = order.Payment.PaymentProvider.Name,
-					ApiEndpoint = order.Payment.PaymentProvider.ApiEndpoint,
-					PublicKey = order.Payment.PaymentProvider.PublicKey,
-					IsActive = order.Payment.PaymentProvider.IsActive,
-                    DeletedAt= order.Payment.DeletedAt
-                    
+				
+	
+              
                     
 				},
 				Amount = order.Payment.Amount,

@@ -11,7 +11,7 @@ namespace E_Commerce.DtoModels.OrderDtos
 		[StringLength(500, ErrorMessage = "Notes cannot exceed 500 characters")]
 		public string? Notes { get; set; }
 
-		public PaymentMethod paymentMethod { get; set; }
+		public PaymentMethodEnums paymentMethod { get; set; }
 	}
 
 	public class UpdateOrderStatusDto

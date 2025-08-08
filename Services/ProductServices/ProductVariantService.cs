@@ -225,7 +225,7 @@ namespace E_Commerce.Services.ProductServices
 			_logger.LogInformation($"Checking if variant with color={dto.Color}, size={dto.Size}, waist={dto.Waist}, length={dto.Length} already exists for product {productId}");
 			var existingVariant = await _unitOfWork.ProductVariant.IsExsistBySizeandColor(productId, dto.Color, dto.Size, dto.Waist, dto.Length);
 				
-			if (existingVariant != null)
+			if (existingVariant)
 			{
 				_logger.LogWarning($"Attempt to add duplicate variant for product {productId} with color={dto.Color}, size={dto.Size}");
 				return Result<ProductVariantDto>.Fail("Variant with this color , size , waist and length already exists", 400);

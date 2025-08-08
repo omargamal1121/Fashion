@@ -195,6 +195,26 @@ namespace E_Commerce.Services
 					IsMain = true
 				};
 
+				switch (folderName.ToLower())
+				{
+					case "categoryphotos":
+						savedImage.CategoryId = id;
+						break;
+					case "productphotos":
+						savedImage.ProductId = id;
+						break;
+					case "subcategoryphotos":
+						savedImage.SubCategoryId = id;
+						break;
+					case "collectionphotos":
+						savedImage.CollectionId = id;
+						break;
+					case "customerphotos":
+						savedImage.CustomerId = userId;
+						break;
+				}
+
+
 				var imageRepo = _unitOfWork.Repository<Image>();
 				await imageRepo.CreateAsync(savedImage);
 				await _unitOfWork.CommitAsync();

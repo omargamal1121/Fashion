@@ -1,16 +1,25 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using E_Commerce.Enums;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E_Commerce.Models
 {
-	public class PaymentMethod:BaseEntity
+	public class PaymentMethod : BaseEntity
 	{
 		
 
 		[Required(ErrorMessage = "Payment method name is required.")]
-		[StringLength(20, MinimumLength = 3, ErrorMessage = "Name must be between 3 and 20 characters.")]
-		[RegularExpression(@"^[a-zA-Z0-9][a-zA-Z0-9\s\-,]*[a-zA-Z0-9]$", ErrorMessage = "Name must start and end with an alphanumeric character and can contain spaces, hyphens, and commas in between.")]
+		[StringLength(20, MinimumLength = 3)]
 		public string Name { get; set; } = string.Empty;
-		public ICollection<PaymentProvider> PaymentProviders { get; set; } = new List<PaymentProvider>();
+
+		public PaymentMethodEnums Method { get; set; }
+
+		[ForeignKey("PaymentProviders")]
+		public int PaymentProviderId { get; set; }
+		public bool IsActive { get; set; }
+		public PaymentProvider PaymentProviders { get; set; }
+		public string? IntegrationId { get; set; }
 		public ICollection<Payment> Payments { get; set; } = new List<Payment>();
 	}
+
 }

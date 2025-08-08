@@ -3,6 +3,7 @@ using E_Commerce.DtoModels.ImagesDtos;
 using E_Commerce.DtoModels.ProductDtos;
 using E_Commerce.DtoModels.Shared;
 using E_Commerce.Enums;
+using E_Commerce.Services;
 
 namespace E_Commerce.DtoModels.OrderDtos
 {
@@ -72,20 +73,8 @@ namespace E_Commerce.DtoModels.OrderDtos
         public OrderStatus Status { get; set; } 
     }
 
-    public class PaymentMethodDto : BaseDto
-    {
-        public string Name { get; set; } = string.Empty;
-    }
-
-    public class PaymentProviderDto : BaseDto
-    {
-        public string Name { get; set; } = string.Empty;
-        public string ApiEndpoint { get; set; } = string.Empty;
-        public string? PublicKey { get; set; }
-        public bool IsActive { get; set; }
-    }
-
-
+    
+   
 
 
 

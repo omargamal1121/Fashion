@@ -25,6 +25,7 @@ namespace E_Commerce.Context
 		public DbSet<AdminOperationsLog>  adminOperationsLogs { get; set; }
 		public DbSet<Cart> Cart { get; set; }
 		public DbSet<Order> Orders { get; set; }
+		public DbSet<PaymentWebhook> PaymentWebhooks { get; set; }
 		public DbSet<Item> Items { get; set; }
 		public DbSet<Product> Products { get; set; }
 		public DbSet<Payment> Payments { get; set; }
@@ -112,12 +113,6 @@ namespace E_Commerce.Context
 				.HasForeignKey(i => i.CollectionId)
 				.OnDelete(DeleteBehavior.Cascade);
 
-			// Customer - Image (1:M)
-			builder.Entity<Customer>()
-				.HasOne(c => c.Image)
-				.WithMany(i => i.Customers)
-				.HasForeignKey(c => c.ImageId)
-				.OnDelete(DeleteBehavior.Cascade);
 
 			// Product - Review (1:M)
 			builder.Entity<Product>()
@@ -282,11 +277,7 @@ namespace E_Commerce.Context
 				.OnDelete(DeleteBehavior.SetNull);
 
 			// PaymentMethod - PaymentProvider (1:M)
-			builder.Entity<PaymentMethod>()
-				.HasMany(pm => pm.PaymentProviders)
-				.WithOne(pp => pp.PaymentMethod)
-				.HasForeignKey(pp => pp.PaymentMethodId)
-				.OnDelete(DeleteBehavior.Restrict);
+		
 
 			// PaymentMethod - Payment (1:M)
 			builder.Entity<PaymentMethod>()
@@ -301,6 +292,13 @@ namespace E_Commerce.Context
 				.WithOne(p => p.PaymentProvider)
 				.HasForeignKey(p => p.PaymentProviderId)
 				.OnDelete(DeleteBehavior.Restrict);
+
+			// Payment - PaymentWebhook (1:M)
+			builder.Entity<Payment>()
+				.HasMany(p => p.Webhooks)
+				.WithOne(w => w.Payment)
+				.HasForeignKey(w => w.PaymentId)
+				.OnDelete(DeleteBehavior.Cascade);
 		}
 	}
 }

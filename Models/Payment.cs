@@ -36,5 +36,7 @@ namespace E_Commerce.Models
 		[StringLength(100)]
 		public string? TransactionId { get; set; }
 
+		// Navigation property for webhooks
+		public ICollection<PaymentWebhook> Webhooks { get; set; } = new List<PaymentWebhook>();
 	}
 }

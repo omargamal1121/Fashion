@@ -371,6 +371,8 @@ namespace E_Commerce.Services.CategoryServcies
 					return Result<CategoryDto>.Fail("Try Again later", 500);
 				}
 				 RemoveCategoryCache();
+				await _unitOfWork.CommitAsync();
+				await transaction.CommitAsync();
 				var categoryaftercreate= await _unitOfWork.Category.GetByIdAsync(category.Id);
 				if (categoryaftercreate == null)
 				{

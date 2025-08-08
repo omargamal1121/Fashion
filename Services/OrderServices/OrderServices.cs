@@ -24,6 +24,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using static E_Commerce.Services.PayMobServices.PayMobServices;
+using E_Commerce.DtoModels.PaymentDtos;
 
 namespace E_Commerce.Services.Order
 {
@@ -31,11 +32,12 @@ namespace E_Commerce.Services.Order
     {
         private readonly ILogger<OrderServices> _logger;
         private readonly IMapper _mapper;
-        private readonly IPayMobServices _payMobServices;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserOpreationServices _userOpreationServices;
         private readonly IOrderRepository _orderRepository;
         private readonly ICartServices _cartServices;
+        private readonly IPaymentMethodsServices _paymentMethodsServices;
+        private readonly IPaymentServices _paymentServices;
 		private readonly IBackgroundJobClient _backgroundJobClient;
 		private readonly IErrorNotificationService _errorNotificationService;
 		private readonly IAdminOpreationServices _adminOperationServices;
@@ -45,7 +47,8 @@ namespace E_Commerce.Services.Order
 		private const string CACHE_TAG_CART = "cart";
 
 		public OrderServices(
-            IPayMobServices payMobServices,
+            IPaymentMethodsServices paymentMethodsServices,
+            IPaymentServices paymentServices,
             IBackgroundJobClient backgroundJobClient,
             IErrorNotificationService errorNotificationService,
             
@@ -59,7 +62,9 @@ namespace E_Commerce.Services.Order
             IAdminOpreationServices adminOperationServices,
             ICacheManager cacheManager)
         {
-            _payMobServices = payMobServices;
+            _paymentMethodsServices= paymentMethodsServices;
+        
+            _paymentServices = paymentServices;
             _backgroundJobClient = backgroundJobClient;
             _errorNotificationService = errorNotificationService;
             _userManager = userManager;
@@ -252,16 +257,20 @@ namespace E_Commerce.Services.Order
 				if (user == null)
 					return Result<OrderWithPaymentDto>.Fail("UnAuthorized", 401);
 
-				if (await _unitOfWork.Cart.IsEmptyAsync(userId))
+				if (!await _unitOfWork.Cart.IsExsistByUserId(userId))
 					return Result<OrderWithPaymentDto>.Fail("Cart is empty", 400);
 
-				var address = await _unitOfWork.CustomerAddress.GetAddressByIdAsync(orderDto.AddressId);
-				if (address == null)
-					return Result<OrderWithPaymentDto>.Fail("Address not found", 404);
+				
+				if (!await _unitOfWork.CustomerAddress.IsExsistByIdAndUserIdAsync(orderDto.AddressId,userId))
+					return Result<OrderWithPaymentDto>.Fail("Address doesn't exsist", 400);
+
+				
 
 				var cartResult = await _cartServices.GetCartAsync(userId);
 				if (!cartResult.Success || cartResult.Data == null)
 					return Result<OrderWithPaymentDto>.Fail("Failed to retrieve cart", 400);
+				if ( cartResult.Data .IsEmpty)
+					return Result<OrderWithPaymentDto>.Fail("Failed to Empty cart", 400);
 
 				var cart = cartResult.Data;
 
@@ -332,74 +341,29 @@ namespace E_Commerce.Services.Order
 					return Result<OrderWithPaymentDto>.Fail("An error occurred while creating the order", 500);
 				}
 				#endregion
-				string paymentUrl = string.Empty;
+                string paymentUrl = string.Empty;
+             
+                var createPayment = new CreatePayment
+                {
+                    CustomerId = userId,
+                    AddressId = orderDto.AddressId,
+                    OrderId = createdOrder.Id,
+                    Amount = total,
+                    PaymentMethod = orderDto.paymentMethod,
+                    Currency = "EGP",
+                    Notes = orderDto.Notes
+                };
 
-				#region 💳 PayMob Integration (If Payment Method != Cash)
-
-				if (orderDto.paymentMethod != Enums.PaymentMethod.Cash)
-				{
-					_logger.LogInformation("Initiating Paymob payment for order: {OrderId}", createdOrder.Id);
-
-					var token = await _payMobServices.GetTokenAsync();
-					if (string.IsNullOrEmpty(token))
-					{
-						_logger.LogError("Paymob Token is null");
-						await transaction.RollbackAsync();
-						return Result<OrderWithPaymentDto>.Fail("Failed to initiate payment", 500);
-					}
-
-					var paymobOrderRequest = new CreateOrderRequest
-					{
-						auth_token = token,
-						amount_cents = amountInCents,
-						currency = "EGP",
-						delivery_needed = true
-					};
-
-					var paymobOrderId = await _payMobServices.CreateOrderInPaymobAsync(paymobOrderRequest);
-					if (paymobOrderId == 0)
-					{
-						_logger.LogError("Failed to create order in Paymob");
-						await transaction.RollbackAsync();
-						return Result<OrderWithPaymentDto>.Fail("Failed to initiate payment", 500);
-					}
-
-					var paymentKeyRequest = new PaymentKeyContent
-					{
-						amount_cents = amountInCents,
-						auth_token = token,
-						order_id = paymobOrderId,
-                        integration_id= 5221967,
-
-
-						billing_data = new billing_data
-						{
-							city = address.City ?? "NA",
-							country = address.Country ?? "EG",
-							state = address.State ?? "NA",
-							postal_code = address.PostalCode ?? "NA",
-							street = address.StreetAddress ?? "NA",
-							first_name = user.Name?.Split(" ").FirstOrDefault() ?? "NA",
-							last_name = user.Name?.Split(" ").Skip(1).FirstOrDefault() ?? "NA",
-							email = user.Email ?? "noemail@email.com",
-							phone_number = user.PhoneNumber ?? "0000000000"
-						}
-					};
-
-					var paymentKey = await _payMobServices.GeneratePaymentKeyAsync(paymentKeyRequest);
-					if (string.IsNullOrEmpty(paymentKey))
-					{
-						_logger.LogError("Failed to generate payment key from Paymob");
-						await transaction.RollbackAsync();
-						return Result<OrderWithPaymentDto>.Fail("Failed to initiate payment", 500);
-					}
-
-					_logger.LogInformation("Payment Key generated successfully for Paymob order: {PaymobOrderId}", paymobOrderId);
-					 paymentUrl = $"https://accept.paymob.com/api/acceptance/iframes/945070?payment_token={paymentKey}";
-
-
-				}
-				#endregion
+                var paymentCreateResult = await _paymentServices.CreatePaymentMethod(createPayment, userId);
+                if (!paymentCreateResult.Success)
+                {
+                    await transaction.RollbackAsync();
+                    return Result<OrderWithPaymentDto>.Fail("Failed to initiate payment", 500);
+                }
+                if (paymentCreateResult.Data != null && paymentCreateResult.Data.IsRedirectRequired)
+                {
+                    paymentUrl = paymentCreateResult.Data.RedirectUrl ?? string.Empty;
+                }
 
 				#region ✅ Finalize and Return
 				await _unitOfWork.CommitAsync();
@@ -426,7 +390,7 @@ namespace E_Commerce.Services.Order
 				return Result<OrderWithPaymentDto>.Fail("An error occurred while creating the order", 500);
 			}
 		}
-
+        
 
 
 
